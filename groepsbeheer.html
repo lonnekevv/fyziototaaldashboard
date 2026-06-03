@@ -40,26 +40,26 @@ const COLLEAGUES=["Rob","Lars","Mayke","Jan Willem","Nikita","Laura","Lonneke","
 function mkM(n,b,s,sr,su,sk,r,rf){return{id:Date.now()+Math.random(),naam:String(n),betaling:b||"incasso",stopped:!!s,stopReason:sr||"",stopUntil:su||"",stopUnknown:!!sk,reserved:!!r,reservedFrom:rf||""};}
 
 const FT_INIT=[
-  {id:1,day:"Maandag",time:"09:15",colleague:"Lonneke",members:[mkM("Carolien"),mkM("Corina"),mkM("Monique"),mkM("Lidy"),mkM("Els"),mkM("Nienke"),mkM("Marjolein")]},
-  {id:2,day:"Maandag",time:"20:00",colleague:"Jesper",members:[mkM("Theo"),mkM("Renée"),mkM("Marco v.H."),mkM("Marco L."),mkM("Martijn"),mkM("Joost","incasso",true,"Liesklachten","",true),mkM("Patricia"),mkM("Aschwin")]},
-  {id:3,day:"Dinsdag",time:"08:25",colleague:"Ellen",members:[mkM("Henk B."),mkM("Herma P."),mkM("Herma D.W."),mkM("Jeanette","incasso",true,"Vakantie","2025-07-01"),mkM("Henk H.","incasso",true,"TKP OK","",true)]},
-  {id:4,day:"Dinsdag",time:"09:15",colleague:"Jesper",members:[mkM("Margreet"),mkM("Ina"),mkM("Gerry"),mkM("Lidy","geen"),mkM("Rikie"),mkM("Anjo"),mkM("Dieneke"),mkM("Betsy")]},
-  {id:5,day:"Dinsdag",time:"19:15",colleague:"Laura (verv. Nikita)",members:[mkM("Armin"),mkM("Maria"),mkM("Jolanda"),mkM("Bastiaan"),mkM("Jos"),mkM("Jolanda","incasso",true,"MCL + VKB letsel","",true),mkM("Maureen"),mkM("Judith")]},
-  {id:6,day:"Woensdag",time:"07:30",colleague:"Thomas",members:[mkM("Frank"),mkM("Hans"),mkM("Peter"),mkM("John"),mkM("André")]},
-  {id:7,day:"Woensdag",time:"08:50",colleague:"Mayke",members:[mkM("Mariëlle"),mkM("Maaike","geen"),mkM("Bertine"),mkM("Dorothee"),mkM("Jacqueline"),mkM("Mirjam"),mkM("Eva"),mkM("Angela")]},
-  {id:8,day:"Woensdag",time:"19:00",colleague:"Jan Willem",members:[mkM("Jan Willem"),mkM("Roelien"),mkM("André"),mkM("Rianne"),mkM("Theo"),mkM("Harry"),mkM("Boaz"),mkM("Dianne")]},
-  {id:9,day:"Woensdag",time:"20:00",colleague:"Lonneke",members:[mkM("Mirjam"),mkM("Bas","geen"),mkM("Heidy"),mkM("Wim"),mkM("Karin"),mkM("Marcel"),mkM("Ronald"),mkM("Manon")]},
-  {id:10,day:"Donderdag",time:"07:30",colleague:"Jesper",members:[mkM("Leidus"),mkM("Carlo"),mkM("Patrick"),mkM("Henk"),mkM("Wilrick"),mkM("Judith"),mkM("Tjeerd"),mkM("Bert")]},
-  {id:11,day:"Donderdag",time:"10:20",colleague:"Julia",members:[mkM("Anneke"),mkM("Ank"),mkM("Marita"),mkM("Nel"),mkM("Lemien")]},
-  {id:12,day:"Donderdag",time:"19:15",colleague:"Lars",members:[mkM("Wim"),mkM("Laila"),mkM("Sabine"),mkM("Ronnie"),mkM("Bert"),mkM("Marion"),mkM("Peter"),mkM("Jan")]},
-  {id:13,day:"Vrijdag",time:"07:30",colleague:"Jan Willem",members:[mkM("Henk"),mkM("André","incasso",true,"Voetblessure","2025-06-30"),mkM("Robert"),mkM("Ruth"),mkM("Patrick"),mkM("Michel"),mkM("Ank"),mkM("Marcel")]},
-  {id:14,day:"Vrijdag",time:"09:15",colleague:"Jesper",members:[mkM("Annet","geen"),mkM("Mariëtte"),mkM("Ria"),mkM("Elly"),mkM("Erna"),mkM("Trudy"),mkM("Hannie","contant")]},
+  {id:1,day:"Maandag",time:"09:15",colleague:"Lonneke",niveau:"Belastbaar, wisselend niveau",members:[mkM("Carolien"),mkM("Corina"),mkM("Monique"),mkM("Lidy"),mkM("Els"),mkM("Nienke"),mkM("Marjolein")]},
+  {id:2,day:"Maandag",time:"20:00",colleague:"Jesper",niveau:"Belastbaar, wisselend niveau",members:[mkM("Theo"),mkM("Renée"),mkM("Marco v.H."),mkM("Marco L."),mkM("Martijn"),mkM("Joost","incasso",true,"Liesklachten","",true),mkM("Patricia"),mkM("Aschwin")]},
+  {id:3,day:"Dinsdag",time:"08:25",colleague:"Ellen",niveau:"60+ belastbaar",members:[mkM("Henk B."),mkM("Herma P."),mkM("Herma D.W."),mkM("Jeanette","incasso",true,"Vakantie","2025-07-01"),mkM("Henk H.","incasso",true,"TKP OK","",true)]},
+  {id:4,day:"Dinsdag",time:"09:15",colleague:"Jesper",niveau:"60+ laag belastbaar",members:[mkM("Margreet"),mkM("Ina"),mkM("Gerry"),mkM("Lidy","geen"),mkM("Rikie"),mkM("Anjo"),mkM("Dieneke"),mkM("Betsy")]},
+  {id:5,day:"Dinsdag",time:"19:15",colleague:"Laura (verv. Nikita)",niveau:"Belastbaar, wisselend niveau",members:[mkM("Armin"),mkM("Maria"),mkM("Jolanda"),mkM("Bastiaan"),mkM("Jos"),mkM("Jolanda","incasso",true,"MCL + VKB letsel","",true),mkM("Maureen"),mkM("Judith")]},
+  {id:6,day:"Woensdag",time:"07:30",colleague:"Thomas",niveau:"Belastbaar, wisselend niveau",members:[mkM("Frank"),mkM("Hans"),mkM("Peter"),mkM("John"),mkM("André")]},
+  {id:7,day:"Woensdag",time:"08:50",colleague:"Mayke",niveau:"Vrouwen 40+",members:[mkM("Mariëlle"),mkM("Maaike","geen"),mkM("Bertine"),mkM("Dorothee"),mkM("Jacqueline"),mkM("Mirjam"),mkM("Eva"),mkM("Angela")]},
+  {id:8,day:"Woensdag",time:"19:00",colleague:"Jan Willem",niveau:"Belastbaar, wisselend niveau",members:[mkM("Jan Willem"),mkM("Roelien"),mkM("André"),mkM("Rianne"),mkM("Theo"),mkM("Harry"),mkM("Boaz"),mkM("Dianne")]},
+  {id:9,day:"Woensdag",time:"20:00",colleague:"Lonneke",niveau:"Belastbaar, wisselend niveau",members:[mkM("Mirjam"),mkM("Bas","geen"),mkM("Heidy"),mkM("Wim"),mkM("Karin"),mkM("Marcel"),mkM("Ronald"),mkM("Manon")]},
+  {id:10,day:"Donderdag",time:"07:30",colleague:"Jesper",niveau:"Belastbaar, wisselend niveau",members:[mkM("Leidus"),mkM("Carlo"),mkM("Patrick"),mkM("Henk"),mkM("Wilrick"),mkM("Judith"),mkM("Tjeerd"),mkM("Bert")]},
+  {id:11,day:"Donderdag",time:"10:20",colleague:"Julia",niveau:"60+ belastbaar",members:[mkM("Anneke"),mkM("Ank"),mkM("Marita"),mkM("Nel"),mkM("Lemien")]},
+  {id:12,day:"Donderdag",time:"19:15",colleague:"Lars",niveau:"Belastbaar, wisselend niveau",members:[mkM("Wim"),mkM("Laila"),mkM("Sabine"),mkM("Ronnie"),mkM("Bert"),mkM("Marion"),mkM("Peter"),mkM("Jan")]},
+  {id:13,day:"Vrijdag",time:"07:30",colleague:"Jan Willem",niveau:"Belastbaar, wisselend niveau",members:[mkM("Henk"),mkM("André","incasso",true,"Voetblessure","2025-06-30"),mkM("Robert"),mkM("Ruth"),mkM("Patrick"),mkM("Michel"),mkM("Ank"),mkM("Marcel")]},
+  {id:14,day:"Vrijdag",time:"09:15",colleague:"Jesper",niveau:"60+ laag belastbaar",members:[mkM("Annet","geen"),mkM("Mariëtte"),mkM("Ria"),mkM("Elly"),mkM("Erna"),mkM("Trudy"),mkM("Hannie","contant")]},
 ];
 const BA_INIT=[
-  {id:1,day:"Maandag",time:"19:00",colleague:"Lynn",members:[mkM("Maaike"),mkM("Carla"),mkM("Angela"),mkM("Loïs"),mkM("Monique"),mkM("Eline")]},
-  {id:2,day:"Maandag",time:"20:00",colleague:"Lynn",members:[mkM("Anneke"),mkM("Maaike"),mkM("Karin"),mkM("Dorothee"),mkM("Bertine"),mkM("Saskia")]},
-  {id:3,day:"Dinsdag",time:"20:15",colleague:"Laura (verv. Nikita)",members:[mkM("Ank"),mkM("Monika"),mkM("Liselore"),mkM("Karin"),mkM("Gaby"),mkM("Sandy")]},
-  {id:4,day:"Vrijdag",time:"09:15",colleague:"Lynn",members:[mkM("Rianne"),mkM("Renate"),mkM("Jolanda"),mkM("Judith"),mkM("Julia")]},
+  {id:1,day:"Maandag",time:"19:00",colleague:"Lynn",niveau:"",members:[mkM("Maaike"),mkM("Carla"),mkM("Angela"),mkM("Loïs"),mkM("Monique"),mkM("Eline")]},
+  {id:2,day:"Maandag",time:"20:00",colleague:"Lynn",niveau:"",members:[mkM("Anneke"),mkM("Maaike"),mkM("Karin"),mkM("Dorothee"),mkM("Bertine"),mkM("Saskia")]},
+  {id:3,day:"Dinsdag",time:"20:15",colleague:"Laura (verv. Nikita)",niveau:"",members:[mkM("Ank"),mkM("Monika"),mkM("Liselore"),mkM("Karin"),mkM("Gaby"),mkM("Sandy")]},
+  {id:4,day:"Vrijdag",time:"09:15",colleague:"Lynn",niveau:"",members:[mkM("Rianne"),mkM("Renate"),mkM("Jolanda"),mkM("Judith"),mkM("Julia")]},
 ];
 
 const FT_MAX=8,BA_MAX=6;
@@ -69,12 +69,27 @@ function stamp(){return Date.now()+Math.random();}
 function dateStr(ts){return new Date(ts).toLocaleDateString("nl-NL",{day:"2-digit",month:"2-digit",year:"numeric"});}
 function fmtDate(s){if(!s)return null;var p=s.split("-");return p[2]+"-"+p[1]+"-"+p[0];}
 function sortG(a){return a.slice().sort(function(a,b){var d=DAY_ORDER.indexOf(a.day)-DAY_ORDER.indexOf(b.day);return d!==0?d:a.time.localeCompare(b.time);});}
-function mergeG(saved,init){var seen={};var dd=saved.filter(function(g){var k=g.day+"|"+g.time;if(seen[k])return false;seen[k]=true;return true;});var ids=dd.map(function(g){return g.id;});var miss=init.filter(function(g){return ids.indexOf(g.id)===-1;});return sortG(dd.concat(miss));}
+
+function mergeG(saved,init){
+  var seen={};
+  var dd=saved.filter(function(g){var k=g.day+"|"+g.time;if(seen[k])return false;seen[k]=true;return true;});
+  var ids=dd.map(function(g){return g.id;});
+  var miss=init.filter(function(g){return ids.indexOf(g.id)===-1;});
+  var result=sortG(dd.concat(miss));
+  // Altijd niveau overnemen uit init (niveau is vaste config, geen gebruikersdata)
+  result=result.map(function(g){
+    var match=null;
+    for(var i=0;i<init.length;i++){if(init[i].id===g.id){match=init[i];break;}}
+    if(match)return Object.assign({},g,{niveau:match.niveau||""});
+    return g;
+  });
+  return result;
+}
 
 var STATE={
   mainTab:"ft",
-  ft:{groups:null,waitlist:null,loading:true,saveStatus:"",tab:"groups",filterFree:false,expandedGroup:null,expandedEdit:null,newMember:{naam:"",betaling:"incasso"},editColleague:"",wlForm:{naam:"",availability:{},referrer:"",referrerOther:"",note:""},wlEditId:null,showAddGroup:false,newGroup:{day:"Maandag",time:"",colleague:""},reserveForm:{}},
-  ba:{groups:null,waitlist:null,loading:true,saveStatus:"",tab:"groups",filterFree:false,expandedGroup:null,expandedEdit:null,newMember:{naam:"",betaling:"incasso"},editColleague:"",wlForm:{naam:"",availability:{},referrer:"",referrerOther:"",note:""},wlEditId:null,showAddGroup:false,newGroup:{day:"Maandag",time:"",colleague:""},reserveForm:{}}
+  ft:{groups:null,waitlist:null,loading:true,saveStatus:"",tab:"groups",filterFree:false,expandedGroup:null,expandedEdit:null,newMember:{naam:"",betaling:"incasso"},editColleague:"",editNiveau:"",wlForm:{naam:"",availability:{},referrer:"",referrerOther:"",note:""},wlEditId:null,showAddGroup:false,newGroup:{day:"Maandag",time:"",colleague:"",niveau:""},reserveForm:{}},
+  ba:{groups:null,waitlist:null,loading:true,saveStatus:"",tab:"groups",filterFree:false,expandedGroup:null,expandedEdit:null,newMember:{naam:"",betaling:"incasso"},editColleague:"",editNiveau:"",wlForm:{naam:"",availability:{},referrer:"",referrerOther:"",note:""},wlEditId:null,showAddGroup:false,newGroup:{day:"Maandag",time:"",colleague:"",niveau:""},reserveForm:{}}
 };
 
 function render(){document.getElementById("root").innerHTML="";document.getElementById("root").appendChild(buildApp());}
@@ -154,19 +169,14 @@ function buildModule(mod,MAX,accent,accentLight){
   var permN=notifs.filter(function(n){return !n.onlyTemp;});
   var tempN=notifs.filter(function(n){return n.onlyTemp;});
 
-  // stat bar
   var statText=totalActive+" actief"+(totalStopped>0?" · "+totalStopped+" gestopt":"")+(totalReserved>0?" · "+totalReserved+" gereserveerd":"")+" · "+waitlist.length+" op wachtlijst";
   var saveBtn=el("button",{style:{padding:"5px 12px",background:accent,color:"#fff",border:"none",borderRadius:"6px",fontSize:"13px"},onClick:function(){saveModule(mod,mod==="ft"?KEYS.ftg:KEYS.bag,mod==="ft"?KEYS.ftw:KEYS.baw);}},"💾 Opslaan");
   var statBar=el("div",{style:{padding:"10px 16px",background:accentLight,borderBottom:"1px solid #ddd",display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:"8px"}},[
     el("span",{style:{fontSize:"13px",color:accent,fontWeight:"600"}},statText),
-    el("div",{style:{display:"flex",alignItems:"center",gap:"8px"}},[
-      S.saveStatus?el("span",{style:{fontSize:"12px",color:accent,fontStyle:"italic"}},S.saveStatus):null,
-      saveBtn
-    ])
+    el("div",{style:{display:"flex",alignItems:"center",gap:"8px"}},[S.saveStatus?el("span",{style:{fontSize:"12px",color:accent,fontStyle:"italic"}},S.saveStatus):null,saveBtn])
   ]);
   wrap.appendChild(statBar);
 
-  // notifications
   if(permN.length>0||tempN.length>0){
     var nb=el("div",{style:{padding:"10px 16px 0"}});
     if(permN.length>0){
@@ -184,19 +194,15 @@ function buildModule(mod,MAX,accent,accentLight){
     wrap.appendChild(nb);
   }
 
-  // tabs
   var tabBar=el("div",{style:{display:"flex",gap:"8px",padding:"10px 16px 0"}});
   ["groups","waitlist"].forEach(function(t){
     var active=S.tab===t;
-    var btn=el("button",{style:{padding:"7px 18px",borderRadius:"20px",border:"none",fontSize:"13px",fontWeight:"500",background:active?accent:G.grayLight,color:active?"#fff":"#1a1a1a"},onClick:function(){S.tab=t;render();}},t==="groups"?"Groepen":"Wachtlijst ("+waitlist.length+")");
-    tabBar.appendChild(btn);
+    tabBar.appendChild(el("button",{style:{padding:"7px 18px",borderRadius:"20px",border:"none",fontSize:"13px",fontWeight:"500",background:active?accent:G.grayLight,color:active?"#fff":"#1a1a1a"},onClick:function(){S.tab=t;render();}},t==="groups"?"Groepen":"Wachtlijst ("+waitlist.length+")"));
   });
   wrap.appendChild(tabBar);
 
   if(S.tab==="groups"){
     var gWrap=el("div",{style:{padding:"12px 16px"}});
-
-    // filter row
     var fRow=el("div",{style:{display:"flex",alignItems:"center",gap:"10px",marginBottom:"10px",flexWrap:"wrap"}});
     [false,true].forEach(function(val){
       var active=S.filterFree===val;
@@ -207,7 +213,6 @@ function buildModule(mod,MAX,accent,accentLight){
     fRow.appendChild(el("button",{style:{padding:"5px 12px",background:G.orange,color:"#fff",border:"none",borderRadius:"16px",fontSize:"12px",fontWeight:"600"},onClick:function(){S.showAddGroup=!S.showAddGroup;render();}},S.showAddGroup?"Annuleren":"+ Groep"));
     gWrap.appendChild(fRow);
 
-    // add group form
     if(S.showAddGroup){
       var agf=el("div",{style:{background:G.grayLight,border:"1px solid #ddd",borderRadius:"10px",padding:"12px 14px",marginBottom:"12px"}});
       agf.appendChild(el("div",{style:{fontSize:"13px",fontWeight:"600",color:accent,marginBottom:"8px"}},"Nieuwe groep"));
@@ -217,20 +222,21 @@ function buildModule(mod,MAX,accent,accentLight){
       daySelect.value=S.newGroup.day;
       var timeInp=el("input",{style:{width:"75px",padding:"6px 8px",border:"1px solid #ddd",borderRadius:"6px",fontSize:"13px"},placeholder:"19:00",value:S.newGroup.time,onInput:function(e){S.newGroup.time=e.target.value;}});
       var collInp=el("input",{style:{flex:"1",minWidth:"120px",padding:"6px 8px",border:"1px solid #ddd",borderRadius:"6px",fontSize:"13px",width:"100%"},placeholder:"Naam",value:S.newGroup.colleague,onInput:function(e){S.newGroup.colleague=e.target.value;}});
+      var niveauInp=el("input",{style:{flex:"1",minWidth:"120px",padding:"6px 8px",border:"1px solid #ddd",borderRadius:"6px",fontSize:"13px",width:"100%"},placeholder:"Bijv. 60+ belastbaar",value:S.newGroup.niveau||"",onInput:function(e){S.newGroup.niveau=e.target.value;}});
       agRow.appendChild(el("div",{},[el("div",{style:{fontSize:"12px",fontWeight:"600",color:"#666",marginBottom:"3px"}},"Dag"),daySelect]));
       agRow.appendChild(el("div",{},[el("div",{style:{fontSize:"12px",fontWeight:"600",color:"#666",marginBottom:"3px"}},"Tijd"),timeInp]));
       agRow.appendChild(el("div",{style:{flex:"1",minWidth:"120px"}},[el("div",{style:{fontSize:"12px",fontWeight:"600",color:"#666",marginBottom:"3px"}},"Fysiotherapeut"),collInp]));
+      agRow.appendChild(el("div",{style:{flex:"1",minWidth:"120px"}},[el("div",{style:{fontSize:"12px",fontWeight:"600",color:"#666",marginBottom:"3px"}},"Niveau"),niveauInp]));
       agRow.appendChild(el("button",{style:{padding:"6px 12px",background:G.orange,color:"#fff",border:"none",borderRadius:"6px",fontSize:"13px",fontWeight:"600"},onClick:function(){
         if(!S.newGroup.time.trim()||!S.newGroup.colleague.trim())return;
-        groups.push({id:stamp(),day:S.newGroup.day,time:S.newGroup.time.trim(),colleague:S.newGroup.colleague.trim(),members:[]});
+        groups.push({id:stamp(),day:S.newGroup.day,time:S.newGroup.time.trim(),colleague:S.newGroup.colleague.trim(),niveau:S.newGroup.niveau||"",members:[]});
         STATE[mod].groups=sortG(groups);
-        S.newGroup={day:"Maandag",time:"",colleague:""};S.showAddGroup=false;render();
+        S.newGroup={day:"Maandag",time:"",colleague:"",niveau:""};S.showAddGroup=false;render();
       }},"Toevoegen"));
       agf.appendChild(agRow);
       gWrap.appendChild(agf);
     }
 
-    // grid
     var displayed=S.filterFree?groups.filter(function(g){var ac=g.members.filter(function(m){return !m.stopped&&!m.reserved;}).length;var rc=g.members.filter(function(m){return m.reserved;}).length;return ac+rc<MAX;}):groups;
     var grid=el("div",{style:{display:"grid",gridTemplateColumns:"repeat("+activeDays.length+", 1fr)",gap:"10px"}});
 
@@ -256,9 +262,18 @@ function buildModule(mod,MAX,accent,accentLight){
 
         var card=el("div",{style:{background:"#fff",border:"1.5px solid "+bc,borderRadius:"10px",overflow:"hidden",marginBottom:"8px"}});
 
+        // KAART HEADER — tijd + fysiotherapeut links, niveau rechts
         var cardHead=el("div",{style:{background:hbg,padding:"9px 11px 7px",borderBottom:"1px solid "+hb,cursor:"pointer"},onClick:function(){S.expandedGroup=open?null:g.id;S.expandedEdit=null;render();}});
-        cardHead.appendChild(el("div",{style:{fontSize:"15px",fontWeight:"700",color:tc,marginBottom:"1px"}},g.time));
-        cardHead.appendChild(el("div",{style:{fontSize:"11px",color:"#666"}},g.colleague));
+        var headRow=el("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"flex-start",gap:"4px"}});
+        var headLeft=el("div",{});
+        headLeft.appendChild(el("div",{style:{fontSize:"15px",fontWeight:"700",color:tc,marginBottom:"1px"}},g.time));
+        headLeft.appendChild(el("div",{style:{fontSize:"11px",color:"#666"}},g.colleague));
+        headRow.appendChild(headLeft);
+        if(g.niveau){
+          var headRight=el("div",{style:{fontSize:"10px",color:tc,fontWeight:"600",textAlign:"right",maxWidth:"55%",lineHeight:"1.3",wordBreak:"break-word",flexShrink:"0"}},g.niveau);
+          headRow.appendChild(headRight);
+        }
+        cardHead.appendChild(headRow);
         card.appendChild(cardHead);
 
         var cardFoot=el("div",{style:{padding:"7px 11px",display:"flex",justifyContent:"space-between",alignItems:"center",cursor:"pointer"},onClick:function(){S.expandedGroup=open?null:g.id;S.expandedEdit=null;render();}});
@@ -276,10 +291,13 @@ function buildModule(mod,MAX,accent,accentLight){
           if(S.expandedEdit===g.id){
             var eDiv=el("div",{style:{marginBottom:"10px"}});
             eDiv.appendChild(el("div",{style:{fontSize:"12px",fontWeight:"600",color:"#666",marginBottom:"3px"}},"Fysiotherapeut"));
+            var eInp=el("input",{style:{width:"100%",padding:"5px 9px",border:"1px solid #ddd",borderRadius:"6px",fontSize:"13px",marginBottom:"6px",boxSizing:"border-box"},value:S.editColleague,onInput:function(e){S.editColleague=e.target.value;}});
+            eDiv.appendChild(eInp);
+            eDiv.appendChild(el("div",{style:{fontSize:"12px",fontWeight:"600",color:"#666",marginBottom:"3px"}},"Niveau"));
             var eRow=el("div",{style:{display:"flex",gap:"6px"}});
-            var eInp=el("input",{style:{flex:"1",padding:"5px 9px",border:"1px solid #ddd",borderRadius:"6px",fontSize:"13px"},value:S.editColleague,onInput:function(e){S.editColleague=e.target.value;}});
-            eRow.appendChild(eInp);
-            eRow.appendChild(el("button",{style:{padding:"5px 9px",background:accent,color:"#fff",border:"none",borderRadius:"6px",fontSize:"13px"},onClick:function(){g.colleague=S.editColleague;S.expandedEdit=null;render();}},"✓"));
+            var eNivInp=el("input",{style:{flex:"1",padding:"5px 9px",border:"1px solid #ddd",borderRadius:"6px",fontSize:"13px"},value:S.editNiveau||"",onInput:function(e){S.editNiveau=e.target.value;}});
+            eRow.appendChild(eNivInp);
+            eRow.appendChild(el("button",{style:{padding:"5px 9px",background:accent,color:"#fff",border:"none",borderRadius:"6px",fontSize:"13px"},onClick:function(){g.colleague=S.editColleague;g.niveau=S.editNiveau;S.expandedEdit=null;render();}},"✓"));
             eRow.appendChild(el("button",{style:{background:"none",border:"none",cursor:"pointer",color:G.red,fontSize:"15px"},onClick:function(){S.expandedEdit=null;render();}},"✕"));
             eDiv.appendChild(eRow);
             panel.appendChild(eDiv);
@@ -287,7 +305,7 @@ function buildModule(mod,MAX,accent,accentLight){
             var hRow=el("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"8px"}});
             hRow.appendChild(el("span",{style:{fontSize:"10px",color:"#666",fontWeight:"600"}},"DEELNEMERS"));
             var btnRow=el("div",{style:{display:"flex",gap:"4px"}});
-            btnRow.appendChild(el("button",{style:{fontSize:"10px",padding:"2px 6px",background:accentLight,color:accent,border:"1px solid "+accent,borderRadius:"6px"},onClick:function(){S.expandedEdit=g.id;S.editColleague=g.colleague;render();}},"✏"));
+            btnRow.appendChild(el("button",{style:{fontSize:"10px",padding:"2px 6px",background:accentLight,color:accent,border:"1px solid "+accent,borderRadius:"6px"},onClick:function(){S.expandedEdit=g.id;S.editColleague=g.colleague;S.editNiveau=g.niveau||"";render();}},"✏"));
             btnRow.appendChild(el("button",{style:{fontSize:"10px",padding:"2px 6px",background:"#fdecea",color:G.red,border:"1px solid "+G.red,borderRadius:"6px"},onClick:function(){if(confirm("Groep verwijderen?")){STATE[mod].groups=sortG(groups.filter(function(x){return x.id!==g.id;}));S.expandedGroup=null;render();}}},"🗑"));
             hRow.appendChild(btnRow);
             panel.appendChild(hRow);
@@ -299,7 +317,7 @@ function buildModule(mod,MAX,accent,accentLight){
             if(m.reserved){
               var rRow=el("div",{style:{display:"flex",alignItems:"center",gap:"5px",padding:"4px 0",borderBottom:"1px solid #ddd",background:"#f8f4ff"}});
               rRow.appendChild(el("span",{style:{fontSize:"11px"}},"📌"));
-              rRow.appendChild(el("span",{style:{flex:"1",fontSize:"12px",fontWeight:"500",color:G.purple,fontStyle:"italic"}},m.naam+(m.reservedFrom?" (v.a. "+fmtDate(m.reservedFrom)+")" :"")));
+              rRow.appendChild(el("span",{style:{flex:"1",fontSize:"12px",fontWeight:"500",color:G.purple,fontStyle:"italic"}},m.naam+(m.reservedFrom?" (v.a. "+fmtDate(m.reservedFrom)+")":"")));
               rRow.appendChild(el("span",{style:{fontSize:"10px",padding:"1px 6px",borderRadius:"8px",background:G.purpleLight,color:G.purple,border:"1px solid "+G.purple,fontWeight:"600"}},"Gereserveerd"));
               rRow.appendChild(el("button",{style:{background:"none",border:"none",cursor:"pointer",color:G.red,fontSize:"13px",padding:"0 2px"},onClick:function(){g.members=g.members.filter(function(x){return x.id!==m.id;});render();}},"✕"));
               panel.appendChild(rRow);
@@ -307,23 +325,19 @@ function buildModule(mod,MAX,accent,accentLight){
             }
             var mRow=el("div",{style:{display:"flex",alignItems:"center",gap:"5px",padding:"4px 0",borderBottom:"1px solid #ddd",opacity:m.stopped?"0.65":"1"}});
             mRow.appendChild(el("span",{style:{flex:"1",fontSize:"12px",fontWeight:"500",textDecoration:m.stopped?"line-through":"none"}},m.naam));
-            var bBtn=el("button",{style:bStyle(m.betaling||"incasso"),onClick:function(){var c={incasso:"contant",contant:"geen",geen:"incasso"};m.betaling=c[m.betaling||"incasso"];render();}},BLAB[m.betaling||"incasso"]);
-            mRow.appendChild(bBtn);
-            var sBtn=el("button",{style:{fontSize:"10px",padding:"2px 5px",borderRadius:"8px",cursor:"pointer",background:m.stopped?G.orangeLight:"#f5f5f3",color:m.stopped?G.orange:"#666",border:"1px solid "+(m.stopped?G.orange:"#ddd"),fontWeight:"600"},onClick:function(){m.stopped=!m.stopped;if(!m.stopped){m.stopReason="";m.stopUntil="";m.stopUnknown=false;}render();}},"⏸");
-            mRow.appendChild(sBtn);
+            mRow.appendChild(el("button",{style:bStyle(m.betaling||"incasso"),onClick:function(){var c={incasso:"contant",contant:"geen",geen:"incasso"};m.betaling=c[m.betaling||"incasso"];render();}},BLAB[m.betaling||"incasso"]));
+            mRow.appendChild(el("button",{style:{fontSize:"10px",padding:"2px 5px",borderRadius:"8px",cursor:"pointer",background:m.stopped?G.orangeLight:"#f5f5f3",color:m.stopped?G.orange:"#666",border:"1px solid "+(m.stopped?G.orange:"#ddd"),fontWeight:"600"},onClick:function(){m.stopped=!m.stopped;if(!m.stopped){m.stopReason="";m.stopUntil="";m.stopUnknown=false;}render();}},"⏸"));
             mRow.appendChild(el("button",{style:{background:"none",border:"none",cursor:"pointer",color:G.red,fontSize:"13px",padding:"0 2px"},onClick:function(){g.members=g.members.filter(function(x){return x.id!==m.id;});render();}},"✕"));
             panel.appendChild(mRow);
 
             if(m.stopped){
               var sp=el("div",{style:{background:G.orangeLight,border:"1px solid #f0c090",borderRadius:"6px",padding:"6px 8px",margin:"2px 0 4px"}});
               sp.appendChild(el("div",{style:{fontSize:"10px",color:G.orange,fontWeight:"600",marginBottom:"2px"}},"REDEN *"));
-              var rInp=el("input",{style:{width:"100%",padding:"3px 6px",border:"1px solid "+(m.stopReason&&m.stopReason.trim()?"#f0c090":G.red),borderRadius:"5px",fontSize:"11px",background:"#fff",boxSizing:"border-box"},placeholder:"verplicht",value:m.stopReason||"",onInput:function(e){m.stopReason=e.target.value;render();}});
-              sp.appendChild(rInp);
+              sp.appendChild(el("input",{style:{width:"100%",padding:"3px 6px",border:"1px solid "+(m.stopReason&&m.stopReason.trim()?"#f0c090":G.red),borderRadius:"5px",fontSize:"11px",background:"#fff",boxSizing:"border-box"},placeholder:"verplicht",value:m.stopReason||"",onInput:function(e){m.stopReason=e.target.value;render();}}));
               if(!m.stopReason||!m.stopReason.trim())sp.appendChild(el("div",{style:{fontSize:"10px",color:G.red,marginTop:"1px"}},"Verplicht"));
               sp.appendChild(el("div",{style:{fontSize:"10px",color:G.orange,fontWeight:"600",marginBottom:"2px",marginTop:"4px"}},"TOT WANNEER *"));
               if(!m.stopUnknown){
-                var dInp=el("input",{type:"date",style:{width:"100%",padding:"3px 6px",border:"1px solid "+(!m.stopUnknown&&!m.stopUntil?G.red:"#f0c090"),borderRadius:"5px",fontSize:"11px",background:"#fff",boxSizing:"border-box",marginBottom:"3px"},value:m.stopUntil||"",onChange:function(e){m.stopUntil=e.target.value;render();}});
-                sp.appendChild(dInp);
+                sp.appendChild(el("input",{type:"date",style:{width:"100%",padding:"3px 6px",border:"1px solid "+(!m.stopUnknown&&!m.stopUntil?G.red:"#f0c090"),borderRadius:"5px",fontSize:"11px",background:"#fff",boxSizing:"border-box",marginBottom:"3px"},value:m.stopUntil||"",onChange:function(e){m.stopUntil=e.target.value;render();}}));
               }
               var ukLabel=el("label",{style:{display:"flex",alignItems:"center",gap:"5px",fontSize:"11px",cursor:"pointer"}});
               var ukCb=el("input",{type:"checkbox",onChange:function(e){m.stopUnknown=e.target.checked;if(e.target.checked)m.stopUntil="";render();}});
@@ -340,27 +354,23 @@ function buildModule(mod,MAX,accent,accentLight){
           if(ac+rc<MAX){
             var addWrap=el("div",{style:{marginTop:"8px",borderTop:"1px solid #ddd",paddingTop:"8px"}});
             var rf=S.reserveForm[g.id]||{naam:"",from:""};
-
             var addRow=el("div",{style:{display:"flex",gap:"5px",marginBottom:"6px",alignItems:"center",flexWrap:"wrap"}});
             var nmInp=el("input",{style:{flex:"1",minWidth:"80px",padding:"6px 9px",border:"1px solid #ddd",borderRadius:"6px",fontSize:"13px"},placeholder:"Naam deelnemer",value:S.newMember.naam,onInput:function(e){S.newMember.naam=e.target.value;}});
             var betSel=el("select",{style:{padding:"4px 6px",border:"1px solid #ddd",borderRadius:"6px",fontSize:"11px"},onChange:function(e){S.newMember.betaling=e.target.value;}});
             ["incasso","contant","geen"].forEach(function(b){betSel.appendChild(el("option",{value:b},b==="incasso"?"Incasso":b==="contant"?"Contant":"Geen"));});
             betSel.value=S.newMember.betaling;
-            addRow.appendChild(nmInp);
-            addRow.appendChild(betSel);
+            addRow.appendChild(nmInp);addRow.appendChild(betSel);
             addRow.appendChild(el("button",{style:{padding:"4px 8px",background:G.orange,color:"#fff",border:"none",borderRadius:"6px",fontSize:"11px",fontWeight:"600"},onClick:function(){
               if(!S.newMember.naam.trim())return;
               g.members.push({id:stamp(),naam:S.newMember.naam.trim(),betaling:S.newMember.betaling,stopped:false,stopReason:"",stopUntil:"",stopUnknown:false,reserved:false,reservedFrom:""});
               S.newMember={naam:"",betaling:"incasso"};render();
             }},"+ Toevoegen"));
             addWrap.appendChild(addRow);
-
             var resRow=el("div",{style:{display:"flex",gap:"5px",alignItems:"center",flexWrap:"wrap"}});
             var rnInp=el("input",{style:{flex:"1",minWidth:"80px",padding:"6px 9px",border:"1px solid #ddd",borderRadius:"6px",fontSize:"13px"},placeholder:"📌 Naam",value:rf.naam,onInput:function(e){if(!S.reserveForm[g.id])S.reserveForm[g.id]={naam:"",from:""};S.reserveForm[g.id].naam=e.target.value;}});
             resRow.appendChild(rnInp);
             resRow.appendChild(el("label",{style:{fontSize:"11px",color:"#666",whiteSpace:"nowrap"}},"Instroomdatum:"));
-            var rdInp=el("input",{type:"date",style:{padding:"4px 6px",border:"1px solid #ddd",borderRadius:"6px",fontSize:"11px"},value:rf.from,onChange:function(e){if(!S.reserveForm[g.id])S.reserveForm[g.id]={naam:"",from:""};S.reserveForm[g.id].from=e.target.value;}});
-            resRow.appendChild(rdInp);
+            resRow.appendChild(el("input",{type:"date",style:{padding:"4px 6px",border:"1px solid #ddd",borderRadius:"6px",fontSize:"11px"},value:rf.from,onChange:function(e){if(!S.reserveForm[g.id])S.reserveForm[g.id]={naam:"",from:""};S.reserveForm[g.id].from=e.target.value;}}));
             resRow.appendChild(el("button",{style:{padding:"4px 8px",background:G.purple,color:"#fff",border:"none",borderRadius:"6px",fontSize:"11px",fontWeight:"600"},onClick:function(){
               var rff=S.reserveForm[g.id]||{naam:"",from:""};
               if(!rff.naam.trim())return;
@@ -386,14 +396,11 @@ function buildModule(mod,MAX,accent,accentLight){
     var wWrap=el("div",{style:{padding:"12px 16px"}});
     var wForm=el("div",{style:{background:G.grayLight,border:"1px solid #ddd",borderRadius:"10px",padding:"14px 16px",marginBottom:"14px"}});
     wForm.appendChild(el("p",{style:{fontSize:"15px",fontWeight:"700",color:accent,margin:"0 0 10px"}},S.wlEditId!==null?"Bewerken":"Nieuwe aanmelding"));
-
     var wfRow1=el("div",{style:{display:"flex",gap:"10px",flexWrap:"wrap",marginBottom:"10px"}});
     var nmWrap=el("div",{style:{flex:"1",minWidth:"130px"}});
     nmWrap.appendChild(el("label",{style:{fontSize:"12px",fontWeight:"600",color:"#666",marginBottom:"3px",display:"block"}},"Naam *"));
-    var nmInp2=el("input",{style:{width:"100%",padding:"7px 10px",border:"1px solid #ddd",borderRadius:"6px",fontSize:"14px",boxSizing:"border-box"},placeholder:"Voornaam",value:S.wlForm.naam,onInput:function(e){S.wlForm.naam=e.target.value;}});
-    nmWrap.appendChild(nmInp2);
+    nmWrap.appendChild(el("input",{style:{width:"100%",padding:"7px 10px",border:"1px solid #ddd",borderRadius:"6px",fontSize:"14px",boxSizing:"border-box"},placeholder:"Voornaam",value:S.wlForm.naam,onInput:function(e){S.wlForm.naam=e.target.value;}}));
     wfRow1.appendChild(nmWrap);
-
     var refWrap=el("div",{style:{flex:"1",minWidth:"180px"}});
     refWrap.appendChild(el("label",{style:{fontSize:"12px",fontWeight:"600",color:"#666",marginBottom:"3px",display:"block"}},"Via wie aangemeld"));
     var refSel=el("select",{style:{width:"100%",padding:"7px 10px",border:"1px solid #ddd",borderRadius:"6px",fontSize:"14px",boxSizing:"border-box"},onChange:function(e){S.wlForm.referrer=e.target.value;if(e.target.value!=="anders")S.wlForm.referrerOther="";render();}});
@@ -403,12 +410,10 @@ function buildModule(mod,MAX,accent,accentLight){
     refSel.value=S.wlForm.referrer;
     refWrap.appendChild(refSel);
     if(S.wlForm.referrer==="anders"){
-      var roInp=el("input",{style:{width:"100%",padding:"7px 10px",border:"1px solid #ddd",borderRadius:"6px",fontSize:"14px",boxSizing:"border-box",marginTop:"5px"},placeholder:"Naam",value:S.wlForm.referrerOther||"",onInput:function(e){S.wlForm.referrerOther=e.target.value;}});
-      refWrap.appendChild(roInp);
+      refWrap.appendChild(el("input",{style:{width:"100%",padding:"7px 10px",border:"1px solid #ddd",borderRadius:"6px",fontSize:"14px",boxSizing:"border-box",marginTop:"5px"},placeholder:"Naam",value:S.wlForm.referrerOther||"",onInput:function(e){S.wlForm.referrerOther=e.target.value;}}));
     }
     wfRow1.appendChild(refWrap);
     wForm.appendChild(wfRow1);
-
     var avWrap=el("div",{style:{marginBottom:"10px"}});
     avWrap.appendChild(el("div",{style:{fontSize:"12px",fontWeight:"600",color:"#666",marginBottom:"5px"}},"Beschikbaarheid"));
     var dpRow=el("div",{style:{display:"flex",gap:"7px",marginBottom:"7px",flexWrap:"wrap"}});
@@ -424,7 +429,6 @@ function buildModule(mod,MAX,accent,accentLight){
     });
     dpRow.appendChild(el("button",{style:{padding:"5px 11px",borderRadius:"16px",border:"1px solid #ddd",background:"#fff",color:"#666",fontSize:"12px"},onClick:function(){S.wlForm.availability={};render();}},"Wis alles"));
     avWrap.appendChild(dpRow);
-
     var cbGrid=el("div",{style:{display:"grid",gridTemplateColumns:"repeat(auto-fill, minmax(130px, 1fr))",gap:"7px"}});
     activeDays.forEach(function(day){
       var dg=groups.filter(function(gg){return gg.day===day;}).sort(function(a,b){return a.time.localeCompare(b.time);});
@@ -443,12 +447,10 @@ function buildModule(mod,MAX,accent,accentLight){
     });
     avWrap.appendChild(cbGrid);
     wForm.appendChild(avWrap);
-
     var noteWrap=el("div",{style:{marginBottom:"10px"}});
     noteWrap.appendChild(el("label",{style:{fontSize:"12px",fontWeight:"600",color:"#666",marginBottom:"3px",display:"block"}},"Notitie"));
     noteWrap.appendChild(el("input",{style:{width:"100%",padding:"7px 10px",border:"1px solid #ddd",borderRadius:"6px",fontSize:"14px",boxSizing:"border-box"},placeholder:"opmerkingen",value:S.wlForm.note,onInput:function(e){S.wlForm.note=e.target.value;}}));
     wForm.appendChild(noteWrap);
-
     var wfBtns=el("div",{style:{display:"flex",gap:"8px"}});
     wfBtns.appendChild(el("button",{style:{padding:"6px 13px",background:G.orange,color:"#fff",border:"none",borderRadius:"6px",fontSize:"13px",fontWeight:"600"},onClick:function(){
       if(!S.wlForm.naam.trim())return;
@@ -460,10 +462,8 @@ function buildModule(mod,MAX,accent,accentLight){
     if(S.wlEditId!==null)wfBtns.appendChild(el("button",{style:{padding:"5px 11px",background:accentLight,color:accent,border:"1px solid "+accent,borderRadius:"6px",fontSize:"12px"},onClick:function(){S.wlEditId=null;S.wlForm={naam:"",availability:{},referrer:"",referrerOther:"",note:""};render();}},"Annuleren"));
     wForm.appendChild(wfBtns);
     wWrap.appendChild(wForm);
-
     wWrap.appendChild(el("p",{style:{fontSize:"14px",fontWeight:"700",color:accent,margin:"0 0 8px"}},"Wachtlijst ("+waitlist.length+")"));
     if(waitlist.length===0)wWrap.appendChild(el("div",{style:{color:"#666",fontSize:"13px"}},"Wachtlijst is leeg."));
-
     var sorted=waitlist.slice().sort(function(a,b){return a.date-b.date;});
     sorted.forEach(function(w,i){
       var ref=w.referrer==="anders"?(w.referrerOther||"anders"):w.referrer;
@@ -493,8 +493,6 @@ function buildModule(mod,MAX,accent,accentLight){
 
 function buildApp(){
   var app=el("div",{style:{fontFamily:"'Segoe UI',system-ui,sans-serif",color:"#1a1a1a"}});
-
-  // header
   var hdr=el("div",{style:{background:G.green,color:"#fff",padding:"16px 24px 0",borderRadius:"0 0 12px 12px"}});
   hdr.appendChild(el("h1",{style:{margin:"0 0 12px",fontSize:"19px",fontWeight:"600"}},"Fyzio Totaal — Groepsbeheer"));
   var tabRow=el("div",{style:{display:"flex",gap:"4px"}});
@@ -504,7 +502,6 @@ function buildApp(){
   });
   hdr.appendChild(tabRow);
   app.appendChild(hdr);
-
   var body=el("div",{style:{border:"1px solid #ddd",borderTop:"none",borderRadius:"0 0 12px 12px",overflow:"hidden",background:"#fff"}});
   if(STATE.mainTab==="ft")body.appendChild(buildModule("ft",FT_MAX,G.green,G.greenLight));
   else body.appendChild(buildModule("ba",BA_MAX,G.blue,G.blueLight));
@@ -512,7 +509,6 @@ function buildApp(){
   return app;
 }
 
-// init
 loadModule("ft",KEYS.ftg,KEYS.ftw,FT_INIT);
 loadModule("ba",KEYS.bag,KEYS.baw,BA_INIT);
 </script>
