@@ -9,124 +9,60 @@
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: 'Inter', 'Segoe UI', sans-serif; background: #f0f0ee; min-height: 100vh; color: #1a1a1a; }
 
-    header {
-      background: #1a4a3a;
-      padding: 0 40px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      height: 70px;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.15);
-    }
-    .header-left { display: flex; align-items: center; gap: 14px; }
-    .logo-circle { width: 42px; height: 42px; background: #e8611a; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
-    .header-title { color: #fff; font-size: 18px; font-weight: 700; }
-    .header-subtitle { color: rgba(255,255,255,0.65); font-size: 12px; margin-top: 1px; }
-    .header-right { color: rgba(255,255,255,0.6); font-size: 13px; }
+    /* HEADER */
+    header { background: #1a4a3a; padding: 0 1.25rem; display: flex; align-items: center; justify-content: space-between; height: 62px; box-shadow: 0 2px 12px rgba(0,0,0,0.15); }
+    .header-left { display: flex; align-items: center; gap: 12px; }
+    .logo-circle { width: 38px; height: 38px; background: #e8611a; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+    .header-title { color: #fff; font-size: 16px; font-weight: 700; }
+    .header-subtitle { color: rgba(255,255,255,0.65); font-size: 11px; margin-top: 1px; }
+    .header-right { color: rgba(255,255,255,0.6); font-size: 12px; white-space: nowrap; }
+    /* Clock verbergen op heel smal scherm */
+    @media (max-width: 420px) { .header-right { display: none; } }
 
-    .hero {
-      background: linear-gradient(135deg, #1a4a3a 0%, #2d6b55 100%);
-      padding: 50px 40px 40px;
-      text-align: center;
-      color: #fff;
-    }
-    .hero h1 { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
-    .hero p { font-size: 15px; opacity: 0.8; max-width: 460px; margin: 0 auto; line-height: 1.6; }
+    /* HERO */
+    .hero { background: linear-gradient(135deg, #1a4a3a 0%, #2d6b55 100%); padding: 36px 1.25rem 30px; text-align: center; color: #fff; }
+    .hero h1 { font-size: 22px; font-weight: 700; margin-bottom: 7px; }
+    .hero p { font-size: 13px; opacity: 0.8; max-width: 420px; margin: 0 auto; line-height: 1.6; }
 
-    .container { max-width: 860px; margin: 0 auto; padding: 36px 20px 60px; }
+    /* CONTAINER */
+    .container { max-width: 860px; margin: 0 auto; padding: 28px 1rem 60px; }
+    .section-title { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.4px; color: #999; margin-bottom: 12px; }
 
-    .section-title {
-      font-size: 11px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 1.4px;
-      color: #999;
-      margin-bottom: 14px;
-    }
+    /* GRID */
+    .tools-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 28px; }
+    @media (max-width: 640px) { .tools-grid { grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 380px) { .tools-grid { grid-template-columns: 1fr; } }
 
-    .tools-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 14px;
-      margin-bottom: 32px;
-    }
-
-    .tool-card {
-      background: #fff;
-      border-radius: 12px;
-      padding: 22px;
-      text-decoration: none;
-      color: inherit;
-      border: 1.5px solid #e4e4e0;
-      transition: box-shadow 0.2s, transform 0.2s;
-      display: flex;
-      flex-direction: column;
-      position: relative;
-      overflow: hidden;
-      min-height: 220px;
-    }
-    .tool-card:hover { box-shadow: 0 6px 24px rgba(0,0,0,0.10); transform: translateY(-2px); border-color: var(--accent); }
+    /* CARDS */
+    .tool-card { background: #fff; border-radius: 12px; padding: 18px; text-decoration: none; color: inherit; border: 1.5px solid #e4e4e0; transition: box-shadow 0.2s, transform 0.2s; display: flex; flex-direction: column; position: relative; overflow: hidden; min-height: 0; }
     .tool-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: var(--accent); }
+    @media (hover: hover) { .tool-card:hover { box-shadow: 0 6px 24px rgba(0,0,0,0.10); transform: translateY(-2px); border-color: var(--accent); } }
+    .tool-card:active { transform: scale(0.98); }
 
-    .tool-icon { font-size: 26px; margin-bottom: 10px; display: block; }
-    .tool-name { font-size: 15px; font-weight: 700; color: #1a1a1a; margin-bottom: 6px; }
-    .tool-desc { font-size: 12px; color: #777; line-height: 1.5; margin-bottom: 12px; flex: 1; }
+    .tool-icon { font-size: 22px; margin-bottom: 8px; display: block; }
+    .tool-name { font-size: 13px; font-weight: 700; color: #1a1a1a; margin-bottom: 5px; line-height: 1.3; }
+    .tool-desc { font-size: 11px; color: #777; line-height: 1.5; margin-bottom: 10px; flex: 1; }
+    /* Beschrijving verbergen op smal mobiel voor compactheid */
+    @media (max-width: 480px) { .tool-desc { display: none; } }
 
-    .tool-tags { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 14px; }
-    .tag { font-size: 10px; padding: 2px 8px; border-radius: 20px; font-weight: 500; background: #f0f0ee; color: #777; }
+    .tool-tags { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 12px; }
+    .tag { font-size: 10px; padding: 2px 7px; border-radius: 20px; font-weight: 500; background: #f0f0ee; color: #777; }
     .tag.green { background: #e8f5ed; color: #1e7e4e; }
     .tag.blue  { background: #e8f0f8; color: #1a3a5a; }
     .tag.orange{ background: #fdf0e8; color: #e8611a; }
+    @media (max-width: 480px) { .tool-tags { display: none; } }
 
-    .open-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      padding: 7px 14px;
-      background: var(--accent);
-      color: #fff;
-      border-radius: 7px;
-      font-size: 12px;
-      font-weight: 600;
-      text-decoration: none;
-      align-self: flex-start;
-      transition: opacity 0.15s;
-    }
+    .open-btn { display: inline-flex; align-items: center; gap: 5px; padding: 8px 14px; background: var(--accent); color: #fff; border-radius: 7px; font-size: 12px; font-weight: 600; text-decoration: none; align-self: flex-start; transition: opacity 0.15s; min-height: 36px; }
     .open-btn:hover { opacity: 0.85; }
 
-    .divider { height: 1px; background: #e4e4e0; margin: 28px 0; }
+    .divider { height: 1px; background: #e4e4e0; margin: 22px 0; }
 
-    .soon-card {
-      background: #fff;
-      border-radius: 12px;
-      padding: 22px;
-      border: 1.5px dashed #ddd;
-      opacity: 0.5;
-      min-height: 220px;
-      display: flex;
-      flex-direction: column;
-    }
+    .soon-card { background: #fff; border-radius: 12px; padding: 18px; border: 1.5px dashed #ddd; opacity: 0.5; display: flex; flex-direction: column; }
 
-    .info-bar {
-      background: #fff;
-      border-radius: 10px;
-      padding: 14px 20px;
-      border: 1px solid #e4e4e0;
-      display: flex;
-      align-items: flex-start;
-      gap: 10px;
-      font-size: 13px;
-      color: #666;
-      margin-top: 8px;
-    }
+    .info-bar { background: #fff; border-radius: 10px; padding: 12px 16px; border: 1px solid #e4e4e0; display: flex; align-items: flex-start; gap: 10px; font-size: 12px; color: #666; margin-top: 8px; }
+    .info-bar code { word-break: break-all; font-size: 11px; background: #f0f0ee; padding: 1px 5px; border-radius: 4px; }
 
-    footer {
-      background: #1a4a3a;
-      color: rgba(255,255,255,0.5);
-      text-align: center;
-      padding: 18px;
-      font-size: 12px;
-    }
+    footer { background: #1a4a3a; color: rgba(255,255,255,0.5); text-align: center; padding: 16px 1rem; font-size: 12px; }
     footer strong { color: rgba(255,255,255,0.85); }
   </style>
 </head>
@@ -149,7 +85,6 @@
   </div>
 
   <div class="container">
-
     <div class="section-title">Beschikbare tools</div>
     <div class="tools-grid">
 
@@ -157,10 +92,7 @@
         <span class="tool-icon">📋</span>
         <div class="tool-name">Administratiehulp KLACHT</div>
         <div class="tool-desc">Gestructureerde hulp bij het documenteren van klachten volgens de KLACHT-methode.</div>
-        <div class="tool-tags">
-          <span class="tag blue">Administratie</span>
-          <span class="tag">Klinisch</span>
-        </div>
+        <div class="tool-tags"><span class="tag blue">Administratie</span><span class="tag">Klinisch</span></div>
         <span class="open-btn" style="--accent: #1a3a5a;">Openen →</span>
       </a>
 
@@ -168,11 +100,7 @@
         <span class="tool-icon">🏃</span>
         <div class="tool-name">Fyziotraining & Balance</div>
         <div class="tool-desc">Beheer deelnemers, wachtlijsten, tijdelijke stops en reserveringen voor alle trainingsgroepen.</div>
-        <div class="tool-tags">
-          <span class="tag green">Fyziotraining</span>
-          <span class="tag blue">Balance</span>
-          <span class="tag orange">Wachtlijst</span>
-        </div>
+        <div class="tool-tags"><span class="tag green">Fyziotraining</span><span class="tag blue">Balance</span><span class="tag orange">Wachtlijst</span></div>
         <span class="open-btn" style="--accent: #1a4a3a;">Openen →</span>
       </a>
 
@@ -180,10 +108,7 @@
         <span class="tool-icon">🦵</span>
         <div class="tool-name">Testen VKB</div>
         <div class="tool-desc">Testprotocol en scoringsoverzicht voor VKB-revalidatie.</div>
-        <div class="tool-tags">
-          <span class="tag green">Revalidatie</span>
-          <span class="tag">Klinisch</span>
-        </div>
+        <div class="tool-tags"><span class="tag green">Revalidatie</span><span class="tag">Klinisch</span></div>
         <span class="open-btn" style="--accent: #1a4a3a;">Openen →</span>
       </a>
 
@@ -202,9 +127,8 @@
 
     <div class="info-bar">
       <span>💡</span>
-      <div>Sla deze pagina op als bladwijzer: <strong>https://lonnekevv.github.io/fyziototaaldashboard/</strong></div>
+      <div>Sla op als bladwijzer: <code>lonnekevv.github.io/fyziototaaldashboard</code></div>
     </div>
-
   </div>
 
   <footer>
@@ -214,13 +138,11 @@
   <script>
     function updateClock() {
       var now = new Date();
-      var days = ['zondag','maandag','dinsdag','woensdag','donderdag','vrijdag','zaterdag'];
+      var days = ['zo','ma','di','wo','do','vr','za'];
       var months = ['jan','feb','mrt','apr','mei','jun','jul','aug','sep','okt','nov','dec'];
-      var d = days[now.getDay()];
-      var date = now.getDate() + ' ' + months[now.getMonth()];
       var h = String(now.getHours()).padStart(2,'0');
       var m = String(now.getMinutes()).padStart(2,'0');
-      document.getElementById('clock').textContent = d + ' ' + date + '  ·  ' + h + ':' + m;
+      document.getElementById('clock').textContent = days[now.getDay()] + ' ' + now.getDate() + ' ' + months[now.getMonth()] + '  ' + h + ':' + m;
     }
     updateClock();
     setInterval(updateClock, 30000);
