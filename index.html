@@ -9,31 +9,25 @@
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: 'Inter', 'Segoe UI', sans-serif; background: #f0f0ee; min-height: 100vh; color: #1a1a1a; }
 
-    /* HEADER */
     header { background: #1a4a3a; padding: 0 1.25rem; display: flex; align-items: center; justify-content: space-between; height: 62px; box-shadow: 0 2px 12px rgba(0,0,0,0.15); }
     .header-left { display: flex; align-items: center; gap: 12px; }
     .logo-circle { width: 38px; height: 38px; background: #e8611a; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
     .header-title { color: #fff; font-size: 16px; font-weight: 700; }
     .header-subtitle { color: rgba(255,255,255,0.65); font-size: 11px; margin-top: 1px; }
     .header-right { color: rgba(255,255,255,0.6); font-size: 12px; white-space: nowrap; }
-    /* Clock verbergen op heel smal scherm */
     @media (max-width: 420px) { .header-right { display: none; } }
 
-    /* HERO */
     .hero { background: linear-gradient(135deg, #1a4a3a 0%, #2d6b55 100%); padding: 36px 1.25rem 30px; text-align: center; color: #fff; }
     .hero h1 { font-size: 22px; font-weight: 700; margin-bottom: 7px; }
     .hero p { font-size: 13px; opacity: 0.8; max-width: 420px; margin: 0 auto; line-height: 1.6; }
 
-    /* CONTAINER */
     .container { max-width: 860px; margin: 0 auto; padding: 28px 1rem 60px; }
     .section-title { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.4px; color: #999; margin-bottom: 12px; }
 
-    /* GRID */
     .tools-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 28px; }
     @media (max-width: 640px) { .tools-grid { grid-template-columns: 1fr 1fr; } }
     @media (max-width: 380px) { .tools-grid { grid-template-columns: 1fr; } }
 
-    /* CARDS */
     .tool-card { background: #fff; border-radius: 12px; padding: 18px; text-decoration: none; color: inherit; border: 1.5px solid #e4e4e0; transition: box-shadow 0.2s, transform 0.2s; display: flex; flex-direction: column; position: relative; overflow: hidden; min-height: 0; }
     .tool-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: var(--accent); }
     @media (hover: hover) { .tool-card:hover { box-shadow: 0 6px 24px rgba(0,0,0,0.10); transform: translateY(-2px); border-color: var(--accent); } }
@@ -42,7 +36,6 @@
     .tool-icon { font-size: 22px; margin-bottom: 8px; display: block; }
     .tool-name { font-size: 13px; font-weight: 700; color: #1a1a1a; margin-bottom: 5px; line-height: 1.3; }
     .tool-desc { font-size: 11px; color: #777; line-height: 1.5; margin-bottom: 10px; flex: 1; }
-    /* Beschrijving verbergen op smal mobiel voor compactheid */
     @media (max-width: 480px) { .tool-desc { display: none; } }
 
     .tool-tags { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 12px; }
@@ -56,7 +49,6 @@
     .open-btn:hover { opacity: 0.85; }
 
     .divider { height: 1px; background: #e4e4e0; margin: 22px 0; }
-
     .soon-card { background: #fff; border-radius: 12px; padding: 18px; border: 1.5px dashed #ddd; opacity: 0.5; display: flex; flex-direction: column; }
 
     .info-bar { background: #fff; border-radius: 10px; padding: 12px 16px; border: 1px solid #e4e4e0; display: flex; align-items: flex-start; gap: 10px; font-size: 12px; color: #666; margin-top: 8px; }
@@ -104,11 +96,11 @@
         <span class="open-btn" style="--accent: #1a4a3a;">Openen →</span>
       </a>
 
-      <a class="tool-card" href="testen-vkb.html" target="_blank" style="--accent: #1a4a3a;">
+      <a class="tool-card" href="vkb-planning.html" target="_blank" style="--accent: #1a4a3a;">
         <span class="tool-icon">🦵</span>
-        <div class="tool-name">Testen VKB</div>
-        <div class="tool-desc">Testprotocol en scoringsoverzicht voor VKB-revalidatie.</div>
-        <div class="tool-tags"><span class="tag green">Revalidatie</span><span class="tag">Klinisch</span></div>
+        <div class="tool-name">VKB Testen & Planning</div>
+        <div class="tool-desc">Testprotocol, scoringsoverzicht én testplanning voor VKB-revalidaties. Inclusief urgentieoverzicht.</div>
+        <div class="tool-tags"><span class="tag green">Revalidatie</span><span class="tag">Planning</span><span class="tag">Klinisch</span></div>
         <span class="open-btn" style="--accent: #1a4a3a;">Openen →</span>
       </a>
 
