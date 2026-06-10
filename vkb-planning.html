@@ -101,8 +101,10 @@ async function dbSet(key,value){
 }
 async function dbList(){
   try{
-    const r=await fetch(SB_URL+"/rest/v1/storage?key=like.vkb_%&select=key,value",{headers:{"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY}});
-    return await r.json();
+    const r=await fetch(SB_URL+"/rest/v1/storage?key=like.vkb_*&select=key,value",{headers:{"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY}});
+    const d=await r.json();
+    if(!Array.isArray(d))return[];
+    return d;
   }catch(e){return[];}
 }
 async function saveData(nr,d){await dbSet("vkb_"+nr,JSON.stringify(d));}
