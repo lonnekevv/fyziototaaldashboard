@@ -155,7 +155,7 @@
           <div class="test-invoer">
             <div class="score-rij">
               <div class="score-veld"><label>Lengte (cm)</label><input type="number" id="lengte" placeholder="175" step="0.5"></div>
-              <div class="score-veld"><label>Gewicht (kg)</label><input type="number" id="gewicht" placeholder="82" step="0.1"></div>
+              <div class="score-veld"><label>Gewicht (kg)</label><input type="number" id="gewicht" placeholder="82" step="0.1" oninput="berekenVO2max()"></div>
             </div>
           </div>
         </div>
@@ -203,7 +203,14 @@
           <div class="test-naam" onclick="toggleInstructie(this)"><strong>Sit en Reach</strong><span class="chevron">v</span></div>
           <div class="test-instructie">Deelnemer zit op de grond met gestrekte benen, voeten plat tegen de meetbox. Beide handen op elkaar, langzaam zo ver mogelijk naar voren reiken zonder de knieen te buigen. Houd 2 seconden vast.<br><br><strong>Score:</strong> afstand ten opzichte van de voeten in cm (+ = voorbij de tenen, - = voor de tenen).<br><strong>Voorzichtig bij actuele lage rugklachten.</strong></div>
           <div class="test-invoer">
-            <div class="score-rij enkel"><div class="score-veld"><label>Score (cm)</label><input type="number" id="sit_reach" placeholder="bijv. 8 of -3" step="0.5"></div></div>
+            <div class="score-rij enkel">
+              <div class="score-veld">
+                <label>Score (cm)</label>
+                <input type="number" id="sit_reach" placeholder="bijv. 8 of -3" step="0.5" oninput="updateNormSitReach()">
+                <div class="norm-tekst" id="norm-sit-reach">Norm: Goed &gt;10 cm / Gemiddeld 0-10 cm / Slecht &lt;0 cm</div>
+                <span class="score-badge" id="sit_reach_badge"></span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -317,14 +324,13 @@
           <div class="test-naam" onclick="toggleInstructie(this)"><strong>1000m Roeitest (Concept2)</strong><span class="chevron">v</span></div>
           <div class="test-instructie">1000 meter 'all-out' roeien op maximaal vermogen. Stel de weerstand in op level 4-6. Noteer eindtijd en gemiddelde split (pace per 500m).<br><br><strong>Norm mannen:</strong> Top &lt;3:30 / Gemiddeld 3:30-4:20 / Matig &gt;4:20<br><strong>Norm vrouwen:</strong> Top &lt;4:10 / Gemiddeld 4:10-5:05 / Matig &gt;5:05</div>
           <div class="test-invoer">
-            <div class="score-rij">
+            <div class="score-rij enkel">
               <div class="score-veld">
                 <label>Eindtijd (min:sec)</label>
                 <input type="text" id="roei_tijd" placeholder="bijv. 3:55" oninput="updateNormRoei()">
                 <span class="score-badge" id="roei_badge"></span>
                 <div class="norm-tekst" id="norm-roei"></div>
               </div>
-              <div class="score-veld"><label>Gemiddelde pace (/500m)</label><input type="text" id="roei_pace" placeholder="bijv. 1:57"></div>
             </div>
           </div>
         </div>
@@ -337,8 +343,25 @@
               <div class="score-veld"><label>Hartslag min 6 (bpm)</label><input type="number" id="astrand_hf6" placeholder="bpm" min="40" max="200"></div>
             </div>
             <div class="score-rij">
-              <div class="score-veld"><label>Weerstand (Watt)</label><input type="number" id="astrand_watt" placeholder="W" min="0"></div>
-              <div class="score-veld"><label>Geschatte VO2max (ml/kg/min)</label><input type="number" id="astrand_vo2" placeholder="optioneel" step="0.1"></div>
+              <div class="score-veld">
+                <label>Weerstand (Watt)</label>
+                <input type="number" id="astrand_watt" placeholder="W" min="0" oninput="berekenVO2max()">
+              </div>
+              <div class="score-veld">
+                <label>Gewicht (kg) <span style="font-weight:400;color:#aaa">(overgenomen uit lichaamsmaten)</span></label>
+                <input type="number" id="astrand_gewicht" placeholder="Vul gewicht in bij lichaamsmaten" step="0.1" readonly style="background:#f9f9f9;color:var(--tekst-zacht)">
+              </div>
+            </div>
+            <div class="score-rij">
+              <div class="score-veld">
+                <label>Berekende VO2max (L/min)</label>
+                <input type="number" id="astrand_vo2_abs" placeholder="wordt automatisch berekend" step="0.01" readonly style="background:#f9f9f9;color:var(--tekst-zacht)">
+              </div>
+              <div class="score-veld">
+                <label>Berekende VO2max (ml/kg/min)</label>
+                <input type="number" id="astrand_vo2" placeholder="wordt automatisch berekend" step="0.1" readonly style="background:#f9f9f9;color:var(--tekst-zacht)">
+                <div class="norm-tekst" id="norm-vo2"></div>
+              </div>
             </div>
           </div>
         </div>
@@ -491,9 +514,9 @@ function verzamelData(){
     dll:radio('dll'),dll_hoek:v('dll_hoek'),
     plank_variant:v('plank-variant'),plank:v('plank'),
     conditie_variant:v('conditie-variant'),
-    roei_tijd:v('roei_tijd'),roei_pace:v('roei_pace'),
+    roei_tijd:v('roei_tijd'),
     step_hf:v('step_hf'),
-    astrand_hf5:v('astrand_hf5'),astrand_hf6:v('astrand_hf6'),astrand_watt:v('astrand_watt'),astrand_vo2:v('astrand_vo2'),
+    astrand_hf5:v('astrand_hf5'),astrand_hf6:v('astrand_hf6'),astrand_watt:v('astrand_watt'),astrand_vo2:v('astrand_vo2'),astrand_vo2_abs:v('astrand_vo2_abs'),astrand_gewicht:v('astrand_gewicht'),
     blessure_info:v('blessure_info'),blessure_invloed:v('blessure_invloed'),
   };
 }
@@ -505,7 +528,7 @@ function vulFormulierIn(d){
    'lengte','gewicht','buikomvang','wall_angels_opm','overhead_squat_opm','sit_reach',
    'sp_hh_li','sp_kg_li','sp_hh_re','sp_kg_re','slsu_li','slsu_re',
    'brug_li','brug_re','biering','roman_li','roman_re','dll_hoek','plank',
-   'roei_tijd','roei_pace','step_hf','astrand_hf5','astrand_hf6','astrand_watt','astrand_vo2',
+   'roei_tijd','step_hf','astrand_hf5','astrand_hf6','astrand_watt','astrand_vo2','astrand_vo2_abs','astrand_gewicht',
    'blessure_info','blessure_invloed'
   ].forEach(id=>stel(id,d[id.replace(/-/g,'_')]));
   if(d.wall_angels)zetRadio('wall_angels',d.wall_angels);
@@ -515,7 +538,7 @@ function vulFormulierIn(d){
   if(d.roman_variant){stel('roman-variant',d.roman_variant);updateRomanNorm();}
   if(d.plank_variant){stel('plank-variant',d.plank_variant);updatePlankNorm();}
   if(d.conditie_variant){stel('conditie-variant',d.conditie_variant);updateConditieVariant();}
-  updateNormBuik();updateNormSP();updateNormStep();
+  updateNormBuik();updateNormSP();updateNormStep();berekenVO2max();
 }
 
 const v=id=>document.getElementById(id)?.value||'';
@@ -644,6 +667,82 @@ function updateNormRoei(){
     if(sec<250){badge2.textContent='Top';badge2.classList.add('top');}
     else if(sec<=305){badge2.textContent='Gemiddeld';badge2.classList.add('goed');}
     else{badge2.textContent='Matig';badge2.classList.add('matig');}
+  }
+}
+
+
+function updateNormSitReach(){
+  const val=parseFloat(v('sit_reach'));
+  const b=document.getElementById('sit_reach_badge');
+  b.className='score-badge';b.textContent='';
+  if(isNaN(val))return;
+  if(val>10){b.textContent='Goed';b.classList.add('goed');}
+  else if(val>=0){b.textContent='Gemiddeld';b.classList.add('matig');}
+  else{b.textContent='Slecht';b.classList.add('zwak');}
+}
+
+function berekenVO2max(){
+  // Astrand-Rhyming nomogram formule
+  // VO2max (L/min) = (Watt x 12 + 300) / (HF_gem - 28)
+  // Leeftijdscorrectie: correctiefactor op basis van Astrand leeftijdstabel
+  // Daarna /1000 * (1000/gewicht) = /gewicht * 1000 voor ml/kg/min
+  // Gewicht spiegelen vanuit lichaamsmaten
+  const gewichtHoofd=v('gewicht');
+  const astGew=document.getElementById('astrand_gewicht');
+  if(gewichtHoofd&&astGew)astGew.value=gewichtHoofd;
+
+  const hf5=parseFloat(v('astrand_hf5')),hf6=parseFloat(v('astrand_hf6'));
+  const watt=parseFloat(v('astrand_watt')),gew=parseFloat(v('gewicht'))||parseFloat(v('astrand_gewicht'));
+  const lft=parseInt(v('input-leeftijd'))||0;
+  const vo2abs=document.getElementById('astrand_vo2_abs');
+  const vo2rel=document.getElementById('astrand_vo2');
+  const normEl=document.getElementById('norm-vo2');
+  vo2abs.value='';vo2rel.value='';normEl.textContent='';
+
+  if(isNaN(hf5)||isNaN(hf6)||isNaN(watt)||watt<=0)return;
+  const hfGem=(hf5+hf6)/2;
+  if(hfGem<=28)return;
+
+  // Astrand-Rhyming basisformule
+  const vo2L=((watt*12)+300)/(hfGem-28)/1000;
+
+  // Leeftijdscorrectie (Astrand 1954 / Astrand & Rodahl)
+  let correctie=1.0;
+  if(lft>0){
+    if(lft<=25)correctie=1.10;
+    else if(lft<=35)correctie=1.00;
+    else if(lft<=40)correctie=0.93;
+    else if(lft<=45)correctie=0.86;
+    else if(lft<=50)correctie=0.80;
+    else if(lft<=55)correctie=0.74;
+    else correctie=0.68;
+  }
+  const vo2gecorr=vo2L*correctie;
+  vo2abs.value=vo2gecorr.toFixed(2);
+
+  if(!isNaN(gew)&&gew>0){
+    const vo2mlkg=(vo2gecorr/gew)*1000;
+    vo2rel.value=vo2mlkg.toFixed(1);
+
+    // VO2max normen (ACSM, algemeen)
+    const g=v('input-geslacht');
+    let norm='';
+    if(g==='man'){
+      if(lft<=29)norm=vo2mlkg>=55?'Uitstekend':vo2mlkg>=46?'Goed':vo2mlkg>=38?'Gemiddeld':vo2mlkg>=30?'Ondergemiddeld':'Slecht';
+      else if(lft<=39)norm=vo2mlkg>=51?'Uitstekend':vo2mlkg>=43?'Goed':vo2mlkg>=35?'Gemiddeld':vo2mlkg>=27?'Ondergemiddeld':'Slecht';
+      else if(lft<=49)norm=vo2mlkg>=47?'Uitstekend':vo2mlkg>=39?'Goed':vo2mlkg>=31?'Gemiddeld':vo2mlkg>=24?'Ondergemiddeld':'Slecht';
+      else if(lft<=59)norm=vo2mlkg>=43?'Uitstekend':vo2mlkg>=36?'Goed':vo2mlkg>=28?'Gemiddeld':vo2mlkg>=20?'Ondergemiddeld':'Slecht';
+      else norm=vo2mlkg>=37?'Uitstekend':vo2mlkg>=31?'Goed':vo2mlkg>=23?'Gemiddeld':vo2mlkg>=16?'Ondergemiddeld':'Slecht';
+    }else if(g==='vrouw'){
+      if(lft<=29)norm=vo2mlkg>=49?'Uitstekend':vo2mlkg>=40?'Goed':vo2mlkg>=32?'Gemiddeld':vo2mlkg>=24?'Ondergemiddeld':'Slecht';
+      else if(lft<=39)norm=vo2mlkg>=45?'Uitstekend':vo2mlkg>=36?'Goed':vo2mlkg>=28?'Gemiddeld':vo2mlkg>=20?'Ondergemiddeld':'Slecht';
+      else if(lft<=49)norm=vo2mlkg>=41?'Uitstekend':vo2mlkg>=32?'Goed':vo2mlkg>=24?'Gemiddeld':vo2mlkg>=16?'Ondergemiddeld':'Slecht';
+      else if(lft<=59)norm=vo2mlkg>=37?'Uitstekend':vo2mlkg>=28?'Goed':vo2mlkg>=20?'Gemiddeld':vo2mlkg>=13?'Ondergemiddeld':'Slecht';
+      else norm=vo2mlkg>=33?'Uitstekend':vo2mlkg>=24?'Goed':vo2mlkg>=17?'Gemiddeld':vo2mlkg>=11?'Ondergemiddeld':'Slecht';
+    }
+    if(norm)normEl.textContent='Categorie: '+norm+(lft?'':' (voer leeftijd in voor norm)');
+  }else{
+    normEl.textContent='Voer gewicht in voor VO2max/kg berekening';
   }
 }
 
@@ -810,9 +909,9 @@ function bouwScoreSamenvatting(d){
   if(d.roman_li)r.push('Laterale Roman Chair ('+(d.roman_variant||'verzwaard')+'): links '+d.roman_li+' sec, rechts '+d.roman_re+' sec');
   if(d.dll)r.push('Double Leg Lowering: '+d.dll+(d.dll_hoek?' (losgelaten bij '+d.dll_hoek+' graden)':''));
   if(d.plank)r.push('Plank ('+(d.plank_variant||'rkc')+'): '+d.plank+' sec');
-  if(d.conditie_variant==='roei'&&d.roei_tijd)r.push('Roeitest 1000m: '+d.roei_tijd+' (pace '+d.roei_pace+'/500m)');
+  if(d.conditie_variant==='roei'&&d.roei_tijd)r.push('Roeitest 1000m: '+d.roei_tijd);
   if(d.conditie_variant==='step'&&d.step_hf)r.push('YMCA Steptest: herstelHF '+d.step_hf+' bpm na 60 sec');
-  if(d.conditie_variant==='astrand'&&d.astrand_hf6)r.push('Astrand fietstest: HF min5='+d.astrand_hf5+' min6='+d.astrand_hf6+' bpm, '+d.astrand_watt+'W'+(d.astrand_vo2?', VO2max '+d.astrand_vo2+' ml/kg/min':''));
+  if(d.conditie_variant==='astrand'&&d.astrand_hf6)r.push('Astrand fietstest: HF min5='+d.astrand_hf5+' min6='+d.astrand_hf6+' bpm, '+d.astrand_watt+'W'+(d.astrand_vo2?' - VO2max '+d.astrand_vo2_abs+' L/min ('+d.astrand_vo2+' ml/kg/min)':''));
   return r.join('\n');
 }
 
