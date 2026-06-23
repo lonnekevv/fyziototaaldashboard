@@ -703,10 +703,20 @@ function berekenVO2max(){
   const hfGem=(hf5+hf6)/2;
   if(hfGem<=28)return;
 
-  // Astrand-Rhyming basisformule
-  const vo2L=((watt*12)+300)/(hfGem-28)/1000;
+  // Astrand-Rhyming regressieformule (nomogram-benadering, bron: meetinstrumentenzorg)
+  // Belasting omrekenen van Watt naar kgm/min (1W = 6.12 kgm/min)
+  const belastingKgm=watt*6.12;
+  const g=v('input-geslacht');
 
-  // Leeftijdscorrectie (Astrand 1954 / Astrand & Rodahl)
+  // Regressieformule geeft VO2max in ml/kg/min
+  let vo2mlkg=0;
+  if(g==='man'){
+    vo2mlkg=(0.00212*belastingKgm+0.299)/(0.769*hfGem-48.5)*1000;
+  }else{
+    vo2mlkg=(0.00193*belastingKgm+0.326)/(0.769*hfGem-56.1)*1000;
+  }
+
+  // Leeftijdscorrectie (Astrand & Rodahl correctietabel)
   let correctie=1.0;
   if(lft>0){
     if(lft<=25)correctie=1.10;
@@ -717,11 +727,14 @@ function berekenVO2max(){
     else if(lft<=55)correctie=0.74;
     else correctie=0.68;
   }
-  const vo2gecorr=vo2L*correctie;
+  const vo2mlkg_corr=vo2mlkg*correctie;
+
+  // Omrekenen naar L/min via gewicht
+  const vo2gecorr=(!isNaN(gew)&&gew>0)?(vo2mlkg_corr*gew/1000):0;
   vo2abs.value=vo2gecorr.toFixed(2);
 
   if(!isNaN(gew)&&gew>0){
-    const vo2mlkg=(vo2gecorr/gew)*1000;
+    const vo2mlkg=vo2mlkg_corr;
     vo2rel.value=vo2mlkg.toFixed(1);
 
     // VO2max normen (ACSM, algemeen)
