@@ -8,15 +8,18 @@
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Segoe UI', system-ui, sans-serif; background: #f3f4f6; }
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; font-family: 'Segoe UI', system-ui, sans-serif; background: #f3f4f6; }
+    @keyframes spin { to { transform: rotate(360deg); } }
   </style>
 </head>
 <body>
   <div id="root"></div>
-
   <script type="text/babel">
     const { useState } = React;
+
+    // ─── VERVANG DEZE WAARDE MET JE EIGEN ANTHROPIC API KEY ───
+    const API_KEY = "JOUW_API_KEY_HIER";
 
     const G = {
       green: "#1a4a3a", greenMid: "#2d6b55", greenLight: "#e8f2ee", greenLighter: "#f2f8f5",
@@ -51,73 +54,96 @@
       { id: "degeneratief", label: "Degeneratieve fase", kort: "Degeneratief", kleur: "#b94a2c", kleurLight: "#fdf0ec" },
     ];
 
-    function CollagreenVezels({ fase, width = 220, height = 90 }) {
-      const vezels = [];
-      const rows = 7;
-      for (let r = 0; r < rows; r++) {
-        const y = 12 + r * (height - 24) / (rows - 1);
+    const callClaude = async function(prompt) {
+      const res = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key": API_KEY,
+          "anthropic-version": "2023-06-01",
+        },
+        body: JSON.stringify({
+          model: "claude-sonnet-4-20250514",
+          max_tokens: 1000,
+          messages: [{ role: "user", content: prompt }],
+        }),
+      });
+      if (!res.ok) throw new Error("API error " + res.status);
+      const data = await res.json();
+      return data.content.map(function(b) { return b.text || ""; }).join("") || "";
+    };
+
+    function CollagreenVezels(props) {
+      var fase = props.fase;
+      var width = props.width || 220;
+      var height = props.height || 90;
+      var vezels = [];
+      var rows = 7;
+      for (var r = 0; r < rows; r++) {
+        var y = 12 + r * (height - 24) / (rows - 1);
         if (fase === "acuut") {
-          let d = `M8,${y}`;
-          for (let x = 8; x <= width - 8; x += 6) {
-            const amp = (x > 70 && x < 130) ? 3.5 : 1.2;
-            d += ` L${x},${y + amp * Math.sin((x / 18) * Math.PI)}`;
+          var d = "M8," + y;
+          for (var x = 8; x <= width - 8; x += 6) {
+            var amp = (x > 70 && x < 130) ? 3.5 : 1.2;
+            d += " L" + x + "," + (y + amp * Math.sin((x / 18) * Math.PI));
           }
-          const isAangedaan = r === 2 || r === 4;
-          vezels.push(<path key={r} d={d} stroke={isAangedaan ? "#2d6b55" : "#8ba89e"} strokeWidth={isAangedaan ? 2 : 1.4} fill="none" strokeLinecap="round" opacity={isAangedaan ? 1 : 0.65} />);
+          var isAangedaan = r === 2 || r === 4;
+          vezels.push(React.createElement("path", { key: r, d: d, stroke: isAangedaan ? "#2d6b55" : "#8ba89e", strokeWidth: isAangedaan ? 2 : 1.4, fill: "none", strokeLinecap: "round", opacity: isAangedaan ? 1 : 0.65 }));
         } else if (fase === "dysrepair") {
-          let d = `M8,${y}`;
-          const offset = r * 3.7;
-          for (let x = 8; x <= width - 8; x += 5) {
-            const amp = 4 + 2 * Math.sin(r * 1.3);
-            d += ` L${x},${y + amp * Math.sin(((x + offset) / 14) * Math.PI)}`;
+          var d = "M8," + y;
+          var offset = r * 3.7;
+          for (var x = 8; x <= width - 8; x += 5) {
+            var amp = 4 + 2 * Math.sin(r * 1.3);
+            d += " L" + x + "," + (y + amp * Math.sin(((x + offset) / 14) * Math.PI));
           }
-          const isVerstoord = r === 1 || r === 3 || r === 5;
-          vezels.push(<path key={r} d={d} stroke={isVerstoord ? "#c09a2a" : "#8ba89e"} strokeWidth={isVerstoord ? 2.2 : 1.4} fill="none" strokeLinecap="round" opacity={isVerstoord ? 0.95 : 0.55} />);
+          var isVerstoord = r === 1 || r === 3 || r === 5;
+          vezels.push(React.createElement("path", { key: r, d: d, stroke: isVerstoord ? "#c09a2a" : "#8ba89e", strokeWidth: isVerstoord ? 2.2 : 1.4, fill: "none", strokeLinecap: "round", opacity: isVerstoord ? 0.95 : 0.55 }));
         } else {
-          let d = `M8,${y}`;
-          const offset = r * 5.1;
-          for (let x = 8; x <= width - 8; x += 4) {
-            const amp = 6 + 3 * Math.abs(Math.sin(r * 0.9));
-            const freq = 10 + r % 3 * 3;
-            d += ` L${x},${y + amp * Math.sin(((x + offset) / freq) * Math.PI)}`;
+          var d = "M8," + y;
+          var offset = r * 5.1;
+          for (var x = 8; x <= width - 8; x += 4) {
+            var amp = 6 + 3 * Math.abs(Math.sin(r * 0.9));
+            var freq = 10 + r % 3 * 3;
+            d += " L" + x + "," + (y + amp * Math.sin(((x + offset) / freq) * Math.PI));
           }
-          const isZwaar = r % 2 === 0;
-          vezels.push(<path key={r} d={d} stroke={isZwaar ? "#b94a2c" : "#8ba89e"} strokeWidth={isZwaar ? 2.4 : 1.3} fill="none" strokeLinecap="round" opacity={isZwaar ? 1 : 0.45} />);
+          var isZwaar = r % 2 === 0;
+          vezels.push(React.createElement("path", { key: r, d: d, stroke: isZwaar ? "#b94a2c" : "#8ba89e", strokeWidth: isZwaar ? 2.4 : 1.3, fill: "none", strokeLinecap: "round", opacity: isZwaar ? 1 : 0.45 }));
         }
       }
 
-      const bloedvaten = [];
+      var bloedvaten = [];
       if (fase === "dysrepair") {
         bloedvaten.push(
-          <path key="bv1" d={`M${width*0.45},10 Q${width*0.5},${height/2} ${width*0.42},${height-10}`} stroke="#c0392b" strokeWidth="1.5" fill="none" opacity="0.55" />,
-          <path key="bv2" d={`M${width*0.62},15 Q${width*0.67},${height/2} ${width*0.58},${height-12}`} stroke="#c0392b" strokeWidth="1.2" fill="none" opacity="0.45" />
+          React.createElement("path", { key: "bv1", d: "M" + (width*0.45) + ",10 Q" + (width*0.5) + "," + (height/2) + " " + (width*0.42) + "," + (height-10), stroke: "#c0392b", strokeWidth: "1.5", fill: "none", opacity: "0.55" }),
+          React.createElement("path", { key: "bv2", d: "M" + (width*0.62) + ",15 Q" + (width*0.67) + "," + (height/2) + " " + (width*0.58) + "," + (height-12), stroke: "#c0392b", strokeWidth: "1.2", fill: "none", opacity: "0.45" })
         );
       } else if (fase === "degeneratief") {
-        for (let i = 0; i < 5; i++) {
-          const x = width * (0.25 + i * 0.13);
+        for (var i = 0; i < 5; i++) {
+          var bx = width * (0.25 + i * 0.13);
           bloedvaten.push(
-            <path key={`bv${i}`} d={`M${x},8 Q${x+8},${height/2} ${x-5},${height-8}`} stroke="#c0392b" strokeWidth="1.4" fill="none" opacity="0.6" />,
-            <path key={`bvb${i}`} d={`M${x+4},20 Q${x-6},${height/2} ${x+8},${height-20}`} stroke="#c0392b" strokeWidth="1" fill="none" opacity="0.4" />
+            React.createElement("path", { key: "bv" + i, d: "M" + bx + ",8 Q" + (bx+8) + "," + (height/2) + " " + (bx-5) + "," + (height-8), stroke: "#c0392b", strokeWidth: "1.4", fill: "none", opacity: "0.6" }),
+            React.createElement("path", { key: "bvb" + i, d: "M" + (bx+4) + ",20 Q" + (bx-6) + "," + (height/2) + " " + (bx+8) + "," + (height-20), stroke: "#c0392b", strokeWidth: "1", fill: "none", opacity: "0.4" })
           );
         }
       }
 
-      const extra = [];
-      if (fase === "acuut") extra.push(<ellipse key="zwel" cx={width*0.5} cy={height/2} rx={38} ry={height*0.38} fill="#2d6b55" fillOpacity="0.08" stroke="#2d6b55" strokeWidth="1" strokeDasharray="4,3" />);
-      if (fase === "degeneratief") extra.push(
-        <ellipse key="d1" cx={width*0.35} cy={height*0.4} rx={22} ry={14} fill="#b94a2c" fillOpacity="0.09" stroke="#b94a2c" strokeWidth="0.8" strokeDasharray="3,2" />,
-        <ellipse key="d2" cx={width*0.65} cy={height*0.65} rx={18} ry={12} fill="#b94a2c" fillOpacity="0.09" stroke="#b94a2c" strokeWidth="0.8" strokeDasharray="3,2" />
-      );
+      var extra = [];
+      if (fase === "acuut") extra.push(React.createElement("ellipse", { key: "zwel", cx: width*0.5, cy: height/2, rx: 38, ry: height*0.38, fill: "#2d6b55", fillOpacity: "0.08", stroke: "#2d6b55", strokeWidth: "1", strokeDasharray: "4,3" }));
+      if (fase === "degeneratief") {
+        extra.push(
+          React.createElement("ellipse", { key: "d1", cx: width*0.35, cy: height*0.4, rx: 22, ry: 14, fill: "#b94a2c", fillOpacity: "0.09", stroke: "#b94a2c", strokeWidth: "0.8", strokeDasharray: "3,2" }),
+          React.createElement("ellipse", { key: "d2", cx: width*0.65, cy: height*0.65, rx: 18, ry: 12, fill: "#b94a2c", fillOpacity: "0.09", stroke: "#b94a2c", strokeWidth: "0.8", strokeDasharray: "3,2" })
+        );
+      }
 
-      return (
-        <svg viewBox={`0 0 ${width} ${height}`} width="100%" style={{ display: "block", borderRadius: 8, background: "#f9fafb", border: "1px solid #e5e7eb" }}>
-          {vezels}{bloedvaten}{extra}
-        </svg>
+      return React.createElement("svg", { viewBox: "0 0 " + width + " " + height, width: "100%", style: { display: "block", borderRadius: 8, background: "#f9fafb", border: "1px solid #e5e7eb" } },
+        vezels, bloedvaten, extra
       );
     }
 
-    function Infographic({ activeFase }) {
-      const kenmerken = {
+    function Infographic(props) {
+      var activeFase = props.activeFase;
+      var kenmerken = {
         acuut: [
           { term: "Ordelijke vezelstructuur", uitleg: "Vezels nog goed gerangschikt" },
           { term: "Verhoogde celactiviteit", uitleg: "Cellen werken extra hard" },
@@ -138,55 +164,52 @@
         ],
       };
 
-      return (
-        <div style={{ background: G.white, border: `1px solid ${G.grayBorder}`, borderRadius: 16, overflow: "hidden", marginBottom: 20 }}>
-          <div style={{ background: G.green, padding: "14px 20px" }}>
-            <p style={{ margin: 0, fontSize: 13, fontWeight: 700, color: G.white, textTransform: "uppercase", letterSpacing: "0.06em" }}>Het continuümmodel van tendinopathie</p>
-            <p style={{ margin: "2px 0 0", fontSize: 11, color: "rgba(255,255,255,0.65)" }}>Een dynamisch proces, afhankelijk van belasting. Fasen overlappen en zijn omkeerbaar.</p>
-          </div>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 0 }}>
-            {FASEN.map((f, i) => {
-              const actief = f.id === activeFase;
-              return (
-                <div key={f.id} style={{ padding: "16px 14px", borderRight: i < 2 ? `1px solid ${G.grayBorder}` : "none", background: actief ? f.kleurLight : G.white }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 10 }}>
-                    <div style={{ width: 22, height: 22, borderRadius: "50%", background: actief ? f.kleur : G.grayBorder, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 700, color: actief ? G.white : G.textMuted, flexShrink: 0 }}>{i + 1}</div>
-                    <span style={{ fontSize: 12, fontWeight: 700, color: actief ? f.kleur : G.textMuted }}>{f.kort}</span>
-                    {actief && <span style={{ fontSize: 10, background: f.kleur, color: G.white, borderRadius: 10, padding: "1px 7px", fontWeight: 600 }}>Jouw fase</span>}
-                  </div>
-                  <div style={{ marginBottom: 10 }}><CollagreenVezels fase={f.id} width={200} height={80} /></div>
-                  <ul style={{ margin: 0, padding: 0, listStyle: "none" }}>
-                    {kenmerken[f.id].map((k, ki) => (
-                      <li key={ki} style={{ display: "flex", gap: 6, alignItems: "flex-start", marginBottom: 6 }}>
-                        <span style={{ color: actief ? f.kleur : G.textMuted, fontSize: 13, flexShrink: 0, marginTop: 1 }}>•</span>
-                        <span style={{ lineHeight: 1.4 }}>
-                          <span style={{ fontSize: 11.5, fontWeight: 600, color: actief ? G.text : G.textMuted, display: "block" }}>{k.term}</span>
-                          <span style={{ fontSize: 10.5, color: actief ? G.textMuted : "#b0b0b0" }}>{k.uitleg}</span>
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              );
-            })}
-          </div>
-          <div style={{ padding: "10px 20px", borderTop: `1px solid ${G.grayBorder}`, background: G.grayLight, display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
-            <span style={{ fontSize: 12, color: G.textMuted }}>↔</span>
-            <span style={{ fontSize: 12, color: G.textMuted }}>De fasen zijn niet vast en de pees kan heen en weer bewegen afhankelijk van belasting. Te veel rust kan de pees terugzetten, te veel belasting ook. De juiste dosering houdt je in beweging richting herstel.</span>
-          </div>
-          <div style={{ padding: "12px 20px", borderTop: `1px solid ${G.grayBorder}`, display: "flex", gap: 12, alignItems: "flex-start" }}>
-            <div style={{ width: 32, height: 32, borderRadius: "50%", background: G.greenLight, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, fontSize: 16 }}>🎯</div>
-            <div>
-              <p style={{ margin: "0 0 2px", fontSize: 12, fontWeight: 700, color: G.green }}>Klinische implicatie</p>
-              <p style={{ margin: 0, fontSize: 12, color: G.textMuted, lineHeight: 1.5 }}>De focus ligt niet op het 'genezen' van aangedaan weefsel, maar op het optimaliseren van de belastbaarheid van de gezonde collageenmatrix.</p>
-            </div>
-          </div>
-        </div>
+      return React.createElement("div", { style: { background: G.white, border: "1px solid " + G.grayBorder, borderRadius: 16, overflow: "hidden", marginBottom: 20 } },
+        React.createElement("div", { style: { background: G.green, padding: "14px 20px" } },
+          React.createElement("p", { style: { margin: 0, fontSize: 13, fontWeight: 700, color: G.white, textTransform: "uppercase", letterSpacing: "0.06em" } }, "Het continuümmodel van tendinopathie"),
+          React.createElement("p", { style: { margin: "2px 0 0", fontSize: 11, color: "rgba(255,255,255,0.65)" } }, "Een dynamisch proces, afhankelijk van belasting. Fasen overlappen en zijn omkeerbaar.")
+        ),
+        React.createElement("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 0 } },
+          FASEN.map(function(f, i) {
+            var actief = f.id === activeFase;
+            return React.createElement("div", { key: f.id, style: { padding: "16px 14px", borderRight: i < 2 ? "1px solid " + G.grayBorder : "none", background: actief ? f.kleurLight : G.white } },
+              React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 7, marginBottom: 10 } },
+                React.createElement("div", { style: { width: 22, height: 22, borderRadius: "50%", background: actief ? f.kleur : G.grayBorder, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 700, color: actief ? G.white : G.textMuted, flexShrink: 0 } }, i + 1),
+                React.createElement("span", { style: { fontSize: 12, fontWeight: 700, color: actief ? f.kleur : G.textMuted } }, f.kort),
+                actief && React.createElement("span", { style: { fontSize: 10, background: f.kleur, color: G.white, borderRadius: 10, padding: "1px 7px", fontWeight: 600 } }, "Jouw fase")
+              ),
+              React.createElement("div", { style: { marginBottom: 10 } }, React.createElement(CollagreenVezels, { fase: f.id, width: 200, height: 80 })),
+              React.createElement("ul", { style: { margin: 0, padding: 0, listStyle: "none" } },
+                kenmerken[f.id].map(function(k, ki) {
+                  return React.createElement("li", { key: ki, style: { display: "flex", gap: 6, alignItems: "flex-start", marginBottom: 6 } },
+                    React.createElement("span", { style: { color: actief ? f.kleur : G.textMuted, fontSize: 13, flexShrink: 0, marginTop: 1 } }, "•"),
+                    React.createElement("span", { style: { lineHeight: 1.4 } },
+                      React.createElement("span", { style: { fontSize: 11.5, fontWeight: 600, color: actief ? G.text : G.textMuted, display: "block" } }, k.term),
+                      React.createElement("span", { style: { fontSize: 10.5, color: actief ? G.textMuted : "#b0b0b0" } }, k.uitleg)
+                    )
+                  );
+                })
+              )
+            );
+          })
+        ),
+        React.createElement("div", { style: { padding: "10px 20px", borderTop: "1px solid " + G.grayBorder, background: G.grayLight, display: "flex", alignItems: "center", justifyContent: "center", gap: 8 } },
+          React.createElement("span", { style: { fontSize: 12, color: G.textMuted } }, "↔"),
+          React.createElement("span", { style: { fontSize: 12, color: G.textMuted } }, "De fasen zijn niet vast en de pees kan heen en weer bewegen afhankelijk van belasting. Te veel rust kan de pees terugzetten, te veel belasting ook. De juiste dosering houdt je in beweging richting herstel.")
+        ),
+        React.createElement("div", { style: { padding: "12px 20px", borderTop: "1px solid " + G.grayBorder, display: "flex", gap: 12, alignItems: "flex-start" } },
+          React.createElement("div", { style: { width: 32, height: 32, borderRadius: "50%", background: G.greenLight, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, fontSize: 16 } }, "🎯"),
+          React.createElement("div", null,
+            React.createElement("p", { style: { margin: "0 0 2px", fontSize: 12, fontWeight: 700, color: G.green } }, "Klinische implicatie"),
+            React.createElement("p", { style: { margin: 0, fontSize: 12, color: G.textMuted, lineHeight: 1.5 } }, "De focus ligt niet op het 'genezen' van aangedaan weefsel, maar op het optimaliseren van de belastbaarheid van de gezonde collageenmatrix.")
+          )
+        )
       );
     }
 
-    function BelastingAdvies({ fase }) {
-      const adviezen = {
+    function BelastingAdvies(props) {
+      var fase = props.fase;
+      var adviezen = {
         acuut: {
           kleur: FASEN[0].kleur, kleurLight: FASEN[0].kleurLight,
           items: [
@@ -215,120 +238,72 @@
           ]
         }
       };
-      const d = adviezen[fase];
-      return (
-        <div style={{ background: d.kleurLight, border: `1px solid ${d.kleur}30`, borderRadius: 16, padding: 20, marginBottom: 20 }}>
-          <p style={{ margin: "0 0 14px", fontSize: 13, fontWeight: 700, color: d.kleur, textTransform: "uppercase", letterSpacing: "0.05em" }}>Belastingadvies</p>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-            {d.items.map((item, i) => (
-              <div key={i} style={{ background: G.white, borderRadius: 10, padding: "12px 14px", border: `1px solid ${d.kleur}20` }}>
-                <p style={{ margin: "0 0 4px", fontSize: 13, fontWeight: 600, color: G.text }}>{item.titel}</p>
-                <p style={{ margin: 0, fontSize: 12, color: G.textMuted, lineHeight: 1.5 }}>{item.tekst}</p>
-              </div>
-            ))}
-          </div>
-        </div>
+      var d = adviezen[fase];
+      return React.createElement("div", { style: { background: d.kleurLight, border: "1px solid " + d.kleur + "30", borderRadius: 16, padding: 20, marginBottom: 20 } },
+        React.createElement("p", { style: { margin: "0 0 14px", fontSize: 13, fontWeight: 700, color: d.kleur, textTransform: "uppercase", letterSpacing: "0.05em" } }, "Belastingadvies"),
+        React.createElement("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 } },
+          d.items.map(function(item, i) {
+            return React.createElement("div", { key: i, style: { background: G.white, borderRadius: 10, padding: "12px 14px", border: "1px solid " + d.kleur + "20" } },
+              React.createElement("p", { style: { margin: "0 0 4px", fontSize: 13, fontWeight: 600, color: G.text } }, item.titel),
+              React.createElement("p", { style: { margin: 0, fontSize: 12, color: G.textMuted, lineHeight: 1.5 } }, item.tekst)
+            );
+          })
+        )
       );
     }
 
-    const LEEG_FORM = { pees: "achilles", fase: "acuut", duur: "", oorzaak: "", ochtendstijfheid: false, stijfheidDuur: "", extraNotities: "" };
-
-    // ─── VERVANG DEZE WAARDE MET JE EIGEN ANTHROPIC API KEY ───
-    const API_KEY = "JOUW_API_KEY_HIER";
+    var LEEG_FORM = { pees: "achilles", fase: "acuut", duur: "", oorzaak: "", ochtendstijfheid: false, stijfheidDuur: "", extraNotities: "" };
 
     function App() {
-      const [form, setForm] = useState(LEEG_FORM);
-      const [result, setResult] = useState(null);
-      const [tab, setTab] = useState("invoer");
-      const [kopieertekst, setKopieertekst] = useState("Kopieer tekst");
+      var state = useState(LEEG_FORM);
+      var form = state[0]; var setForm = state[1];
+      var resultState = useState(null);
+      var result = resultState[0]; var setResult = resultState[1];
+      var tabState = useState("invoer");
+      var tab = tabState[0]; var setTab = tabState[1];
+      var kopieertekstState = useState("Kopieer tekst");
+      var kopieertekst = kopieertekstState[0]; var setKopieertekst = kopieertekstState[1];
 
-      const peesData = PEZEN.find(p => p.id === form.pees);
-      const faseData = FASEN.find(f => f.id === form.fase);
+      var peesData = PEZEN.find(function(p) { return p.id === form.pees; });
+      var faseData = FASEN.find(function(f) { return f.id === form.fase; });
 
-      const genereer = async () => {
+      var genereer = async function() {
         setResult(null);
         setTab("resultaat");
 
-        const faseInstructies = {
-          acuut: `BIOLOGISCH: De pees reageert op een belasting die net te groot was. Stel je voor: de vezels in de pees staan onder spanning en de cellen werken overuren om het weefsel te versterken. De structuur is nog intact, maar de pees geeft aan dat hij even de kans nodig heeft om bij te komen. Dit is een normale, omkeerbare reactie.
-KLACHTEN: Pijn bij opstarten en belasting, neemt vaak af tijdens bewegen maar kan daarna toenemen. Gevoeligheid op de pees bij aanraking. Leg dit mechanisme uit: de pees reageert op druk en spanning, maar kalmeert zodra hij opgewarmd is.
-EMMER-METAFOOR (alleen gebruiken als oorzaak overbelasting of plotselinge toename van activiteit is): Vergelijk het met een emmer die langzaam volloopt: elke dag een beetje meer belasting dan de pees aankan, totdat de emmer overloopt en klachten ontstaan. Het goede nieuws is dat de emmer ook weer leeg kan lopen door de belasting slim te doseren.
-LOAD MANAGEMENT: Benadruk dat load management essentieel is. Niet omdat bewegen gevaarlijk is, maar omdat de pees zich alleen aanpast bij de juiste dosis belasting. Te veel doorzetten houdt de pees in de reactieve fase; te weinig doen vertraagt de adaptatie. De juiste dosering is wat het verschil maakt.
-PROGNOSE: Eerste verbetering na 8 tot 12 weken. Met de juiste dosering van belasting past de pees zich aan en verwachten we dat de klachten afnemen. Leg uit waarom: peesweefsel verandert langzaam, maar het gaat de goede kant op als de belasting klopt.`,
-          dysrepair: `BIOLOGISCH: De pees heeft geprobeerd zichzelf te herstellen, maar dat herstelproces is ontregeld geraakt. Vergelijk het met een wond die niet netjes geneest: de vezels liggen minder ordelijk dan normaal, er zijn meer herstelcellen actief dan nodig en er zijn kleine bloedvaatjes ingegroeid op plekken waar ze normaal niet zitten. Die ingroei maakt de pees gevoeliger voor prikkelingen.
-KLACHTEN: Pijn bij en na belasting, soms ook aanwezig in rust. De pees geeft vaker signalen af omdat het weefsel gevoeliger is geworden. Benoem dat dit niet betekent dat er iets ernstigs mis is, maar dat de pees extra aandacht vraagt. De ingegroeid bloedvaatjes en zenuwtjes geven pijnsignalen af, ook zonder dat bewegen de pees verder beschadigt.
-EMMER-METAFOOR (alleen gebruiken als oorzaak overbelasting of plotselinge toename van activiteit is): Vergelijk het met een emmer die langzaam is volgelopen: de pees heeft langere tijd meer belasting gekregen dan hij aankon, totdat het herstelproces ontregeld raakte. De emmer kan weer leeglopen, maar dat vraagt tijd en de juiste dosering.
-LOAD MANAGEMENT: Benadruk dat load management essentieel is. Niet omdat bewegen gevaarlijk is, maar omdat de pees zich alleen aanpast bij de juiste dosis belasting. Te veel doorzetten houdt het herstelproces ontregeld; te weinig doen ook. De juiste dosering is wat het herstel op gang brengt.
-PROGNOSE: Eerste verbetering na 8 tot 12 weken, volledig herstel duurt regelmatig 6 tot 12 maanden. Dit klinkt lang, maar het weerspiegelt hoe peesweefsel biologisch werkt: het past zich langzaam maar zeker aan als de belasting goed gedoseerd is.`,
-          degeneratief: `BIOLOGISCH: De pees heeft langdurig onder een verstoord belastingpatroon gefunctioneerd. De vezels zijn minder georganiseerd geraakt, de kwaliteit van de herstelcellen is afgenomen en er zijn bloedvaatjes en kleine zenuwtjes ingegroeid die pijnsignalen doorgeven. Geef de patiënt een beeld: het weefsel in de pees ziet er anders uit dan normaal, maar het gezonde weefsel eromheen is nog volledig in staat om sterker te worden. Daar richt de behandeling zich op.
-KLACHTEN: Pijn kan ook in rust aanwezig zijn, doordat de ingegroeid zenuwtjes gevoelig zijn. Benoem dat dit vervelend is en serieus genomen wordt. Leg uit dat die zenuwtjes pijnsignalen afgeven ook zonder dat er daadwerkelijk schade ontstaat door bewegen. Geen nocebo's, maar ook niet bagatelliseren.
-LOAD MANAGEMENT: Benadruk dat load management essentieel is, niet omdat bewegen gevaarlijk is, maar omdat de pees zich alleen aanpast bij de juiste dosis belasting. Te veel doorzetten houdt de pees in de verkeerde fase, maar te weinig doen ook. De juiste dosering is wat het verschil maakt.
-PROGNOSE: Een revalidatietraject van 6 tot 12 maanden is realistisch. Functioneel herstel is in de meeste gevallen goed haalbaar. Onderbouw dit: de behandeling richt zich op het trainen van het gezonde weefsel, en dat weefsel reageert goed op de juiste prikkels.`,
+        var faseInstructies = {
+          acuut: "BIOLOGISCH: De pees reageert op een belasting die net te groot was. Stel je voor: de vezels in de pees staan onder spanning en de cellen werken overuren om het weefsel te versterken. De structuur is nog intact, maar de pees geeft aan dat hij even de kans nodig heeft om bij te komen. Dit is een normale, omkeerbare reactie.\nKLACHTEN: Pijn bij opstarten en belasting, neemt vaak af tijdens bewegen maar kan daarna toenemen. Gevoeligheid op de pees bij aanraking. Leg dit mechanisme uit: de pees reageert op druk en spanning, maar kalmeert zodra hij opgewarmd is.\nEMMER-METAFOOR (alleen gebruiken als oorzaak overbelasting of plotselinge toename van activiteit is): Vergelijk het met een emmer die langzaam volloopt: elke dag een beetje meer belasting dan de pees aankan, totdat de emmer overloopt en klachten ontstaan. Het goede nieuws is dat de emmer ook weer leeg kan lopen door de belasting slim te doseren.\nLOAD MANAGEMENT: Benadruk dat load management essentieel is. Niet omdat bewegen gevaarlijk is, maar omdat de pees zich alleen aanpast bij de juiste dosis belasting. Te veel doorzetten houdt de pees in de reactieve fase; te weinig doen vertraagt de adaptatie. De juiste dosering is wat het verschil maakt.\nPROGNOSE: Eerste verbetering na 8 tot 12 weken. Met de juiste dosering van belasting past de pees zich aan en verwachten we dat de klachten afnemen. Leg uit waarom: peesweefsel verandert langzaam, maar het gaat de goede kant op als de belasting klopt.",
+          dysrepair: "BIOLOGISCH: De pees heeft geprobeerd zichzelf te herstellen, maar dat herstelproces is ontregeld geraakt. Vergelijk het met een wond die niet netjes geneest: de vezels liggen minder ordelijk dan normaal, er zijn meer herstelcellen actief dan nodig en er zijn kleine bloedvaatjes ingegroeid op plekken waar ze normaal niet zitten. Die ingroei maakt de pees gevoeliger voor prikkelingen.\nKLACHTEN: Pijn bij en na belasting, soms ook aanwezig in rust. De pees geeft vaker signalen af omdat het weefsel gevoeliger is geworden. Benoem dat dit niet betekent dat er iets ernstigs mis is, maar dat de pees extra aandacht vraagt. De ingegroeid bloedvaatjes en zenuwtjes geven pijnsignalen af, ook zonder dat bewegen de pees verder beschadigt.\nEMMER-METAFOOR (alleen gebruiken als oorzaak overbelasting of plotselinge toename van activiteit is): Vergelijk het met een emmer die langzaam is volgelopen: de pees heeft langere tijd meer belasting gekregen dan hij aankon, totdat het herstelproces ontregeld raakte. De emmer kan weer leeglopen, maar dat vraagt tijd en de juiste dosering.\nLOAD MANAGEMENT: Benadruk dat load management essentieel is. Niet omdat bewegen gevaarlijk is, maar omdat de pees zich alleen aanpast bij de juiste dosis belasting. Te veel doorzetten houdt het herstelproces ontregeld; te weinig doen ook. De juiste dosering is wat het herstel op gang brengt.\nPROGNOSE: Eerste verbetering na 8 tot 12 weken, volledig herstel duurt regelmatig 6 tot 12 maanden. Dit klinkt lang, maar het weerspiegelt hoe peesweefsel biologisch werkt: het past zich langzaam maar zeker aan als de belasting goed gedoseerd is.",
+          degeneratief: "BIOLOGISCH: De pees heeft langdurig onder een verstoord belastingpatroon gefunctioneerd. De vezels zijn minder georganiseerd geraakt, de kwaliteit van de herstelcellen is afgenomen en er zijn bloedvaatjes en kleine zenuwtjes ingegroeid die pijnsignalen doorgeven. Geef de patiënt een beeld: het weefsel in de pees ziet er anders uit dan normaal, maar het gezonde weefsel eromheen is nog volledig in staat om sterker te worden. Daar richt de behandeling zich op.\nKLACHTEN: Pijn kan ook in rust aanwezig zijn, doordat de ingegroeid zenuwtjes gevoelig zijn. Benoem dat dit vervelend is en serieus genomen wordt. Leg uit dat die zenuwtjes pijnsignalen afgeven ook zonder dat er daadwerkelijk schade ontstaat door bewegen. Geen nocebo's, maar ook niet bagatelliseren.\nLOAD MANAGEMENT: Benadruk dat load management essentieel is, niet omdat bewegen gevaarlijk is, maar omdat de pees zich alleen aanpast bij de juiste dosis belasting. Te veel doorzetten houdt de pees in de verkeerde fase, maar te weinig doen ook. De juiste dosering is wat het verschil maakt.\nPROGNOSE: Een revalidatietraject van 6 tot 12 maanden is realistisch. Functioneel herstel is in de meeste gevallen goed haalbaar. Onderbouw dit: de behandeling richt zich op het trainen van het gezonde weefsel, en dat weefsel reageert goed op de juiste prikkels.",
         };
 
-        const variabelen = [];
-        if (form.duur) variabelen.push(`Duur klachten: ${form.duur}`);
-        if (form.oorzaak) variabelen.push(`Oorzaak: ${form.oorzaak}`);
-        if (form.ochtendstijfheid && form.stijfheidDuur) variabelen.push(`Ochtend-/startstijfheid aanwezig, duurt: ${form.stijfheidDuur}`);
-        else if (form.ochtendstijfheid) variabelen.push(`Ochtend-/startstijfheid aanwezig (duur niet gespecificeerd)`);
-        if (form.extraNotities) variabelen.push(`Extra: ${form.extraNotities}`);
+        var variabelen = [];
+        if (form.duur) variabelen.push("Duur klachten: " + form.duur);
+        if (form.oorzaak) variabelen.push("Oorzaak: " + form.oorzaak);
+        if (form.ochtendstijfheid && form.stijfheidDuur) variabelen.push("Ochtend-/startstijfheid aanwezig, duurt: " + form.stijfheidDuur);
+        else if (form.ochtendstijfheid) variabelen.push("Ochtend-/startstijfheid aanwezig (duur niet gespecificeerd)");
+        if (form.extraNotities) variabelen.push("Extra: " + form.extraNotities);
 
-        const prompt = `Je bent fysiotherapeut bij Fyzio Totaal in Wierden. Schrijf een patiënteninformatiebrief in het Nederlands over peesklachten aan de ${peesData?.label.toLowerCase()}.
-
-VASTE INHOUD PER FASE — dit verwerk je altijd, in deze volgorde en structuur:
-${faseInstructies[form.fase]}
-
-VARIABELEN — verwerk alleen wat hieronder staat, verzin niets:
-${variabelen.length > 0 ? variabelen.join("\n") : "Geen variabelen ingevuld — gebruik alleen de vaste inhoud hierboven."}
-
-AANVULLENDE INSTRUCTIES VOOR OCHTEND-/STARTSTIJFHEID (alleen verwerken als hierboven aanwezig):
-Kortdurende stijfheid na rust is een kenmerk van peesweefsel: een pees heeft geen eigen bloedtoevoer zoals spieren, maar wordt gevoed via beweging. Na een periode van rust droogt het weefsel licht in en heeft het een paar minuten belasting nodig om weer soepel te functioneren. Alleen als duur is opgegeven: benoem die duur en vermeld dat de duur een nuttige graadmeter is voor hoe de pees reageert op het belastingpatroon.
-
-SCHRIJFREGELS:
-- Begin exact met: "Je bent bij ons geweest met klachten aan je ${peesData?.label.toLowerCase()}. Hieronder leggen we je nog eens uit wat er aan de hand is, zodat je dit thuis rustig kunt teruglezen."
-- Tutoyeer altijd
-- Klinisch en helder, niet overdreven empathisch
-- Geen nocebo's: geen 'scheur', 'beschadiging', 'slijtage', 'afwijking', 'ernstig letsel'
-- Geen anatomische uitleg van waar de pees loopt
-- Geen absolute hersteluitspraken ('we zijn er zeker van dat')
-- Geen gedachtestreepjes
-- Geen opvulzinnen
-- 3 tot 4 alinea's, geen bullet points, geen aanhef, geen afsluiting
-- Schrijf ALLEEN de brief`;
+        var prompt = "Je bent fysiotherapeut bij Fyzio Totaal in Wierden. Schrijf een patiënteninformatiebrief in het Nederlands over peesklachten aan de " + peesData.label.toLowerCase() + ".\n\nVASTE INHOUD PER FASE — dit verwerk je altijd, in deze volgorde en structuur:\n" + faseInstructies[form.fase] + "\n\nVARIABELEN — verwerk alleen wat hieronder staat, verzin niets:\n" + (variabelen.length > 0 ? variabelen.join("\n") : "Geen variabelen ingevuld — gebruik alleen de vaste inhoud hierboven.") + "\n\nAANVULLENDE INSTRUCTIES VOOR OCHTEND-/STARTSTIJFHEID (alleen verwerken als hierboven aanwezig):\nKortdurende stijfheid na rust is een kenmerk van peesweefsel: een pees heeft geen eigen bloedtoevoer zoals spieren, maar wordt gevoed via beweging. Na een periode van rust droogt het weefsel licht in en heeft het een paar minuten belasting nodig om weer soepel te functioneren. Alleen als duur is opgegeven: benoem die duur en vermeld dat de duur een nuttige graadmeter is voor hoe de pees reageert op het belastingpatroon.\n\nSCHRIJFREGELS:\n- Begin exact met: \"Je bent bij ons geweest met klachten aan je " + peesData.label.toLowerCase() + ". Hieronder leggen we je nog eens uit wat er aan de hand is, zodat je dit thuis rustig kunt teruglezen.\"\n- Tutoyeer altijd\n- Klinisch en helder, niet overdreven empathisch\n- Geen nocebo's: geen 'scheur', 'beschadiging', 'slijtage', 'afwijking', 'ernstig letsel'\n- Geen anatomische uitleg van waar de pees loopt\n- Geen absolute hersteluitspraken ('we zijn er zeker van dat')\n- Geen gedachtestreepjes\n- Geen opvulzinnen\n- 3 tot 4 alinea's, geen bullet points, geen aanhef, geen afsluiting\n- Schrijf ALLEEN de brief";
 
         try {
-          const res = await fetch("https://api.anthropic.com/v1/messages", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "x-api-key": API_KEY,
-              "anthropic-version": "2023-06-01",
-              "anthropic-dangerous-direct-browser-access": "true",
-            },
-            body: JSON.stringify({
-              model: "claude-sonnet-4-6",
-              max_tokens: 1000,
-              messages: [{ role: "user", content: prompt }],
-            }),
-          });
-          const data = await res.json();
-          const tekst = data.content?.map(b => b.text || "").join("") || "Er is iets misgegaan.";
+          var tekst = await callClaude(prompt);
           setResult(tekst);
-        } catch (e) {
+        } catch(e) {
           setResult("Er is een fout opgetreden. Probeer het opnieuw.");
         }
       };
 
-      const reset = () => {
+      var reset = function() {
         setForm(LEEG_FORM);
         setResult(null);
         setTab("invoer");
       };
 
-      const kopieer = () => {
+      var kopieer = function() {
         if (!result) return;
         try {
-          const el = document.createElement("textarea");
+          var el = document.createElement("textarea");
           el.value = result;
           el.style.cssText = "position:fixed;top:0;left:0;opacity:0;pointer-events:none";
           document.body.appendChild(el);
@@ -337,164 +312,141 @@ SCHRIJFREGELS:
           document.execCommand("copy");
           document.body.removeChild(el);
           setKopieertekst("Gekopieerd ✓");
-          setTimeout(() => setKopieertekst("Kopieer tekst"), 2000);
-        } catch (e) {
+          setTimeout(function() { setKopieertekst("Kopieer tekst"); }, 2000);
+        } catch(e) {
           setKopieertekst("Selecteer tekst handmatig");
-          setTimeout(() => setKopieertekst("Kopieer tekst"), 3000);
+          setTimeout(function() { setKopieertekst("Kopieer tekst"); }, 3000);
         }
       };
 
-      const print = () => {
+      var print = function() {
         if (!result) return;
-        const fInfo = FASEN.find(f => f.id === form.fase);
-        const container = document.getElementById("resultaat-container");
-        const inhoud = container ? container.innerHTML : "";
-        const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Patiënteninformatie Fyzio Totaal</title>
-        <style>
-          body{font-family:'Segoe UI',Arial,sans-serif;max-width:720px;margin:40px auto;color:#1f2937;line-height:1.7;padding:0 20px}
-          .printbtn{display:block;margin:0 0 24px;padding:10px 24px;background:#1a4a3a;color:#fff;border:none;border-radius:8px;font-size:14px;cursor:pointer}
-          textarea{width:100%;padding:14px;border-radius:10px;border:1.5px solid #e5e7eb;font-size:14px;line-height:1.7;font-family:inherit;color:#1f2937;background:#f3f4f6;box-sizing:border-box;resize:none}
-          button:not(.printbtn){display:none}
-          @media print{.printbtn{display:none}}
-        </style></head>
-        <body>
-        <button class="printbtn" onclick="window.print()">Afdrukken / Opslaan als PDF</button>
-        ${inhoud}
-        </body></html>`;
-        const blob = new Blob([html], { type: "text/html" });
-        const url = URL.createObjectURL(blob);
+        var fInfo = FASEN.find(function(f) { return f.id === form.fase; });
+        var container = document.getElementById("resultaat-container");
+        var inhoud = container ? container.innerHTML : "";
+        var html = "<!DOCTYPE html><html><head><meta charset='utf-8'><title>Patiënteninformatie Fyzio Totaal</title><style>body{font-family:'Segoe UI',Arial,sans-serif;max-width:720px;margin:40px auto;color:#1f2937;line-height:1.7;padding:0 20px}.printbtn{display:block;margin:0 0 24px;padding:10px 24px;background:#1a4a3a;color:#fff;border:none;border-radius:8px;font-size:14px;cursor:pointer}textarea{width:100%;padding:14px;border-radius:10px;border:1.5px solid #e5e7eb;font-size:14px;line-height:1.7;font-family:inherit;color:#1f2937;background:#f3f4f6;box-sizing:border-box;resize:none}button:not(.printbtn){display:none}@media print{.printbtn{display:none}}</style></head><body><button class='printbtn' onclick='window.print()'>Afdrukken / Opslaan als PDF</button>" + inhoud + "</body></html>";
+        var blob = new Blob([html], { type: "text/html" });
+        var url = URL.createObjectURL(blob);
         window.open(url, "_blank");
       };
 
-      return (
-        <div style={{ fontFamily: "'Segoe UI', system-ui, sans-serif", maxWidth: 720, margin: "0 auto", padding: "0 0 40px" }}>
-          <div style={{ background: G.green, borderRadius: "0 0 20px 20px", padding: "22px 28px", marginBottom: 24 }}>
-            <p style={{ margin: 0, fontSize: 20, fontWeight: 700, color: G.white }}>Fyzio<span style={{ color: G.orange }}>Totaal</span></p>
-            <p style={{ margin: 0, fontSize: 13, color: "rgba(255,255,255,0.65)" }}>Patiënteninformatie · Peesklachten</p>
-          </div>
+      return React.createElement("div", { style: { fontFamily: "'Segoe UI', system-ui, sans-serif", maxWidth: 720, margin: "0 auto", padding: "0 0 40px" } },
 
-          <div style={{ display: "flex", gap: 4, padding: "0 4px", marginBottom: 20 }}>
-            {[{ id: "invoer", label: "Invoer" }, { id: "resultaat", label: "Informatie & Infographic" }].map(t => (
-              <button key={t.id} onClick={() => setTab(t.id)} style={{ padding: "8px 20px", borderRadius: 8, border: "none", cursor: "pointer", background: tab === t.id ? G.green : G.grayLight, color: tab === t.id ? G.white : G.textMuted, fontWeight: tab === t.id ? 600 : 400, fontSize: 14 }}>{t.label}</button>
-            ))}
-          </div>
+        React.createElement("div", { style: { background: G.green, borderRadius: "0 0 20px 20px", padding: "22px 28px", marginBottom: 24 } },
+          React.createElement("p", { style: { margin: 0, fontSize: 20, fontWeight: 700, color: G.white } },
+            "Fyzio", React.createElement("span", { style: { color: G.orange } }, "Totaal")
+          ),
+          React.createElement("p", { style: { margin: 0, fontSize: 13, color: "rgba(255,255,255,0.65)" } }, "Patiënteninformatie · Peesklachten")
+        ),
 
-          {tab === "invoer" && (
-            <div style={{ padding: "0 4px" }}>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 16 }}>
-                <div>
-                  <label style={{ fontSize: 13, fontWeight: 600, color: G.green, display: "block", marginBottom: 6 }}>Peeslocatie</label>
-                  <select value={form.pees} onChange={e => setForm(f => ({ ...f, pees: e.target.value }))} style={{ width: "100%", padding: "10px 12px", borderRadius: 10, border: `1.5px solid ${G.grayBorder}`, fontSize: 14, background: G.white }}>
-                    {PEZEN.map(p => <option key={p.id} value={p.id}>{p.label}</option>)}
-                  </select>
-                </div>
-                <div>
-                  <label style={{ fontSize: 13, fontWeight: 600, color: G.green, display: "block", marginBottom: 6 }}>Fase (Cook & Purdam)</label>
-                  <select value={form.fase} onChange={e => setForm(f => ({ ...f, fase: e.target.value }))} style={{ width: "100%", padding: "10px 12px", borderRadius: 10, border: `1.5px solid ${G.grayBorder}`, fontSize: 14, background: G.white }}>
-                    {FASEN.map(f => <option key={f.id} value={f.id}>{f.label}</option>)}
-                  </select>
-                </div>
-              </div>
+        React.createElement("div", { style: { display: "flex", gap: 4, padding: "0 4px", marginBottom: 20 } },
+          ["invoer", "resultaat"].map(function(t) {
+            return React.createElement("button", { key: t, onClick: function() { setTab(t); }, style: { padding: "8px 20px", borderRadius: 8, border: "none", cursor: "pointer", background: tab === t ? G.green : G.grayLight, color: tab === t ? G.white : G.textMuted, fontWeight: tab === t ? 600 : 400, fontSize: 14 } },
+              t === "invoer" ? "Invoer" : "Informatie & Infographic"
+            );
+          })
+        ),
 
-              <div style={{ padding: "10px 14px", borderRadius: 10, background: faseData?.kleurLight, border: `1px solid ${faseData?.kleur}30`, marginBottom: 16 }}>
-                <span style={{ fontSize: 13, color: faseData?.kleur, fontWeight: 500 }}>
-                  {form.fase === "acuut" && "Kortdurende reactie op overbelasting. Collageenstructuur grotendeels intact."}
-                  {form.fase === "dysrepair" && "Verstoorde herstelprocessen. Collageendisorganisatie en verhoogde pijngevoeligheid."}
-                  {form.fase === "degeneratief" && "Langdurige disrepair met structuurveranderingen. Neurovasculaire ingroei aanwezig."}
-                </span>
-              </div>
+        tab === "invoer" && React.createElement("div", { style: { padding: "0 4px" } },
+          React.createElement("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 16 } },
+            React.createElement("div", null,
+              React.createElement("label", { style: { fontSize: 13, fontWeight: 600, color: G.green, display: "block", marginBottom: 6 } }, "Peeslocatie"),
+              React.createElement("select", { value: form.pees, onChange: function(e) { setForm(function(f) { return Object.assign({}, f, { pees: e.target.value }); }); }, style: { width: "100%", padding: "10px 12px", borderRadius: 10, border: "1.5px solid " + G.grayBorder, fontSize: 14, background: G.white } },
+                PEZEN.map(function(p) { return React.createElement("option", { key: p.id, value: p.id }, p.label); })
+              )
+            ),
+            React.createElement("div", null,
+              React.createElement("label", { style: { fontSize: 13, fontWeight: 600, color: G.green, display: "block", marginBottom: 6 } }, "Fase (Cook & Purdam)"),
+              React.createElement("select", { value: form.fase, onChange: function(e) { setForm(function(f) { return Object.assign({}, f, { fase: e.target.value }); }); }, style: { width: "100%", padding: "10px 12px", borderRadius: 10, border: "1.5px solid " + G.grayBorder, fontSize: 14, background: G.white } },
+                FASEN.map(function(f) { return React.createElement("option", { key: f.id, value: f.id }, f.label); })
+              )
+            )
+          ),
 
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 16 }}>
-                <div>
-                  <label style={{ fontSize: 13, fontWeight: 600, color: G.green, display: "block", marginBottom: 6 }}>Duur klachten</label>
-                  <input type="text" placeholder="bijv. 3 weken, 2 maanden" value={form.duur} onChange={e => setForm(f => ({ ...f, duur: e.target.value }))} style={{ width: "100%", padding: "10px 12px", borderRadius: 10, border: `1.5px solid ${G.grayBorder}`, fontSize: 14, boxSizing: "border-box" }} />
-                </div>
-                <div>
-                  <label style={{ fontSize: 13, fontWeight: 600, color: G.green, display: "block", marginBottom: 6 }}>Oorzaak</label>
-                  <select value={form.oorzaak} onChange={e => setForm(f => ({ ...f, oorzaak: e.target.value }))} style={{ width: "100%", padding: "10px 12px", borderRadius: 10, border: `1.5px solid ${G.grayBorder}`, fontSize: 14, background: G.white }}>
-                    <option value="">Selecteer oorzaak</option>
-                    {OORZAKEN.map(o => <option key={o} value={o}>{o}</option>)}
-                  </select>
-                </div>
-              </div>
+          React.createElement("div", { style: { padding: "10px 14px", borderRadius: 10, background: faseData.kleurLight, border: "1px solid " + faseData.kleur + "30", marginBottom: 16 } },
+            React.createElement("span", { style: { fontSize: 13, color: faseData.kleur, fontWeight: 500 } },
+              form.fase === "acuut" ? "Kortdurende reactie op overbelasting. Collageenstructuur grotendeels intact." :
+              form.fase === "dysrepair" ? "Verstoorde herstelprocessen. Collageendisorganisatie en verhoogde pijngevoeligheid." :
+              "Langdurige disrepair met structuurveranderingen. Neurovasculaire ingroei aanwezig."
+            )
+          ),
 
-              <div style={{ background: G.greenLighter, border: `1px solid ${G.greenLight}`, borderRadius: 12, padding: "14px 16px", marginBottom: 16 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: form.ochtendstijfheid ? 12 : 0 }}>
-                  <input type="checkbox" id="stijfheid" checked={form.ochtendstijfheid} onChange={e => setForm(f => ({ ...f, ochtendstijfheid: e.target.checked, stijfheidDuur: e.target.checked ? f.stijfheidDuur : "" }))} style={{ width: 18, height: 18, accentColor: G.green, cursor: "pointer" }} />
-                  <label htmlFor="stijfheid" style={{ fontSize: 14, fontWeight: 500, color: G.text, cursor: "pointer" }}>Ochtend- / startstijfheid aanwezig</label>
-                </div>
-                {form.ochtendstijfheid && (
-                  <input type="text" placeholder="Hoe lang? bijv. eerste 10 minuten na opstaan" value={form.stijfheidDuur} onChange={e => setForm(f => ({ ...f, stijfheidDuur: e.target.value }))} style={{ width: "100%", padding: "10px 12px", borderRadius: 10, border: `1.5px solid ${G.grayBorder}`, fontSize: 14, boxSizing: "border-box" }} />
-                )}
-              </div>
+          React.createElement("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 16 } },
+            React.createElement("div", null,
+              React.createElement("label", { style: { fontSize: 13, fontWeight: 600, color: G.green, display: "block", marginBottom: 6 } }, "Duur klachten"),
+              React.createElement("input", { type: "text", placeholder: "bijv. 3 weken, 2 maanden", value: form.duur, onChange: function(e) { setForm(function(f) { return Object.assign({}, f, { duur: e.target.value }); }); }, style: { width: "100%", padding: "10px 12px", borderRadius: 10, border: "1.5px solid " + G.grayBorder, fontSize: 14, boxSizing: "border-box" } })
+            ),
+            React.createElement("div", null,
+              React.createElement("label", { style: { fontSize: 13, fontWeight: 600, color: G.green, display: "block", marginBottom: 6 } }, "Oorzaak"),
+              React.createElement("select", { value: form.oorzaak, onChange: function(e) { setForm(function(f) { return Object.assign({}, f, { oorzaak: e.target.value }); }); }, style: { width: "100%", padding: "10px 12px", borderRadius: 10, border: "1.5px solid " + G.grayBorder, fontSize: 14, background: G.white } },
+                React.createElement("option", { value: "" }, "Selecteer oorzaak"),
+                OORZAKEN.map(function(o) { return React.createElement("option", { key: o, value: o }, o); })
+              )
+            )
+          ),
 
-              <div style={{ marginBottom: 20 }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 6 }}>
-                  <label style={{ fontSize: 13, fontWeight: 600, color: G.green }}>Extra toelichting (optioneel)</label>
-                  <span style={{ fontSize: 11, color: G.textMuted }}>2× Enter om direct te genereren</span>
-                </div>
-                <textarea
-                  placeholder="bijv. patiënt is actief sporter, wedstrijdmomenten relevant"
-                  value={form.extraNotities}
-                  onChange={e => setForm(f => ({ ...f, extraNotities: e.target.value }))}
-                  onKeyDown={e => {
-                    if (e.key === "Enter") {
-                      const now = Date.now();
-                      if (e.target._lastEnter && now - e.target._lastEnter < 500) {
-                        e.preventDefault();
-                        genereer();
-                      }
-                      e.target._lastEnter = now;
-                    }
-                  }}
-                  rows={3}
-                  style={{ width: "100%", padding: "10px 12px", borderRadius: 10, border: `1.5px solid ${G.grayBorder}`, fontSize: 14, resize: "vertical", boxSizing: "border-box", fontFamily: "inherit" }}
-                />
-              </div>
+          React.createElement("div", { style: { background: G.greenLighter, border: "1px solid " + G.greenLight, borderRadius: 12, padding: "14px 16px", marginBottom: 16 } },
+            React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 12, marginBottom: form.ochtendstijfheid ? 12 : 0 } },
+              React.createElement("input", { type: "checkbox", id: "stijfheid", checked: form.ochtendstijfheid, onChange: function(e) { setForm(function(f) { return Object.assign({}, f, { ochtendstijfheid: e.target.checked, stijfheidDuur: e.target.checked ? f.stijfheidDuur : "" }); }); }, style: { width: 18, height: 18, accentColor: G.green, cursor: "pointer" } }),
+              React.createElement("label", { htmlFor: "stijfheid", style: { fontSize: 14, fontWeight: 500, color: G.text, cursor: "pointer" } }, "Ochtend- / startstijfheid aanwezig")
+            ),
+            form.ochtendstijfheid && React.createElement("input", { type: "text", placeholder: "Hoe lang? bijv. eerste 10 minuten na opstaan", value: form.stijfheidDuur, onChange: function(e) { setForm(function(f) { return Object.assign({}, f, { stijfheidDuur: e.target.value }); }); }, style: { width: "100%", padding: "10px 12px", borderRadius: 10, border: "1.5px solid " + G.grayBorder, fontSize: 14, boxSizing: "border-box" } })
+          ),
 
-              <button onClick={genereer} style={{ width: "100%", padding: "14px", borderRadius: 12, border: "none", cursor: "pointer", background: G.green, color: G.white, fontSize: 16, fontWeight: 700 }}>
-                Genereer patiënteninformatie →
-              </button>
-            </div>
-          )}
+          React.createElement("div", { style: { marginBottom: 20 } },
+            React.createElement("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 6 } },
+              React.createElement("label", { style: { fontSize: 13, fontWeight: 600, color: G.green } }, "Extra toelichting (optioneel)"),
+              React.createElement("span", { style: { fontSize: 11, color: G.textMuted } }, "2× Enter om direct te genereren")
+            ),
+            React.createElement("textarea", {
+              placeholder: "bijv. patiënt is actief sporter, wedstrijdmomenten relevant",
+              value: form.extraNotities,
+              onChange: function(e) { setForm(function(f) { return Object.assign({}, f, { extraNotities: e.target.value }); }); },
+              onKeyDown: function(e) {
+                if (e.key === "Enter") {
+                  var now = Date.now();
+                  if (e.target._lastEnter && now - e.target._lastEnter < 500) {
+                    e.preventDefault();
+                    genereer();
+                  }
+                  e.target._lastEnter = now;
+                }
+              },
+              rows: 3,
+              style: { width: "100%", padding: "10px 12px", borderRadius: 10, border: "1.5px solid " + G.grayBorder, fontSize: 14, resize: "vertical", boxSizing: "border-box", fontFamily: "inherit" }
+            })
+          ),
 
-          {tab === "resultaat" && (
-            <div style={{ padding: "0 4px" }}>
-              {!result ? (
-                <div style={{ textAlign: "center", padding: "60px 20px" }}>
-                  <div style={{ width: 40, height: 40, border: `3px solid ${G.greenLight}`, borderTop: `3px solid ${G.green}`, borderRadius: "50%", animation: "spin 1s linear infinite", margin: "0 auto 16px" }} />
-                  <p style={{ color: G.textMuted, fontSize: 14 }}>Brief wordt gegenereerd...</p>
-                  <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
-                </div>
-              ) : (
-                <div id="resultaat-container">
-                  <div style={{ background: G.white, border: `1px solid ${G.grayBorder}`, borderRadius: 16, padding: 24, marginBottom: 16 }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-                      <p style={{ margin: 0, fontSize: 13, fontWeight: 700, color: G.green, textTransform: "uppercase", letterSpacing: "0.05em" }}>Patiëntenbrief</p>
-                      <span style={{ fontSize: 11, color: G.textMuted, background: G.grayLight, padding: "3px 10px", borderRadius: 20 }}>concept — controleer voor verzending</span>
-                    </div>
-                    <textarea value={result} onChange={e => setResult(e.target.value)} rows={12} style={{ width: "100%", padding: "14px", borderRadius: 10, border: `1.5px solid ${G.grayBorder}`, fontSize: 14, lineHeight: 1.7, resize: "vertical", boxSizing: "border-box", fontFamily: "inherit", color: G.text, background: G.grayLight }} />
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginTop: 12 }}>
-                      <button onClick={kopieer} style={{ padding: "11px", borderRadius: 10, border: `1.5px solid ${G.green}`, background: G.white, color: G.green, fontSize: 14, fontWeight: 600, cursor: "pointer" }}>{kopieertekst}</button>
-                      <button onClick={print} style={{ padding: "11px", borderRadius: 10, border: "none", background: G.green, color: G.white, fontSize: 14, fontWeight: 600, cursor: "pointer" }}>Afdrukken / PDF</button>
-                    </div>
-                  </div>
+          React.createElement("button", { onClick: genereer, style: { width: "100%", padding: "14px", borderRadius: 12, border: "none", cursor: "pointer", background: G.green, color: G.white, fontSize: 16, fontWeight: 700 } }, "Genereer patiënteninformatie →")
+        ),
 
-                  <Infographic activeFase={form.fase} />
-                  <BelastingAdvies fase={form.fase} />
-
-                  <button onClick={reset} style={{ width: "100%", padding: "10px", borderRadius: 10, border: `1px solid ${G.grayBorder}`, background: G.grayLight, color: G.textMuted, fontSize: 13, cursor: "pointer" }}>
-                    ← Nieuwe informatie genereren
-                  </button>
-                </div>
-              )}
-            </div>
-          )}
-        </div>
+        tab === "resultaat" && React.createElement("div", { style: { padding: "0 4px" } },
+          !result ? React.createElement("div", { style: { textAlign: "center", padding: "60px 20px" } },
+            React.createElement("div", { style: { width: 40, height: 40, border: "3px solid " + G.greenLight, borderTop: "3px solid " + G.green, borderRadius: "50%", animation: "spin 1s linear infinite", margin: "0 auto 16px" } }),
+            React.createElement("p", { style: { color: G.textMuted, fontSize: 14 } }, "Brief wordt gegenereerd..."),
+            React.createElement("style", null, "@keyframes spin{to{transform:rotate(360deg)}}")
+          ) :
+          React.createElement("div", { id: "resultaat-container" },
+            React.createElement("div", { style: { background: G.white, border: "1px solid " + G.grayBorder, borderRadius: 16, padding: 24, marginBottom: 16 } },
+              React.createElement("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 } },
+                React.createElement("p", { style: { margin: 0, fontSize: 13, fontWeight: 700, color: G.green, textTransform: "uppercase", letterSpacing: "0.05em" } }, "Patiëntenbrief"),
+                React.createElement("span", { style: { fontSize: 11, color: G.textMuted, background: G.grayLight, padding: "3px 10px", borderRadius: 20 } }, "concept — controleer voor verzending")
+              ),
+              React.createElement("textarea", { value: result, onChange: function(e) { setResult(e.target.value); }, rows: 12, style: { width: "100%", padding: "14px", borderRadius: 10, border: "1.5px solid " + G.grayBorder, fontSize: 14, lineHeight: 1.7, resize: "vertical", boxSizing: "border-box", fontFamily: "inherit", color: G.text, background: G.grayLight } }),
+              React.createElement("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginTop: 12 } },
+                React.createElement("button", { onClick: kopieer, style: { padding: "11px", borderRadius: 10, border: "1.5px solid " + G.green, background: G.white, color: G.green, fontSize: 14, fontWeight: 600, cursor: "pointer" } }, kopieertekst),
+                React.createElement("button", { onClick: print, style: { padding: "11px", borderRadius: 10, border: "none", background: G.green, color: G.white, fontSize: 14, fontWeight: 600, cursor: "pointer" } }, "Afdrukken / PDF")
+              )
+            ),
+            React.createElement(Infographic, { activeFase: form.fase }),
+            React.createElement(BelastingAdvies, { fase: form.fase }),
+            React.createElement("button", { onClick: reset, style: { width: "100%", padding: "10px", borderRadius: 10, border: "1px solid " + G.grayBorder, background: G.grayLight, color: G.textMuted, fontSize: 13, cursor: "pointer" } }, "← Nieuwe informatie genereren")
+          )
+        )
       );
     }
 
-    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+    ReactDOM.createRoot(document.getElementById("root")).render(React.createElement(App, null));
   </script>
 </body>
 </html>
