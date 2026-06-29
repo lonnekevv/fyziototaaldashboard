@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Peesklachten – Fyzio Totaal v6</title>
+  <title>Peesklachten – Fyzio Totaal v7</title>
   <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -504,8 +504,8 @@
         if (form.leeftijd) variabelen.push("Leeftijd: " + form.leeftijd + " jaar");
         if (form.duur) variabelen.push("Duur klachten: " + form.duur);
         if (form.oorzaak) variabelen.push("Oorzaak: " + form.oorzaak);
-        if (form.ochtendstijfheid && form.stijfheidDuur) variabelen.push("Ochtend-/startstijfheid aanwezig, duurt: " + form.stijfheidDuur);
-        else if (form.ochtendstijfheid) variabelen.push("Ochtend-/startstijfheid aanwezig");
+        if (form.ochtendstijfheid && form.stijfheidDuur) variabelen.push("STARTSTIJFHEID AANWEZIG: duurt " + form.stijfheidDuur + " na opstaan. Verwerk de vuistregel: als je 's ochtends wakker wordt met een stijve pees, weet je dat je gisteren te veel hebt gedaan. Patiënt mag dit signaal niet negeren en niet doorbelasten.");
+        else if (form.ochtendstijfheid) variabelen.push("STARTSTIJFHEID AANWEZIG (duur niet gespecificeerd). Verwerk de vuistregel: als je 's ochtends wakker wordt met een stijve pees, weet je dat je gisteren te veel hebt gedaan. Patiënt mag dit signaal niet negeren en niet doorbelasten.");
         if (form.extraNotities) variabelen.push("Extra: " + form.extraNotities);
 
         var prompt = "Je bent fysiotherapeut bij Fyzio Totaal in Wierden. Schrijf een patiënteninformatiebrief in het Nederlands over peesklachten aan de " + peesData.label.toLowerCase() + ".\n\nVASTE INHOUD PER FASE:\n" + faseInstructies[form.fase] + "\n\nVARIABELEN — verwerk alleen wat hieronder staat, verzin niets:\n" + (variabelen.length > 0 ? variabelen.join("\n") : "Geen variabelen ingevuld.") + "\n\nAANVULLENDE INSTRUCTIES VOOR OCHTEND-/STARTSTIJFHEID (alleen als aanwezig):\nKortdurende stijfheid na rust is een kenmerk van peesweefsel: een pees heeft geen eigen bloedtoevoer zoals spieren, maar wordt gevoed via beweging. Na rust droogt het weefsel licht in en heeft het een paar minuten beweging nodig om weer soepel te functioneren. Alleen als duur is opgegeven: benoem die duur en vermeld dat de duur een nuttige graadmeter is.\n\nSCHRIJFREGELS:\n- Begin exact met: \"Je bent bij ons geweest met klachten aan je " + peesData.label.toLowerCase() + ". Hieronder leggen we je nog eens uit wat er aan de hand is, zodat je dit thuis rustig kunt teruglezen.\"\n- Tutoyeer altijd\n- Toegankelijk taalgebruik: vermijd vakjargon zoals 'adaptief', 'mechanotransductie', 'isometrisch', 'isotonisch'. Gebruik gewone woorden: 'aanpassing' ipv 'adaptatie', 'spanning opbouwen zonder te bewegen' ipv 'isometrisch', etc.\n- Klinisch en helder, niet overdreven empathisch\n- Geen beangstigende uitspraken: geen 'scheur', 'beschadiging', 'slijtage', 'afwijking', 'ernstig letsel'\n- Geen anatomische uitleg van waar de pees loopt\n- Geen absolute hersteluitspraken\n- Geen gedachtestreepjes\n- Geen opvulzinnen\n- Geen tussenkopjes of vetgedrukte koppen in de brief (geen **Wat is er aan de hand?** of vergelijkbare kopjes)\n- Gebruik altijd 'bij druk' en nooit 'op druk' als het gaat over drukgevoeligheid van de pees\n- Schrijf ALLEEN de brief";
