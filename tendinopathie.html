@@ -7,42 +7,64 @@
   <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; }
     body { margin: 0; font-family: 'Segoe UI', system-ui, sans-serif; background: #f3f4f6; }
     @keyframes spin { to { transform: rotate(360deg); } }
-
+    #print-overlay { display: none; }
     @media print {
-      @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap');
-      body { background: #fff; font-family: 'Outfit', Arial, sans-serif; }
-      .geen-print { display: none !important; }
-      .print-header { display: flex !important; }
-      .print-badge { display: inline-block !important; }
-      .print-pagina1 { page-break-after: always; }
-      #resultaat-container { max-width: 720px; margin: 0 auto; padding: 24px; }
-    }
-    @media screen {
-      .print-header { display: none; }
-      .print-badge { display: none; }
+      body > * { display: none !important; }
+      #print-overlay { display: block !important; font-family: 'Outfit', Arial, sans-serif; color: #1f2937; line-height: 1.7; }
+      #print-overlay .pagina { max-width: 720px; margin: 0 auto; padding: 24px; }
+      #print-overlay .pagina1 { page-break-after: always; }
+      #print-overlay .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #8B2FC9; padding-bottom: 16px; margin-bottom: 24px; }
+      #print-overlay .logo { height: 48px; }
+      #print-overlay .meta { font-size: 12px; color: #6b7280; text-align: right; line-height: 1.6; }
+      #print-overlay .badge { display: inline-block; padding: 4px 14px; border-radius: 20px; font-size: 12px; font-weight: 600; margin-bottom: 20px; }
+      #print-overlay .brief { font-size: 15px; margin-bottom: 32px; }
+      #print-overlay .brief p { margin: 0 0 1em; }
+      #print-overlay .footer { border-top: 1px solid #e5e7eb; padding-top: 14px; font-size: 11px; color: #9ca3af; margin-top: 16px; }
+      #print-overlay .sectie-titel { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #8B2FC9; margin: 0 0 12px; }
+      #print-overlay .infographic { border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden; margin-bottom: 24px; }
+      #print-overlay .inf-header { background: #8B2FC9; padding: 12px 16px; }
+      #print-overlay .inf-header p { margin: 0; color: #fff; font-size: 12px; font-weight: 700; text-transform: uppercase; }
+      #print-overlay .inf-header span { color: rgba(255,255,255,0.65); font-size: 11px; font-weight: 400; }
+      #print-overlay .fasen { display: grid; grid-template-columns: 1fr 1fr 1fr; }
+      #print-overlay .fase { padding: 12px; border-right: 1px solid #e5e7eb; }
+      #print-overlay .fase:last-child { border-right: none; }
+      #print-overlay .fase-naam { font-size: 11px; font-weight: 700; margin: 0 0 6px; }
+      #print-overlay .fase svg { width: 100%; height: 70px; display: block; border-radius: 6px; margin-bottom: 8px; }
+      #print-overlay .kenmerk { font-size: 10px; margin: 0 0 4px; line-height: 1.4; }
+      #print-overlay .kenmerk strong { display: block; font-size: 10.5px; }
+      #print-overlay .kenmerk span { color: #6b7280; }
+      #print-overlay .continuüm { padding: 10px 16px; background: #f3f4f6; border-top: 1px solid #e5e7eb; font-size: 11px; color: #6b7280; text-align: center; }
+      #print-overlay .implicatie { padding: 12px 16px; border-top: 1px solid #e5e7eb; display: flex; gap: 10px; }
+      #print-overlay .implicatie p { margin: 0; font-size: 11px; color: #6b7280; line-height: 1.5; }
+      #print-overlay .implicatie strong { color: #8B2FC9; display: block; font-size: 11px; margin-bottom: 2px; }
+      #print-overlay .advies { border-radius: 12px; padding: 16px; margin-bottom: 24px; }
+      #print-overlay .advies-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+      #print-overlay .advies-item { background: #fff; border-radius: 8px; padding: 10px 12px; }
+      #print-overlay .advies-item strong { display: block; font-size: 11px; margin-bottom: 3px; }
+      #print-overlay .advies-item span { font-size: 10.5px; color: #6b7280; line-height: 1.4; }
     }
   </style>
 </head>
 <body>
   <div id="root"></div>
+  <div id="print-overlay"></div>
+
   <script type="text/babel">
-    const { useState } = React;
+    var { useState } = React;
 
-    // versie 2.0 – met printpagina pagina 1/2 en maakVezels
-    const API_KEY = "JOUW_API_KEY_HIER";
-
-    const G = {
+    var G = {
       green: "#1a4a3a", greenMid: "#2d6b55", greenLight: "#e8f2ee", greenLighter: "#f2f8f5",
       orange: "#e8611a", white: "#ffffff",
       grayLight: "#f3f4f6", grayBorder: "#e5e7eb",
       text: "#1f2937", textMuted: "#6b7280",
     };
 
-    const PEZEN = [
+    var PEZEN = [
       { id: "achilles", label: "Achillespees" },
       { id: "patella", label: "Patellapees" },
       { id: "elleboog", label: "Elleboog (lateraal/mediaal)" },
@@ -52,7 +74,7 @@
       { id: "fascia", label: "Fascia plantaris" },
     ];
 
-    const OORZAKEN = [
+    var OORZAKEN = [
       "Overbelasting (te veel/te intensief)",
       "Onderbelasting (te weinig beweging)",
       "Plotselinge toename van activiteit",
@@ -62,11 +84,53 @@
       "Combinatie van factoren",
     ];
 
-    const FASEN = [
+    var FASEN = [
       { id: "acuut", label: "Reactieve fase", kort: "Reactief", kleur: "#2d6b55", kleurLight: "#e8f2ee" },
       { id: "dysrepair", label: "Dysrepair fase", kort: "Dysrepair", kleur: "#c09a2a", kleurLight: "#fdf8e8" },
       { id: "degeneratief", label: "Degeneratieve fase", kort: "Degeneratief", kleur: "#b94a2c", kleurLight: "#fdf0ec" },
     ];
+
+    var KENMERKEN = {
+      acuut: [
+        { term: "Ordelijke vezelstructuur", uitleg: "Vezels nog goed gerangschikt" },
+        { term: "Verhoogde celactiviteit", uitleg: "Cellen werken extra hard" },
+        { term: "Geen bloedvaten ingegroeid", uitleg: "Weefsel nog niet overprikkeld" },
+        { term: "Pijn bij belasting", uitleg: "Kalmeert na opwarmen" },
+      ],
+      dysrepair: [
+        { term: "Vezels raken verward", uitleg: "Minder ordelijke structuur dan normaal" },
+        { term: "Veel herstelcellen actief", uitleg: "Het herstelproces is ontregeld" },
+        { term: "Bloedvaatjes groeien in", uitleg: "Maakt de pees gevoeliger" },
+        { term: "Pijn bij en ná belasting", uitleg: "Soms ook aanwezig in rust" },
+      ],
+      degeneratief: [
+        { term: "Sterk verward vezelpatroon", uitleg: "Langdurige structuurverandering" },
+        { term: "Verminderde herstelkracht", uitleg: "Cellen werken minder effectief" },
+        { term: "Zenuwtjes ingegroeid", uitleg: "Geven ook in rust pijnsignalen" },
+        { term: "Pijn ook in rust", uitleg: "Door gevoelige zenuwtjes in het weefsel" },
+      ],
+    };
+
+    var ADVIEZEN = {
+      acuut: { kleur: "#2d6b55", kleurLight: "#e8f2ee", items: [
+        { titel: "Verminder piekbelasting tijdelijk", tekst: "Pas activiteiten aan die pijn uitlokken. Volledige rust is niet nodig en werkt averechts." },
+        { titel: "Start met isometrische oefeningen", tekst: "Statische spierspanning zonder beweging dempt pijn en houdt de pees actief." },
+        { titel: "Startstijfheid: informatief, niet alarmerend", tekst: "Korte stijfheid na rust hoort bij deze fase. De duur ervan is een nuttige graadmeter." },
+        { titel: "Vermijd abrupte pieken", tekst: "Schokbelasting en plotselinge intensiteitstoenames tijdelijk beperken." },
+      ]},
+      dysrepair: { kleur: "#c09a2a", kleurLight: "#fdf8e8", items: [
+        { titel: "Gerichte belasting stuurt herstel", tekst: "De pees heeft progressieve mechanische prikkels nodig. Isometrisch is de opstap, isotonisch het vervolg." },
+        { titel: "Zwaar en langzaam (HSR)", tekst: "Heavy Slow Resistance training heeft de voorkeur: hoge weerstand, lage snelheid." },
+        { titel: "Regelmaat boven intensiteit", tekst: "Consistent trainen werkt beter dan afwisselen van veel en niets." },
+        { titel: "Herstel is niet lineair", tekst: "Eerste verbetering is vaak na 8 tot 12 weken merkbaar. Volledig herstel vraagt geduld." },
+      ]},
+      degeneratief: { kleur: "#b94a2c", kleurLight: "#fdf0ec", items: [
+        { titel: "Progressieve belasting als basis", tekst: "De gezonde collageenmatrix is trainbaar. Progressieve krachttraining (HSR) is de kern." },
+        { titel: "Energie-opslag trainen", tekst: "Voor sporters is veerkrachttraining (plyometrie) essentieel zodra de basis stabiel is." },
+        { titel: "Verwacht een lang traject", tekst: "Peesklachten vragen een revalidatieperiode van vaak 6 tot 12 maanden." },
+        { titel: "Terugkeer op basis van capaciteit", tekst: "Hervatting wordt bepaald door wat de pees aankan, niet door een datum." },
+      ]},
+    };
 
     var callClaude = async function(prompt, apiKey) {
       var res = await fetch("https://api.anthropic.com/v1/messages", {
@@ -87,6 +151,51 @@
       var data = await res.json();
       return data.content.map(function(b) { return b.text || ""; }).join("") || "";
     };
+
+    function maakSVG(fase, width, height) {
+      var paden = [];
+      var rows = 7;
+      for (var r = 0; r < rows; r++) {
+        var y = 12 + r * (height - 24) / (rows - 1);
+        var d = "M8," + y;
+        if (fase === "acuut") {
+          for (var x = 8; x <= width - 8; x += 6) {
+            var amp = (x > 70 && x < 130) ? 3.5 : 1.2;
+            d += " L" + x + "," + (y + amp * Math.sin((x / 18) * Math.PI));
+          }
+          var isA = r === 2 || r === 4;
+          paden.push("<path d='" + d + "' stroke='" + (isA ? "#2d6b55" : "#8ba89e") + "' stroke-width='" + (isA ? 2 : 1.4) + "' fill='none' stroke-linecap='round' opacity='" + (isA ? 1 : 0.65) + "'/>");
+        } else if (fase === "dysrepair") {
+          var off = r * 3.7;
+          for (var x = 8; x <= width - 8; x += 5) {
+            var amp = 4 + 2 * Math.sin(r * 1.3);
+            d += " L" + x + "," + (y + amp * Math.sin(((x + off) / 14) * Math.PI));
+          }
+          var isV = r === 1 || r === 3 || r === 5;
+          paden.push("<path d='" + d + "' stroke='" + (isV ? "#c09a2a" : "#8ba89e") + "' stroke-width='" + (isV ? 2.2 : 1.4) + "' fill='none' stroke-linecap='round' opacity='" + (isV ? 0.95 : 0.55) + "'/>");
+        } else {
+          var off = r * 5.1;
+          for (var x = 8; x <= width - 8; x += 4) {
+            var amp = 6 + 3 * Math.abs(Math.sin(r * 0.9));
+            var freq = 10 + r % 3 * 3;
+            d += " L" + x + "," + (y + amp * Math.sin(((x + off) / freq) * Math.PI));
+          }
+          var isZ = r % 2 === 0;
+          paden.push("<path d='" + d + "' stroke='" + (isZ ? "#b94a2c" : "#8ba89e") + "' stroke-width='" + (isZ ? 2.4 : 1.3) + "' fill='none' stroke-linecap='round' opacity='" + (isZ ? 1 : 0.45) + "'/>");
+        }
+      }
+      var extra = "";
+      if (fase === "acuut") extra = "<ellipse cx='" + (width*0.5) + "' cy='" + (height/2) + "' rx='38' ry='" + (height*0.38) + "' fill='#2d6b55' fill-opacity='0.08' stroke='#2d6b55' stroke-width='1' stroke-dasharray='4,3'/>";
+      if (fase === "dysrepair") extra = "<path d='M" + (width*0.45) + ",10 Q" + (width*0.5) + "," + (height/2) + " " + (width*0.42) + "," + (height-10) + "' stroke='#c0392b' stroke-width='1.5' fill='none' opacity='0.55'/>";
+      if (fase === "degeneratief") {
+        for (var i = 0; i < 4; i++) {
+          var bx = width * (0.25 + i * 0.15);
+          extra += "<path d='M" + bx + ",8 Q" + (bx+8) + "," + (height/2) + " " + (bx-5) + "," + (height-8) + "' stroke='#c0392b' stroke-width='1.4' fill='none' opacity='0.5'/>";
+        }
+        extra += "<ellipse cx='" + (width*0.35) + "' cy='" + (height*0.4) + "' rx='20' ry='12' fill='#b94a2c' fill-opacity='0.09' stroke='#b94a2c' stroke-width='0.8' stroke-dasharray='3,2'/>";
+      }
+      return "<svg viewBox='0 0 " + width + " " + height + "' xmlns='http://www.w3.org/2000/svg' style='background:#f9fafb;border-radius:6px;border:1px solid #e5e7eb'>" + paden.join("") + extra + "</svg>";
+    }
 
     function CollagreenVezels(props) {
       var fase = props.fase;
@@ -125,7 +234,6 @@
           vezels.push(React.createElement("path", { key: r, d: d, stroke: isZwaar ? "#b94a2c" : "#8ba89e", strokeWidth: isZwaar ? 2.4 : 1.3, fill: "none", strokeLinecap: "round", opacity: isZwaar ? 1 : 0.45 }));
         }
       }
-
       var bloedvaten = [];
       if (fase === "dysrepair") {
         bloedvaten.push(
@@ -141,16 +249,12 @@
           );
         }
       }
-
       var extra = [];
       if (fase === "acuut") extra.push(React.createElement("ellipse", { key: "zwel", cx: width*0.5, cy: height/2, rx: 38, ry: height*0.38, fill: "#2d6b55", fillOpacity: "0.08", stroke: "#2d6b55", strokeWidth: "1", strokeDasharray: "4,3" }));
-      if (fase === "degeneratief") {
-        extra.push(
-          React.createElement("ellipse", { key: "d1", cx: width*0.35, cy: height*0.4, rx: 22, ry: 14, fill: "#b94a2c", fillOpacity: "0.09", stroke: "#b94a2c", strokeWidth: "0.8", strokeDasharray: "3,2" }),
-          React.createElement("ellipse", { key: "d2", cx: width*0.65, cy: height*0.65, rx: 18, ry: 12, fill: "#b94a2c", fillOpacity: "0.09", stroke: "#b94a2c", strokeWidth: "0.8", strokeDasharray: "3,2" })
-        );
-      }
-
+      if (fase === "degeneratief") extra.push(
+        React.createElement("ellipse", { key: "d1", cx: width*0.35, cy: height*0.4, rx: 22, ry: 14, fill: "#b94a2c", fillOpacity: "0.09", stroke: "#b94a2c", strokeWidth: "0.8", strokeDasharray: "3,2" }),
+        React.createElement("ellipse", { key: "d2", cx: width*0.65, cy: height*0.65, rx: 18, ry: 12, fill: "#b94a2c", fillOpacity: "0.09", stroke: "#b94a2c", strokeWidth: "0.8", strokeDasharray: "3,2" })
+      );
       return React.createElement("svg", { viewBox: "0 0 " + width + " " + height, width: "100%", style: { display: "block", borderRadius: 8, background: "#f9fafb", border: "1px solid #e5e7eb" } },
         vezels, bloedvaten, extra
       );
@@ -158,27 +262,6 @@
 
     function Infographic(props) {
       var activeFase = props.activeFase;
-      var kenmerken = {
-        acuut: [
-          { term: "Ordelijke vezelstructuur", uitleg: "Vezels nog goed gerangschikt" },
-          { term: "Verhoogde celactiviteit", uitleg: "Cellen werken extra hard" },
-          { term: "Geen bloedvaten ingegroeid", uitleg: "Weefsel nog niet overprikkeld" },
-          { term: "Pijn bij belasting", uitleg: "Kalmeert na opwarmen" },
-        ],
-        dysrepair: [
-          { term: "Vezels raken verward", uitleg: "Minder ordelijke structuur dan normaal" },
-          { term: "Veel herstelcellen actief", uitleg: "Het herstelproces is ontregeld" },
-          { term: "Bloedvaatjes groeien in", uitleg: "Maakt de pees gevoeliger" },
-          { term: "Pijn bij en ná belasting", uitleg: "Soms ook aanwezig in rust" },
-        ],
-        degeneratief: [
-          { term: "Sterk verward vezelpatroon", uitleg: "Langdurige structuurverandering" },
-          { term: "Verminderde herstelkracht", uitleg: "Cellen werken minder effectief" },
-          { term: "Zenuwtjes ingegroeid", uitleg: "Geven ook in rust pijnsignalen" },
-          { term: "Pijn ook in rust", uitleg: "Door gevoelige zenuwtjes in het weefsel" },
-        ],
-      };
-
       return React.createElement("div", { style: { background: G.white, border: "1px solid " + G.grayBorder, borderRadius: 16, overflow: "hidden", marginBottom: 20 } },
         React.createElement("div", { style: { background: G.green, padding: "14px 20px" } },
           React.createElement("p", { style: { margin: 0, fontSize: 13, fontWeight: 700, color: G.white, textTransform: "uppercase", letterSpacing: "0.06em" } }, "Het continuümmodel van tendinopathie"),
@@ -195,7 +278,7 @@
               ),
               React.createElement("div", { style: { marginBottom: 10 } }, React.createElement(CollagreenVezels, { fase: f.id, width: 200, height: 80 })),
               React.createElement("ul", { style: { margin: 0, padding: 0, listStyle: "none" } },
-                kenmerken[f.id].map(function(k, ki) {
+                KENMERKEN[f.id].map(function(k, ki) {
                   return React.createElement("li", { key: ki, style: { display: "flex", gap: 6, alignItems: "flex-start", marginBottom: 6 } },
                     React.createElement("span", { style: { color: actief ? f.kleur : G.textMuted, fontSize: 13, flexShrink: 0, marginTop: 1 } }, "•"),
                     React.createElement("span", { style: { lineHeight: 1.4 } },
@@ -224,36 +307,7 @@
 
     function BelastingAdvies(props) {
       var fase = props.fase;
-      var adviezen = {
-        acuut: {
-          kleur: FASEN[0].kleur, kleurLight: FASEN[0].kleurLight,
-          items: [
-            { titel: "Verminder piekbelasting tijdelijk", tekst: "Pas activiteiten aan die pijn uitlokken. Volledige rust is niet nodig en werkt averechts." },
-            { titel: "Start met isometrische oefeningen", tekst: "Statische spierspanning zonder beweging dempt pijn en houdt de pees actief zonder extra belasting." },
-            { titel: "Startstijfheid: informatief, niet alarmerend", tekst: "Korte stijfheid na rust hoort bij deze fase. De duur ervan is een nuttige graadmeter: neemt die toe, dan is bijsturen nodig." },
-            { titel: "Vermijd abrupte pieken", tekst: "Schokbelasting en plotselinge intensiteitstoenames tijdelijk beperken. Bouw daarna stapsgewijs op onder begeleiding." },
-          ]
-        },
-        dysrepair: {
-          kleur: FASEN[1].kleur, kleurLight: FASEN[1].kleurLight,
-          items: [
-            { titel: "Gerichte belasting stuurt herstel", tekst: "De pees heeft progressieve mechanische prikkels nodig om de collageenstructuur te herstellen. Isometrisch is de opstap, isotonisch het vervolg." },
-            { titel: "Zwaar en langzaam (HSR)", tekst: "Heavy Slow Resistance training heeft de voorkeur: hoge weerstand, lage snelheid. Dit stimuleert weefseladaptatie effectief." },
-            { titel: "Regelmaat boven intensiteit", tekst: "Consistent trainen werkt beter dan afwisselen van veel en niets. Plan vaste trainingsmomenten met voldoende herstel ertussen." },
-            { titel: "Herstel is niet lineair", tekst: "Wisselende dagen zijn normaal. Eerste verbetering is vaak na 8 tot 12 weken merkbaar. Volledig herstel vraagt geduld." },
-          ]
-        },
-        degeneratief: {
-          kleur: FASEN[2].kleur, kleurLight: FASEN[2].kleurLight,
-          items: [
-            { titel: "Progressieve belasting als basis", tekst: "De gezonde collageenmatrix rondom de aangedane zone is trainbaar. Progressieve krachttraining (HSR) is de kern van de aanpak." },
-            { titel: "Energie-opslag trainen", tekst: "Voor sporters is ook veerkrachttraining (plyometrie) essentieel zodra de basis stabiel is. De pees fungeert als elastische veer en heeft die prikkel nodig." },
-            { titel: "Verwacht een lang traject", tekst: "Peesklachten die lang bestaan vragen een revalidatieperiode van vaak 6 tot 12 maanden. Dat weerspiegelt hoe langzaam peesweefsel adapteert." },
-            { titel: "Terugkeer op basis van capaciteit", tekst: "Wanneer je sport of activiteit kunt hervatten wordt bepaald door wat je pees aankan, niet door een datum op de kalender." },
-          ]
-        }
-      };
-      var d = adviezen[fase];
+      var d = ADVIEZEN[fase];
       return React.createElement("div", { style: { background: d.kleurLight, border: "1px solid " + d.kleur + "30", borderRadius: 16, padding: 20, marginBottom: 20 } },
         React.createElement("p", { style: { margin: "0 0 14px", fontSize: 13, fontWeight: 700, color: d.kleur, textTransform: "uppercase", letterSpacing: "0.05em" } }, "Belastingadvies"),
         React.createElement("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 } },
@@ -267,45 +321,34 @@
       );
     }
 
-    var LEEG_FORM = { pees: "achilles", fase: "acuut", duur: "", oorzaak: "", ochtendstijfheid: false, stijfheidDuur: "", extraNotities: "" };
-
     function ApiKeyScherm(props) {
       var inputState = useState("");
       var input = inputState[0]; var setInput = inputState[1];
       var foutState = useState(false);
       var fout = foutState[0]; var setFout = foutState[1];
-
       var opslaan = function() {
         if (!input.trim().startsWith("sk-ant-")) { setFout(true); return; }
         localStorage.setItem("ft_apikey", input.trim());
         props.onOpgeslagen(input.trim());
       };
-
       return React.createElement("div", { style: { fontFamily: "'Segoe UI', system-ui, sans-serif", maxWidth: 720, margin: "0 auto", padding: "0 0 40px" } },
         React.createElement("div", { style: { background: G.green, borderRadius: "0 0 20px 20px", padding: "22px 28px", marginBottom: 24 } },
-          React.createElement("p", { style: { margin: 0, fontSize: 20, fontWeight: 700, color: G.white } },
-            "Fyzio", React.createElement("span", { style: { color: G.orange } }, "Totaal")
-          ),
+          React.createElement("p", { style: { margin: 0, fontSize: 20, fontWeight: 700, color: G.white } }, "Fyzio", React.createElement("span", { style: { color: G.orange } }, "Totaal")),
           React.createElement("p", { style: { margin: 0, fontSize: 13, color: "rgba(255,255,255,0.65)" } }, "Patiënteninformatie · Peesklachten")
         ),
         React.createElement("div", { style: { padding: "0 4px" } },
           React.createElement("div", { style: { background: G.white, border: "1px solid " + G.grayBorder, borderRadius: 16, padding: 24 } },
             React.createElement("p", { style: { margin: "0 0 8px", fontSize: 15, fontWeight: 700, color: G.green } }, "API key invoeren"),
             React.createElement("p", { style: { margin: "0 0 20px", fontSize: 13, color: G.textMuted, lineHeight: 1.6 } }, "Voer eenmalig de API key in. Deze wordt opgeslagen in je browser en hoef je daarna niet opnieuw in te voeren."),
-            React.createElement("input", {
-              type: "password",
-              placeholder: "sk-ant-api03-...",
-              value: input,
-              onChange: function(e) { setInput(e.target.value); setFout(false); },
-              onKeyDown: function(e) { if (e.key === "Enter") opslaan(); },
-              style: { width: "100%", padding: "10px 12px", borderRadius: 10, border: "1.5px solid " + (fout ? "#f87171" : G.grayBorder), fontSize: 14, boxSizing: "border-box", marginBottom: 8, fontFamily: "monospace" }
-            }),
+            React.createElement("input", { type: "password", placeholder: "sk-ant-api03-...", value: input, onChange: function(e) { setInput(e.target.value); setFout(false); }, onKeyDown: function(e) { if (e.key === "Enter") opslaan(); }, style: { width: "100%", padding: "10px 12px", borderRadius: 10, border: "1.5px solid " + (fout ? "#f87171" : G.grayBorder), fontSize: 14, boxSizing: "border-box", marginBottom: 8, fontFamily: "monospace" } }),
             fout && React.createElement("p", { style: { fontSize: 12, color: "#f87171", margin: "0 0 12px" } }, "Voer een geldige API key in (begint met sk-ant-)."),
             React.createElement("button", { onClick: opslaan, style: { width: "100%", padding: "12px", borderRadius: 10, border: "none", cursor: "pointer", background: G.green, color: G.white, fontSize: 14, fontWeight: 700 } }, "Opslaan en doorgaan →")
           )
         )
       );
     }
+
+    var LEEG_FORM = { pees: "achilles", fase: "acuut", duur: "", oorzaak: "", ochtendstijfheid: false, stijfheidDuur: "", extraNotities: "" };
 
     function App() {
       var apiKeyState = useState(localStorage.getItem("ft_apikey") || "");
@@ -342,7 +385,7 @@
         else if (form.ochtendstijfheid) variabelen.push("Ochtend-/startstijfheid aanwezig (duur niet gespecificeerd)");
         if (form.extraNotities) variabelen.push("Extra: " + form.extraNotities);
 
-        var prompt = "Je bent fysiotherapeut bij Fyzio Totaal in Wierden. Schrijf een patiënteninformatiebrief in het Nederlands over peesklachten aan de " + peesData.label.toLowerCase() + ".\n\nVASTE INHOUD PER FASE — dit verwerk je altijd, in deze volgorde en structuur:\n" + faseInstructies[form.fase] + "\n\nVARIABELEN — verwerk alleen wat hieronder staat, verzin niets:\n" + (variabelen.length > 0 ? variabelen.join("\n") : "Geen variabelen ingevuld — gebruik alleen de vaste inhoud hierboven.") + "\n\nAANVULLENDE INSTRUCTIES VOOR OCHTEND-/STARTSTIJFHEID (alleen verwerken als hierboven aanwezig):\nKortdurende stijfheid na rust is een kenmerk van peesweefsel: een pees heeft geen eigen bloedtoevoer zoals spieren, maar wordt gevoed via beweging. Na een periode van rust droogt het weefsel licht in en heeft het een paar minuten belasting nodig om weer soepel te functioneren. Alleen als duur is opgegeven: benoem die duur en vermeld dat de duur een nuttige graadmeter is voor hoe de pees reageert op het belastingpatroon.\n\nSCHRIJFREGELS:\n- Begin exact met: \"Je bent bij ons geweest met klachten aan je " + peesData.label.toLowerCase() + ". Hieronder leggen we je nog eens uit wat er aan de hand is, zodat je dit thuis rustig kunt teruglezen.\"\n- Tutoyeer altijd\n- Klinisch en helder, niet overdreven empathisch\n- Geen nocebo's: geen 'scheur', 'beschadiging', 'slijtage', 'afwijking', 'ernstig letsel'\n- Geen anatomische uitleg van waar de pees loopt\n- Geen absolute hersteluitspraken ('we zijn er zeker van dat')\n- Geen gedachtestreepjes\n- Geen opvulzinnen\n- 3 tot 4 alinea's, geen bullet points, geen aanhef, geen afsluiting\n- Schrijf ALLEEN de brief";
+        var prompt = "Je bent fysiotherapeut bij Fyzio Totaal in Wierden. Schrijf een patiënteninformatiebrief in het Nederlands over peesklachten aan de " + peesData.label.toLowerCase() + ".\n\nVASTE INHOUD PER FASE:\n" + faseInstructies[form.fase] + "\n\nVARIABELEN — verwerk alleen wat hieronder staat, verzin niets:\n" + (variabelen.length > 0 ? variabelen.join("\n") : "Geen variabelen ingevuld.") + "\n\nAANVULLENDE INSTRUCTIES VOOR OCHTEND-/STARTSTIJFHEID (alleen als aanwezig):\nKortdurende stijfheid na rust is een kenmerk van peesweefsel: een pees heeft geen eigen bloedtoevoer zoals spieren, maar wordt gevoed via beweging. Na rust droogt het weefsel licht in en heeft het een paar minuten belasting nodig om weer soepel te functioneren. Alleen als duur is opgegeven: benoem die duur en vermeld dat de duur een nuttige graadmeter is.\n\nSCHRIJFREGELS:\n- Begin exact met: \"Je bent bij ons geweest met klachten aan je " + peesData.label.toLowerCase() + ". Hieronder leggen we je nog eens uit wat er aan de hand is, zodat je dit thuis rustig kunt teruglezen.\"\n- Tutoyeer altijd\n- Klinisch en helder, niet overdreven empathisch\n- Geen nocebo's\n- Geen anatomische uitleg van waar de pees loopt\n- Geen absolute hersteluitspraken\n- Geen gedachtestreepjes\n- Geen opvulzinnen\n- 3 tot 4 alinea's, geen bullet points, geen aanhef, geen afsluiting\n- Schrijf ALLEEN de brief";
 
         try {
           var tekst = await callClaude(prompt, apiKey);
@@ -380,130 +423,54 @@
       var print = function() {
         if (!result) return;
         var fInfo = FASEN.find(function(f) { return f.id === form.fase; });
+        var adv = ADVIEZEN[form.fase];
         var briefHtml = result.split("\n\n").map(function(p) { return "<p>" + p + "</p>"; }).join("");
-        var html = "<!DOCTYPE html><html><head><meta charset='utf-8'><title>Patiënteninformatie Fyzio Totaal</title>" +
-          "<link href='https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap' rel='stylesheet'>" +
-          "<style>" +
-          "body{font-family:'Outfit',Arial,sans-serif;max-width:720px;margin:40px auto;color:#1f2937;line-height:1.7;padding:0 24px}" +
-          ".printbtn{display:block;margin:0 0 24px;padding:10px 24px;background:#8B2FC9;color:#fff;border:none;border-radius:8px;font-size:14px;cursor:pointer;font-family:'Outfit',Arial,sans-serif}" +
-          ".header{display:flex;justify-content:space-between;align-items:center;border-bottom:3px solid #8B2FC9;padding-bottom:16px;margin-bottom:24px}" +
-          ".logo{height:48px}" +
-          ".meta{font-size:12px;color:#6b7280;text-align:right;line-height:1.6}" +
-          ".badge{display:inline-block;background:" + fInfo.kleurLight + ";color:" + fInfo.kleur + ";border:1px solid " + fInfo.kleur + "40;padding:4px 14px;border-radius:20px;font-size:12px;font-weight:600;margin-bottom:20px}" +
-          ".brief{font-size:15px;margin-bottom:32px}" +
-          ".brief p{margin:0 0 1em}" +
-          ".sectie-titel{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#8B2FC9;margin:0 0 12px}" +
-          ".infographic{border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;margin-bottom:24px}" +
-          ".infographic-header{background:#8B2FC9;padding:12px 16px}" +
-          ".infographic-header p{margin:0;color:#fff;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em}" +
-          ".infographic-header span{color:rgba(255,255,255,0.65);font-size:11px;font-weight:400}" +
-          ".fasen{display:grid;grid-template-columns:1fr 1fr 1fr}" +
-          ".fase{padding:14px;border-right:1px solid #e5e7eb}" +
-          ".fase:last-child{border-right:none}" +
-          ".fase-naam{font-size:12px;font-weight:700;margin:0 0 8px}" +
-          ".kenmerk{font-size:11px;margin:0 0 5px;line-height:1.4}" +
-          ".kenmerk strong{display:block;font-size:11.5px}" +
-          ".kenmerk span{color:#6b7280;font-size:10.5px}" +
-          ".continuüm{padding:10px 16px;background:#f3f4f6;border-top:1px solid #e5e7eb;font-size:11px;color:#6b7280;text-align:center}" +
-          ".implicatie{padding:12px 16px;border-top:1px solid #e5e7eb;display:flex;gap:10px;align-items:flex-start}" +
-          ".implicatie-icon{font-size:16px;flex-shrink:0}" +
-          ".implicatie p{margin:0;font-size:12px;color:#6b7280;line-height:1.5}" +
-          ".implicatie strong{color:#8B2FC9;display:block;font-size:12px;margin-bottom:2px}" +
-          ".advies{border-radius:12px;padding:16px;margin-bottom:24px}" +
-          ".advies-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}" +
-          ".advies-item{background:#fff;border-radius:8px;padding:10px 12px}" +
-          ".advies-item strong{display:block;font-size:12px;margin-bottom:3px}" +
-          ".advies-item span{font-size:11px;color:#6b7280;line-height:1.4}" +
-          ".footer{border-top:1px solid #e5e7eb;padding-top:14px;font-size:11px;color:#9ca3af;margin-top:8px}" +
-          "@media print{.printbtn{display:none}}" +
-          "</style></head><body>" +
-          "<button class='printbtn' onclick='window.print()'>Afdrukken / Opslaan als PDF</button>" +
-          "<div class='header'>" +
-          "<img src='https://lonnekevv.github.io/fyziototaaldashboard/logo.png' class='logo' />" +
-          "<div class='meta'>Patiënteninformatie peesklachten<br/>" + new Date().toLocaleDateString("nl-NL") + "</div>" +
-          "</div>" +
-          "<div class='badge'>" + fInfo.label + " &nbsp;·&nbsp; " + peesData.label + "</div>" +
+        var datum = new Date().toLocaleDateString("nl-NL");
+
+        var fasenHtml = FASEN.map(function(f, i) {
+          var actief = f.id === form.fase;
+          var kenHtml = KENMERKEN[f.id].map(function(k) {
+            return "<div class='kenmerk'><strong>" + k.term + "</strong><span>" + k.uitleg + "</span></div>";
+          }).join("");
+          var svgHtml = maakSVG(f.id, 180, 70);
+          return "<div class='fase' style='background:" + (actief ? f.kleurLight : "#fff") + ";border-right:" + (i < 2 ? "1px solid #e5e7eb" : "none") + "'>" +
+            "<p class='fase-naam' style='color:" + (actief ? f.kleur : "#9ca3af") + "'>" + (actief ? "▶ " : "") + f.label + "</p>" +
+            svgHtml + kenHtml + "</div>";
+        }).join("");
+
+        var advHtml = adv.items.map(function(item) {
+          return "<div class='advies-item' style='border:1px solid " + adv.kleur + "20'><strong>" + item.titel + "</strong><span>" + item.tekst + "</span></div>";
+        }).join("");
+
+        var overlay = document.getElementById("print-overlay");
+        overlay.innerHTML =
+          "<div class='pagina pagina1'>" +
+          "<div class='header'><img src='https://lonnekevv.github.io/fyziototaaldashboard/logo.png' class='logo'/><div class='meta'>Patiënteninformatie peesklachten<br/>" + datum + "</div></div>" +
+          "<div class='badge' style='background:" + fInfo.kleurLight + ";color:" + fInfo.kleur + ";border:1px solid " + fInfo.kleur + "40'>" + fInfo.label + " &nbsp;·&nbsp; " + peesData.label + "</div>" +
           "<div class='brief'>" + briefHtml + "</div>" +
+          "<div class='footer'>Fyzio Totaal &nbsp;·&nbsp; Nijverheidsstraat 7, Wierden &nbsp;·&nbsp; www.fyziototaal.nl</div>" +
+          "</div>" +
+          "<div class='pagina'>" +
+          "<div class='header'><img src='https://lonnekevv.github.io/fyziototaaldashboard/logo.png' class='logo'/><div class='meta'>Patiënteninformatie peesklachten<br/>" + datum + "</div></div>" +
           "<p class='sectie-titel'>Het continuümmodel van tendinopathie</p>" +
           "<div class='infographic'>" +
-          "<div class='infographic-header'><p>Het continuümmodel van tendinopathie <span>— fasen overlappen en zijn omkeerbaar</span></p></div>" +
-          "<div class='fasen'>" +
-          FASEN.map(function(f) {
-            var actief = f.id === form.fase;
-            var kenmerken = {
-              acuut: [
-                { term: "Ordelijke vezelstructuur", uitleg: "Vezels nog goed gerangschikt" },
-                { term: "Verhoogde celactiviteit", uitleg: "Cellen werken extra hard" },
-                { term: "Geen bloedvaten ingegroeid", uitleg: "Weefsel nog niet overprikkeld" },
-                { term: "Pijn bij belasting", uitleg: "Kalmeert na opwarmen" },
-              ],
-              dysrepair: [
-                { term: "Vezels raken verward", uitleg: "Minder ordelijke structuur dan normaal" },
-                { term: "Veel herstelcellen actief", uitleg: "Het herstelproces is ontregeld" },
-                { term: "Bloedvaatjes groeien in", uitleg: "Maakt de pees gevoeliger" },
-                { term: "Pijn bij en ná belasting", uitleg: "Soms ook aanwezig in rust" },
-              ],
-              degeneratief: [
-                { term: "Sterk verward vezelpatroon", uitleg: "Langdurige structuurverandering" },
-                { term: "Verminderde herstelkracht", uitleg: "Cellen werken minder effectief" },
-                { term: "Zenuwtjes ingegroeid", uitleg: "Geven ook in rust pijnsignalen" },
-                { term: "Pijn ook in rust", uitleg: "Door gevoelige zenuwtjes in het weefsel" },
-              ],
-            };
-            return "<div class='fase' style='background:" + (actief ? f.kleurLight : "#fff") + "'>" +
-              "<p class='fase-naam' style='color:" + (actief ? f.kleur : "#9ca3af") + "'>" + (actief ? "▶ " : "") + f.label + "</p>" +
-              kenmerken[f.id].map(function(k) {
-                return "<div class='kenmerk'><strong>" + k.term + "</strong><span>" + k.uitleg + "</span></div>";
-              }).join("") +
-              "</div>";
-          }).join("") +
-          "</div>" +
+          "<div class='inf-header'><p>Het continuümmodel van tendinopathie <span>— fasen overlappen en zijn omkeerbaar</span></p></div>" +
+          "<div class='fasen'>" + fasenHtml + "</div>" +
           "<div class='continuüm'>↔ De fasen zijn niet vast en de pees kan heen en weer bewegen afhankelijk van belasting. Te veel rust kan de pees terugzetten, te veel belasting ook.</div>" +
-          "<div class='implicatie'><div class='implicatie-icon'>🎯</div><div><p><strong>Klinische implicatie</strong>De focus ligt niet op het genezen van aangedaan weefsel, maar op het optimaliseren van de belastbaarheid van de gezonde collageenmatrix.</p></div></div>" +
+          "<div class='implicatie'><p><strong>Klinische implicatie</strong>De focus ligt niet op het genezen van aangedaan weefsel, maar op het optimaliseren van de belastbaarheid van de gezonde collageenmatrix.</p></div>" +
           "</div>" +
           "<p class='sectie-titel'>Belastingadvies</p>" +
-          (function() {
-            var adviezen = {
-              acuut: { kleur: FASEN[0].kleur, kleurLight: FASEN[0].kleurLight, items: [
-                { titel: "Verminder piekbelasting tijdelijk", tekst: "Pas activiteiten aan die pijn uitlokken. Volledige rust is niet nodig en werkt averechts." },
-                { titel: "Start met isometrische oefeningen", tekst: "Statische spierspanning zonder beweging dempt pijn en houdt de pees actief zonder extra belasting." },
-                { titel: "Startstijfheid: informatief, niet alarmerend", tekst: "Korte stijfheid na rust hoort bij deze fase. De duur ervan is een nuttige graadmeter." },
-                { titel: "Vermijd abrupte pieken", tekst: "Schokbelasting en plotselinge intensiteitstoenames tijdelijk beperken." },
-              ]},
-              dysrepair: { kleur: FASEN[1].kleur, kleurLight: FASEN[1].kleurLight, items: [
-                { titel: "Gerichte belasting stuurt herstel", tekst: "De pees heeft progressieve mechanische prikkels nodig. Isometrisch is de opstap, isotonisch het vervolg." },
-                { titel: "Zwaar en langzaam (HSR)", tekst: "Heavy Slow Resistance training heeft de voorkeur: hoge weerstand, lage snelheid." },
-                { titel: "Regelmaat boven intensiteit", tekst: "Consistent trainen werkt beter dan afwisselen van veel en niets." },
-                { titel: "Herstel is niet lineair", tekst: "Eerste verbetering is vaak na 8 tot 12 weken merkbaar. Volledig herstel vraagt geduld." },
-              ]},
-              degeneratief: { kleur: FASEN[2].kleur, kleurLight: FASEN[2].kleurLight, items: [
-                { titel: "Progressieve belasting als basis", tekst: "De gezonde collageenmatrix is trainbaar. Progressieve krachttraining (HSR) is de kern." },
-                { titel: "Energie-opslag trainen", tekst: "Voor sporters is veerkrachttraining (plyometrie) essentieel zodra de basis stabiel is." },
-                { titel: "Verwacht een lang traject", tekst: "Peesklachten vragen een revalidatieperiode van vaak 6 tot 12 maanden." },
-                { titel: "Terugkeer op basis van capaciteit", tekst: "Hervatting wordt bepaald door wat de pees aankan, niet door een datum." },
-              ]},
-            };
-            var d = adviezen[form.fase];
-            return "<div class='advies' style='background:" + d.kleurLight + ";border:1px solid " + d.kleur + "30'>" +
-              "<div class='advies-grid'>" +
-              d.items.map(function(item) {
-                return "<div class='advies-item' style='border:1px solid " + d.kleur + "20'><strong>" + item.titel + "</strong><span>" + item.tekst + "</span></div>";
-              }).join("") +
-              "</div></div>";
-          })() +
+          "<div class='advies' style='background:" + adv.kleurLight + ";border:1px solid " + adv.kleur + "30'><div class='advies-grid'>" + advHtml + "</div></div>" +
           "<div class='footer'>Fyzio Totaal &nbsp;·&nbsp; Nijverheidsstraat 7, Wierden &nbsp;·&nbsp; www.fyziototaal.nl</div>" +
-          "</body></html>";
-        var blob = new Blob([html], { type: "text/html" });
-        var url = URL.createObjectURL(blob);
-        window.open(url, "_blank");
+          "</div>";
+
+        window.print();
       };
 
       return React.createElement("div", { style: { fontFamily: "'Segoe UI', system-ui, sans-serif", maxWidth: 720, margin: "0 auto", padding: "0 0 40px" } },
 
         React.createElement("div", { style: { background: G.green, borderRadius: "0 0 20px 20px", padding: "22px 28px", marginBottom: 24 } },
-          React.createElement("p", { style: { margin: 0, fontSize: 20, fontWeight: 700, color: G.white } },
-            "Fyzio", React.createElement("span", { style: { color: G.orange } }, "Totaal")
-          ),
+          React.createElement("p", { style: { margin: 0, fontSize: 20, fontWeight: 700, color: G.white } }, "Fyzio", React.createElement("span", { style: { color: G.orange } }, "Totaal")),
           React.createElement("p", { style: { margin: 0, fontSize: 13, color: "rgba(255,255,255,0.65)" } }, "Patiënteninformatie · Peesklachten")
         ),
 
@@ -573,10 +540,7 @@
               onKeyDown: function(e) {
                 if (e.key === "Enter") {
                   var now = Date.now();
-                  if (e.target._lastEnter && now - e.target._lastEnter < 500) {
-                    e.preventDefault();
-                    genereer();
-                  }
+                  if (e.target._lastEnter && now - e.target._lastEnter < 500) { e.preventDefault(); genereer(); }
                   e.target._lastEnter = now;
                 }
               },
