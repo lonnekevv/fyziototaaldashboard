@@ -393,8 +393,12 @@
     function BelastingAdvies(props) {
       var fase = props.fase;
       var d = ADVIEZEN[fase];
-      var itemsState = useState(d.items.map(function(item) { return { titel: item.titel, tekst: item.tekst }; }));
+      var itemsState = useState(props.items || d.items);
       var items = itemsState[0]; var setItems = itemsState[1];
+
+      React.useEffect(function() {
+        if (props.items) setItems(props.items);
+      }, [props.items]);
 
       var updateItem = function(index, veld, waarde) {
         setItems(function(prev) {
@@ -471,6 +475,8 @@
       var form = state[0]; var setForm = state[1];
       var resultState = useState(null);
       var result = resultState[0]; var setResult = resultState[1];
+      var adviesItemsState = useState(null);
+      var adviesItems = adviesItemsState[0]; var setAdviesItems = adviesItemsState[1];
       var tabState = useState("invoer");
       var tab = tabState[0]; var setTab = tabState[1];
       var kopieertekstState = useState("Kopieer tekst");
@@ -481,6 +487,7 @@
 
       var genereer = async function() {
         setResult(null);
+        setAdviesItems(null);
         setTab("resultaat");
 
         var faseInstructies = {
@@ -509,6 +516,7 @@
       var reset = function() {
         setForm(LEEG_FORM);
         setResult(null);
+        setAdviesItems(null);
         setTab("invoer");
       };
 
@@ -535,6 +543,7 @@
         if (!result) return;
         var fInfo = FASEN.find(function(f) { return f.id === form.fase; });
         var adv = ADVIEZEN[form.fase];
+        var printItems = adviesItems || adv.items;
         var briefHtml = result.split("\n\n").map(function(p) { return "<p>" + p + "</p>"; }).join("");
         var datum = new Date().toLocaleDateString("nl-NL");
 
@@ -547,7 +556,7 @@
             ? "Je pees heeft meer belasting gekregen dan hij aankon. De emmer is nog niet vol, maar geeft wel al signalen. Met de juiste aanpak loopt hij weer leeg."
             : form.fase === "dysrepair"
             ? "De emmer is bijna vol: je pees heeft langdurig te veel belasting gehad en het herstelproces is in de war geraakt. De emmer kan weer leeglopen, maar dat vraagt tijd."
-            : "De emmer loopt over: je pees heeft zo lang te veel belasting gehad dat er veranderingen zijn ontstaan. Het goede nieuws: het gezonde weefsel eromheen is nog trainbaar.";
+                            : "De emmer loopt over: je pees heeft zo lang te veel belasting gehad dat er veranderingen zijn ontstaan in de structuur. Maar ook hier geldt: de emmer kan weer leeglopen. Dat vraagt meer tijd en een langdurig opbouwend programma, maar functioneel herstel is in de meeste gevallen goed haalbaar.";
           emmerHtml = "<div style='padding:12px 16px;background:#f8f5ff;border-top:1px solid #e5e7eb;display:flex;align-items:center;gap:16px'>" +
             "<svg viewBox='0 0 60 70' width='50' height='58' style='flex-shrink:0'>" +
             "<path d='M10,15 L5,65 L55,65 L50,15 Z' fill='#e5e7eb' stroke='#9ca3af' stroke-width='1.5'/>" +
@@ -583,7 +592,7 @@
             "<ul style='margin:0;padding:0;list-style:none'>" + symptomenHtml + "</ul></div>";
         }).join("");
 
-        var advHtml = adv.items.map(function(item) {
+        var advHtml = printItems.map(function(item) {
           return "<div class='advies-item' style='border:1px solid " + adv.kleur + "20'><strong>" + item.titel + "</strong><span>" + item.tekst + "</span></div>";
         }).join("");
 
@@ -720,7 +729,7 @@
               )
             ),
             React.createElement(Infographic, { activeFase: form.fase, oorzaak: form.oorzaak }),
-            React.createElement(BelastingAdvies, { fase: form.fase }),
+            adviesItems && React.createElement(BelastingAdvies, { fase: form.fase, items: adviesItems }),
             React.createElement("button", { onClick: reset, style: { width: "100%", padding: "10px", borderRadius: 10, border: "1px solid " + G.grayBorder, background: G.grayLight, color: G.textMuted, fontSize: 13, cursor: "pointer" } }, "← Nieuwe informatie genereren")
           )
         )
