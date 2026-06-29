@@ -115,7 +115,7 @@
 
     var ADVIEZEN = {
       acuut: { kleur: "#2d6b55", kleurLight: "#e8f2ee", items: [
-        { titel: "Verminder piekbelasting tijdelijk", tekst: "Pas activiteiten aan die pijn uitlokken. Volledig stoppen is niet nodig en werkt averechts." },
+        { titel: "Verminder piekbelasting tijdelijk", tekst: "Pas activiteiten aan die pijn uitlokken. Dit betekent niet dat je volledig moet stoppen, maar wel dat je de intensiteit en belasting tijdelijk terugschroeft. Sporten waarbij je veel springt, sprint of van richting verandert kun je het beste even laten rusten of vervangen door lichtere alternatieven." },
         { titel: "Begin met rustige spieroefeningen", tekst: "Je kunt beginnen met oefeningen waarbij je spanning opbouwt zonder te bewegen, bijvoorbeeld door de spier aan te spannen terwijl je been of arm stilstaat. Dit houdt de pees actief zonder extra belasting." },
         { titel: "Startstijfheid hoort erbij", tekst: "Een stijf gevoel na rust is normaal in deze fase. Warm rustig op voor activiteit en let op hoe lang de stijfheid aanhoudt: dat vertelt je hoe de pees reageert." },
         { titel: "Vermijd plotselinge pieken", tekst: "Schokken en abrupte intensiteitstoenames tijdelijk beperken. Bouw activiteiten daarna stap voor stap op onder begeleiding." },
@@ -393,13 +393,33 @@
     function BelastingAdvies(props) {
       var fase = props.fase;
       var d = ADVIEZEN[fase];
+      var itemsState = useState(d.items.map(function(item) { return { titel: item.titel, tekst: item.tekst }; }));
+      var items = itemsState[0]; var setItems = itemsState[1];
+
+      var updateItem = function(index, veld, waarde) {
+        setItems(function(prev) {
+          return prev.map(function(item, i) {
+            return i === index ? Object.assign({}, item, { [veld]: waarde }) : item;
+          });
+        });
+      };
+
       return React.createElement("div", { style: { background: d.kleurLight, border: "1px solid " + d.kleur + "30", borderRadius: 16, padding: 20, marginBottom: 20 } },
         React.createElement("p", { style: { margin: "0 0 14px", fontSize: 13, fontWeight: 700, color: d.kleur, textTransform: "uppercase", letterSpacing: "0.05em" } }, "Belastingadvies"),
         React.createElement("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 } },
-          d.items.map(function(item, i) {
+          items.map(function(item, i) {
             return React.createElement("div", { key: i, style: { background: G.white, borderRadius: 10, padding: "12px 14px", border: "1px solid " + d.kleur + "20" } },
-              React.createElement("p", { style: { margin: "0 0 4px", fontSize: 13, fontWeight: 600, color: G.text } }, item.titel),
-              React.createElement("p", { style: { margin: 0, fontSize: 12, color: G.textMuted, lineHeight: 1.5 } }, item.tekst)
+              React.createElement("input", {
+                value: item.titel,
+                onChange: function(e) { updateItem(i, "titel", e.target.value); },
+                style: { width: "100%", fontSize: 13, fontWeight: 600, color: G.text, border: "none", borderBottom: "1px solid " + G.grayBorder, marginBottom: 6, padding: "2px 0", background: "transparent", boxSizing: "border-box", fontFamily: "inherit" }
+              }),
+              React.createElement("textarea", {
+                value: item.tekst,
+                onChange: function(e) { updateItem(i, "tekst", e.target.value); },
+                rows: 4,
+                style: { width: "100%", fontSize: 12, color: G.textMuted, lineHeight: 1.5, border: "none", resize: "vertical", background: "transparent", fontFamily: "inherit", padding: 0, boxSizing: "border-box" }
+              })
             );
           })
         ),
@@ -476,7 +496,7 @@
         else if (form.ochtendstijfheid) variabelen.push("Ochtend-/startstijfheid aanwezig (duur niet gespecificeerd)");
         if (form.extraNotities) variabelen.push("Extra: " + form.extraNotities);
 
-        var prompt = "Je bent fysiotherapeut bij Fyzio Totaal in Wierden. Schrijf een patiënteninformatiebrief in het Nederlands over peesklachten aan de " + peesData.label.toLowerCase() + ".\n\nVASTE INHOUD PER FASE:\n" + faseInstructies[form.fase] + "\n\nVARIABELEN — verwerk alleen wat hieronder staat, verzin niets:\n" + (variabelen.length > 0 ? variabelen.join("\n") : "Geen variabelen ingevuld.") + "\n\nAANVULLENDE INSTRUCTIES VOOR OCHTEND-/STARTSTIJFHEID (alleen als aanwezig):\nKortdurende stijfheid na rust is een kenmerk van peesweefsel: een pees heeft geen eigen bloedtoevoer zoals spieren, maar wordt gevoed via beweging. Na rust droogt het weefsel licht in en heeft het een paar minuten beweging nodig om weer soepel te functioneren. Alleen als duur is opgegeven: benoem die duur en vermeld dat de duur een nuttige graadmeter is.\n\nSCHRIJFREGELS:\n- Begin exact met: \"Je bent bij ons geweest met klachten aan je " + peesData.label.toLowerCase() + ". Hieronder leggen we je nog eens uit wat er aan de hand is, zodat je dit thuis rustig kunt teruglezen.\"\n- Tutoyeer altijd\n- Toegankelijk taalgebruik: vermijd vakjargon zoals 'adaptief', 'mechanotransductie', 'isometrisch', 'isotonisch'. Gebruik gewone woorden: 'aanpassing' ipv 'adaptatie', 'spanning opbouwen zonder te bewegen' ipv 'isometrisch', etc.\n- Klinisch en helder, niet overdreven empathisch\n- Geen beangstigende uitspraken: geen 'scheur', 'beschadiging', 'slijtage', 'afwijking', 'ernstig letsel'\n- Geen anatomische uitleg van waar de pees loopt\n- Geen absolute hersteluitspraken\n- Geen gedachtestreepjes\n- Geen opvulzinnen\n- Perfecte spelling en grammatica: controleer alle werkwoorden, bijvoeglijke naamwoorden en verbuigingen zorgvuldig\n- 3 tot 4 alinea's, geen opsommingen, geen aanhef, geen afsluiting\n- Schrijf ALLEEN de brief";
+        var prompt = "Je bent fysiotherapeut bij Fyzio Totaal in Wierden. Schrijf een patiënteninformatiebrief in het Nederlands over peesklachten aan de " + peesData.label.toLowerCase() + ".\n\nVASTE INHOUD PER FASE:\n" + faseInstructies[form.fase] + "\n\nVARIABELEN — verwerk alleen wat hieronder staat, verzin niets:\n" + (variabelen.length > 0 ? variabelen.join("\n") : "Geen variabelen ingevuld.") + "\n\nAANVULLENDE INSTRUCTIES VOOR OCHTEND-/STARTSTIJFHEID (alleen als aanwezig):\nKortdurende stijfheid na rust is een kenmerk van peesweefsel: een pees heeft geen eigen bloedtoevoer zoals spieren, maar wordt gevoed via beweging. Na rust droogt het weefsel licht in en heeft het een paar minuten beweging nodig om weer soepel te functioneren. Alleen als duur is opgegeven: benoem die duur en vermeld dat de duur een nuttige graadmeter is.\n\nSCHRIJFREGELS:\n- Begin exact met: \"Je bent bij ons geweest met klachten aan je " + peesData.label.toLowerCase() + ". Hieronder leggen we je nog eens uit wat er aan de hand is, zodat je dit thuis rustig kunt teruglezen.\"\n- Tutoyeer altijd\n- Toegankelijk taalgebruik: vermijd vakjargon zoals 'adaptief', 'mechanotransductie', 'isometrisch', 'isotonisch'. Gebruik gewone woorden: 'aanpassing' ipv 'adaptatie', 'spanning opbouwen zonder te bewegen' ipv 'isometrisch', etc.\n- Klinisch en helder, niet overdreven empathisch\n- Geen beangstigende uitspraken: geen 'scheur', 'beschadiging', 'slijtage', 'afwijking', 'ernstig letsel'\n- Geen anatomische uitleg van waar de pees loopt\n- Geen absolute hersteluitspraken\n- Geen gedachtestreepjes\n- Geen opvulzinnen\n- Gebruik altijd 'bij druk' en nooit 'op druk' als het gaat over drukgevoeligheid van de pees\n- Perfecte spelling en grammatica: controleer alle werkwoorden, bijvoeglijke naamwoorden en verbuigingen zorgvuldig\n- Schrijf ALLEEN de brief";
 
         try {
           var tekst = await callClaude(prompt, apiKey);
