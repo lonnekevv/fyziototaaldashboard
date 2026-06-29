@@ -278,6 +278,20 @@
                 actief && React.createElement("span", { style: { fontSize: 10, background: f.kleur, color: G.white, borderRadius: 10, padding: "1px 7px", fontWeight: 600 } }, "Jouw fase")
               ),
               React.createElement("div", { style: { marginBottom: 10 } }, React.createElement(CollagreenVezels, { fase: f.id, width: 200, height: 80 })),
+              React.createElement("div", { style: { display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 8 } },
+                React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 4 } },
+                  React.createElement("div", { style: { width: 16, height: 2.5, background: "#8ba89e", borderRadius: 2 } }),
+                  React.createElement("span", { style: { fontSize: 9.5, color: G.textMuted } }, "Gezonde vezel")
+                ),
+                React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 4 } },
+                  React.createElement("div", { style: { width: 16, height: 2.5, background: f.kleur, borderRadius: 2 } }),
+                  React.createElement("span", { style: { fontSize: 9.5, color: G.textMuted } }, "Aangedane zone")
+                ),
+                (f.id === "dysrepair" || f.id === "degeneratief") && React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 4 } },
+                  React.createElement("div", { style: { width: 16, height: 2.5, background: "#c0392b", borderRadius: 2, opacity: 0.7 } }),
+                  React.createElement("span", { style: { fontSize: 9.5, color: G.textMuted } }, "Bloedvaten/zenuwtjes")
+                )
+              ),
               React.createElement("ul", { style: { margin: 0, padding: 0, listStyle: "none" } },
                 KENMERKEN[f.id].map(function(k, ki) {
                   return React.createElement("li", { key: ki, style: { display: "flex", gap: 6, alignItems: "flex-start", marginBottom: 6 } },
@@ -434,9 +448,14 @@
             return "<div class='kenmerk'><strong>" + k.term + "</strong><span>" + k.uitleg + "</span></div>";
           }).join("");
           var svgHtml = maakSVG(f.id, 180, 70);
+          var legendaHtml = "<div style='display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px'>" +
+            "<div style='display:flex;align-items:center;gap:4px'><div style='width:16px;height:2.5px;background:#8ba89e;border-radius:2px'></div><span style='font-size:9.5px;color:#6b7280'>Gezonde vezel</span></div>" +
+            "<div style='display:flex;align-items:center;gap:4px'><div style='width:16px;height:2.5px;background:" + f.kleur + ";border-radius:2px'></div><span style='font-size:9.5px;color:#6b7280'>Aangedane zone</span></div>" +
+            (f.id !== "acuut" ? "<div style='display:flex;align-items:center;gap:4px'><div style='width:16px;height:2.5px;background:#c0392b;border-radius:2px;opacity:0.7'></div><span style='font-size:9.5px;color:#6b7280'>Bloedvaten/zenuwtjes</span></div>" : "") +
+            "</div>";
           return "<div class='fase' style='background:" + (actief ? f.kleurLight : "#fff") + ";border-right:" + (i < 2 ? "1px solid #e5e7eb" : "none") + "'>" +
             "<p class='fase-naam' style='color:" + (actief ? f.kleur : "#9ca3af") + "'>" + (actief ? "▶ " : "") + f.label + (actief ? " <span style='font-size:9px;background:" + f.kleur + ";color:#fff;border-radius:8px;padding:1px 6px;font-weight:600;margin-left:4px'>Jouw fase</span>" : "") + "</p>" +
-            svgHtml + kenHtml + "</div>";
+            svgHtml + legendaHtml + kenHtml + "</div>";
         }).join("");
 
         var advHtml = adv.items.map(function(item) {
