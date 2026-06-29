@@ -84,9 +84,9 @@
     ];
 
     var FASEN = [
-      { id: "acuut", label: "Fase 1", kleur: "#2d6b55", kleurLight: "#e8f2ee" },
-      { id: "dysrepair", label: "Fase 2", kleur: "#c09a2a", kleurLight: "#fdf8e8" },
-      { id: "degeneratief", label: "Fase 3", kleur: "#b94a2c", kleurLight: "#fdf0ec" },
+      { id: "acuut", label: "Fase 1", labelInvoer: "Fase 1 — Reactief", kleur: "#2d6b55", kleurLight: "#e8f2ee" },
+      { id: "dysrepair", label: "Fase 2", labelInvoer: "Fase 2 — Dysrepair", kleur: "#c09a2a", kleurLight: "#fdf8e8" },
+      { id: "degeneratief", label: "Fase 3", labelInvoer: "Fase 3 — Degeneratief", kleur: "#b94a2c", kleurLight: "#fdf0ec" },
     ];
 
     var SYMPTOMEN = {
@@ -224,7 +224,7 @@
               React.createElement("rect", { x: "5.5", y: 65 - (vulling * 0.5), width: "49", height: "3", fill: kleur, opacity: "0.6" }),
               vulling >= 95 && React.createElement("path", { d: "M5,15 Q30,5 55,15", stroke: kleur, strokeWidth: "2", fill: "none", opacity: "0.7" }),
               React.createElement("path", { d: "M15,10 Q30,2 45,10", stroke: "#9ca3af", strokeWidth: "1.5", fill: "none" }),
-              React.createElement("text", { x: "30", y: "62", textAnchor: "middle", fontSize: "9", fill: kleur, fontWeight: "700" }, vulling + "%")
+              React.createElement("text", { x: "30", y: "62", textAnchor: "middle", fontSize: "9", fill: kleur, fontWeight: "700" }, vulling === 95 ? "vol" : "")
             )
           ),
           React.createElement("div", null,
@@ -385,7 +385,7 @@
         React.createElement(EmmerVisualisatie, { oorzaak: oorzaak, fase: activeFase }),
         React.createElement("div", { style: { padding: "10px 20px", borderTop: "1px solid " + G.grayBorder, background: G.grayLight, display: "flex", alignItems: "center", justifyContent: "center", gap: 8 } },
           React.createElement("span", { style: { fontSize: 12, color: G.textMuted } }, "↔"),
-          React.createElement("span", { style: { fontSize: 12, color: G.textMuted } }, "De fasen zijn niet vast en de pees kan heen en weer bewegen afhankelijk van belasting. Te veel rust kan de pees terugzetten, te veel belasting ook. De juiste dosering houdt je in beweging richting herstel.")
+          React.createElement("span", { style: { fontSize: 12, color: G.textMuted } }, "De fasen zijn niet vast en een pees kan heen en weer bewegen afhankelijk van belasting. Dit is een langzaam proces dat weken tot maanden duurt: je gaat dus niet van de ene op de andere dag in een andere fase zitten. Te veel rust kan de pees op den duur terugzetten, te veel belasting ook. De juiste dosering houdt je in beweging richting herstel.")
         )
       );
     }
@@ -402,6 +402,13 @@
               React.createElement("p", { style: { margin: 0, fontSize: 12, color: G.textMuted, lineHeight: 1.5 } }, item.tekst)
             );
           })
+        ),
+        React.createElement("div", { style: { marginTop: 12, padding: "10px 14px", background: G.white, borderRadius: 10, border: "1px solid " + d.kleur + "20", display: "flex", alignItems: "center", gap: 10 } },
+          React.createElement("span", { style: { fontSize: 16, flexShrink: 0 } }, "📱"),
+          React.createElement("p", { style: { margin: 0, fontSize: 12, color: G.textMuted, lineHeight: 1.5 } },
+            React.createElement("strong", { style: { color: G.text } }, "Oefeningen via Physitrack. "),
+            "Je ontvangt van ons een uitnodiging voor Physitrack, een app waarmee je jouw oefeningen kunt bekijken en bijhouden. Zo heb je altijd alles bij de hand."
+          )
         )
       );
     }
@@ -614,7 +621,7 @@
             React.createElement("div", null,
               React.createElement("label", { style: { fontSize: 13, fontWeight: 600, color: G.green, display: "block", marginBottom: 6 } }, "Fase (Cook & Purdam)"),
               React.createElement("select", { value: form.fase, onChange: function(e) { setForm(function(f) { return Object.assign({}, f, { fase: e.target.value }); }); }, style: { width: "100%", padding: "10px 12px", borderRadius: 10, border: "1.5px solid " + G.grayBorder, fontSize: 14, background: G.white } },
-                FASEN.map(function(f) { return React.createElement("option", { key: f.id, value: f.id }, f.label); })
+                FASEN.map(function(f) { return React.createElement("option", { key: f.id, value: f.id }, f.labelInvoer); })
               )
             )
           ),
