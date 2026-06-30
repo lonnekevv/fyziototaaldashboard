@@ -859,7 +859,7 @@ async function genereerRapport(){
   toonMelding('melding-globaal','AI genereert het testverslag, even geduld...','laden');
 
   const vergelijkingDeel=vorigVerslagTekst
-    ?'\n\nVORIG TESTVERSLAG:\n"""\n'+vorigVerslagTekst.substring(0,3500)+'\n"""\n\nVergelijk de nieuwe scores uitdrukkelijk met het vorige verslag. Benoem meetbare vooruitgang positief en concreet (bijv. "Je plank is van 45 naar 62 seconden gegaan"). Bij gelijkblijvende scores: benadruk dat het niveau is vastgehouden als prestatie. Noem NOOIT achteruitgang als negatief feit; formuleer dit als aandachtspunt met perspectief.'
+    ?'\n\nVORIG TESTVERSLAG:\n"""\n'+vorigVerslagTekst.substring(0,3500)+'\n"""\n\nVergelijk de nieuwe scores uitdrukkelijk met het vorige verslag. Benoem meetbare vooruitgang positief en concreet (bijv. "Je plank is van 45 naar 62 seconden gegaan"). Bij gelijkblijvende scores: benadruk dat het niveau is vastgehouden als prestatie. Noem NOOIT achteruitgang als negatief feit; formuleer dit als aandachtspunt met perspectief.\n\nBELANGRIJK - TESTUITVOERING KAN VERSCHILLEN: De Biering-Sorensen, Laterale Roman Chair en Plank kunnen nu zijn afgenomen in de VERZWAARDE variant (met extra gewicht), terwijl deze testen bij een vorige meting mogelijk in de NORMALE variant (zonder gewicht) zijn afgenomen, of andersom. Controleer dit altijd aan de hand van wat in de huidige testresultaten staat vermeld (variant staat erbij). Als de variant is veranderd ten opzichte van het vorige verslag: vergelijk de score dan NIET direct, maar benoem expliciet dat de testuitvoering zwaarder of lichter is geworden, zodat de score niet één-op-één te vergelijken is met de vorige keer. Bijvoorbeeld: "Je hebt deze test nu met extra gewicht uitgevoerd, dus is een directe vergelijking met de vorige meting niet helemaal eerlijk. Voor deze zwaardere uitvoering is een tijd van X seconden een mooie score."'
     :'';
 
   const blessureDeel=(data.blessure_info||data.blessure_invloed)
@@ -878,6 +878,7 @@ TAAL EN STIJL:
 - Geen nocebo-taal.
 - Gebruik begrijpelijke taal, maar behoud correcte medische termen waar dat gepast is (bijv. "voorste kruisbandreconstructie" niet "kniereconstructie", "hamstrings" niet "achterkant van je bovenbeen"). Vertaal alleen termen die voor de sporter echt niets zeggen: bijv. niet "valgus" maar "knieen zakken naar binnen"; niet "lumbale extensoren" maar "rugspieren". Herkenbare woorden als "squat" mogen gewoon gebruikt worden, maar vermijd stijve technische samenstellingen zoals "squat-patroon"; schrijf in plaats daarvan gewoon hoe iemand de squat uitvoert, in spreektaal.
 - Wees ANATOMISCH SECUUR: controleer bij elke test welk lichaamsdeel daadwerkelijk getest wordt en gebruik dat consequent. Shoulder Press test de ARMEN/SCHOUDERS, nooit "benen". Single Leg Stand Up, 1-Benige Brug en Roman Chair testen BENEN/HEUPEN. Verwar links/rechts zijde nooit met het verkeerde lichaamsdeel.
+- Benoem bij de Biering-Sorensen, Laterale Roman Chair en Plank altijd kort of de test met of zonder extra gewicht is uitgevoerd (de variant staat bij de testresultaten). Dit is relevant voor de score-interpretatie en voor toekomstige vergelijkingen.
 - Let op grammatica, ook bij meervoud: "je rugspieren hielden het vol" (niet "hield").
 
 ADVIESTOON:
