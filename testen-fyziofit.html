@@ -7,8 +7,8 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
 <style>
   :root {
-    --groen:#1a4a3a; --groen-mid:#2d6b55; --groen-licht:#e8f2ee;
-    --oranje:#e8611a; --oranje-licht:#fdf0e8;
+    --groen:#82176D; --groen-mid:#9C2589; --groen-licht:#f7e9f4;
+    --oranje:#00B6E8; --oranje-licht:#e6f8fd;
     --tekst:#1a1a1a; --tekst-zacht:#555; --border:#dde8e4; --wit:#fff;
     --rood:#c0392b; --rood-licht:#fdf0ee; --geel:#f39c12;
     --radius:10px; --shadow:0 2px 8px rgba(0,0,0,.08);
@@ -33,7 +33,7 @@
   .btn-secondary{background:var(--groen-licht);color:var(--groen);border:1.5px solid var(--border)}
   .btn-secondary:hover{background:var(--border)}
   .btn-oranje{background:var(--oranje);color:#fff}
-  .btn-oranje:hover{background:#c94e10}
+  .btn-oranje:hover{background:#0093BD}
   .btn:disabled{opacity:.5;cursor:not-allowed}
   #app{display:none}
   .app-container{max-width:800px;margin:0 auto;padding:20px 16px 100px}
@@ -131,9 +131,9 @@
     <div class="input-group"><label>Geslacht</label><select id="input-geslacht"><option value="">selecteer</option><option value="man">Man</option><option value="vrouw">Vrouw</option></select></div>
     <div class="input-group"><label>Leeftijd</label><input type="number" id="input-leeftijd" placeholder="48" min="18" max="99"></div>
     <div class="input-group"><label>Tester</label><input type="text" id="input-tester" placeholder="Naam tester"></div>
-    <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:#e8f2ee;border-radius:8px;border:1.5px solid #dde8e4;margin-bottom:16px">
-      <input type="checkbox" id="input-herstelcheck" style="width:18px;height:18px;accent-color:#1a4a3a;cursor:pointer">
-      <label for="input-herstelcheck" style="font-size:.9rem;font-weight:600;color:#1a4a3a;cursor:pointer">Herstelcheck ingevuld</label>
+    <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--groen-licht);border-radius:8px;border:1.5px solid #dde8e4;margin-bottom:16px">
+      <input type="checkbox" id="input-herstelcheck" style="width:18px;height:18px;accent-color:var(--groen);cursor:pointer">
+      <label for="input-herstelcheck" style="font-size:.9rem;font-weight:600;color:var(--groen);cursor:pointer">Herstelcheck ingevuld</label>
     </div>
     <div id="start-melding" class="melding"></div>
     <button class="btn btn-primary" onclick="startSessie()">Starten</button>
@@ -457,11 +457,11 @@ function vraagApiKey() {
   overlay.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:9999;padding:20px";
   overlay.innerHTML = `
     <div style="background:#fff;border-radius:12px;padding:24px;max-width:380px;width:100%">
-      <p style="font-size:15px;font-weight:700;color:#1a4a3a;margin-bottom:8px">API key invoeren</p>
+      <p style="font-size:15px;font-weight:700;color:var(--groen);margin-bottom:8px">API key invoeren</p>
       <p style="font-size:13px;color:#555;line-height:1.6;margin-bottom:16px">Voer eenmalig de API key in. Deze wordt opgeslagen in je browser en hoef je daarna niet opnieuw in te voeren.</p>
       <input id="apikey-input" type="password" placeholder="sk-ant-api03-..." style="width:100%;padding:10px 12px;border-radius:8px;border:1.5px solid #dde8e4;font-size:14px;box-sizing:border-box;margin-bottom:8px;font-family:monospace">
       <p id="apikey-fout" style="font-size:12px;color:#c0392b;display:none;margin-bottom:8px">Voer een geldige key in (begint met sk-ant-).</p>
-      <button id="apikey-opslaan" style="width:100%;padding:11px;border-radius:8px;border:none;background:#1a4a3a;color:#fff;font-size:14px;font-weight:700;cursor:pointer">Opslaan en doorgaan</button>
+      <button id="apikey-opslaan" style="width:100%;padding:11px;border-radius:8px;border:none;background:var(--groen);color:#fff;font-size:14px;font-weight:700;cursor:pointer">Opslaan en doorgaan</button>
     </div>`;
   document.body.appendChild(overlay);
   return new Promise(resolve => {
@@ -884,6 +884,7 @@ TAAL EN STIJL:
 - Geen nocebo-taal.
 - Gebruik begrijpelijke taal, maar behoud correcte medische termen waar dat gepast is (bijv. "voorste kruisbandreconstructie" niet "kniereconstructie", "hamstrings" niet "achterkant van je bovenbeen"). Vertaal alleen termen die voor de sporter echt niets zeggen: bijv. niet "valgus" maar "knieen zakken naar binnen"; niet "lumbale extensoren" maar "rugspieren". Herkenbare woorden als "squat" mogen gewoon gebruikt worden, maar vermijd stijve technische samenstellingen zoals "squat-patroon"; schrijf in plaats daarvan gewoon hoe iemand de squat uitvoert, in spreektaal.
 - Wees ANATOMISCH SECUUR: controleer bij elke test welk lichaamsdeel daadwerkelijk getest wordt en gebruik dat consequent. Shoulder Press test de ARMEN/SCHOUDERS, nooit "benen". Single Leg Stand Up, 1-Benige Brug en Roman Chair testen BENEN/HEUPEN. Verwar links/rechts zijde nooit met het verkeerde lichaamsdeel.
+- Gebruik bij de Sit en Reach altijd het woord "hamstrings", nooit omschrijvingen zoals "beenachterkant" of "achterkant van je benen". Licht het toe indien gewenst: "hamstrings, de spieren aan de achterkant van je bovenbeen". Dit is een harde regel, geen suggestie.
 - Benoem bij de Biering-Sorensen, Laterale Roman Chair en Plank altijd kort of de test met of zonder extra gewicht is uitgevoerd (de variant staat bij de testresultaten). Dit is relevant voor de score-interpretatie en voor toekomstige vergelijkingen.
 - Let op grammatica, ook bij meervoud: "je rugspieren hielden het vol" (niet "hield").
 
@@ -993,18 +994,22 @@ function toonRapport(tekst){
 
 function opmaakRapport(tekst){
   return tekst.split('\n').map((regel,i)=>{
-    regel=regel.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>');
-    if(!regel.trim())return '<br>';
-    if(i===0||/^Testverslag\s/.test(regel.trim())){
-      return '<p style="margin:0 0 20px"><strong style="font-size:1.1rem;color:#8B2FC9;display:block;border-bottom:2px solid #8B2FC9;padding-bottom:8px">'+regel+'</strong></p>';
+    const kaal=regel.replace(/\*\*/g,'').trim();
+    if(!kaal)return '<br>';
+    if(i===0||/^Testverslag\s/.test(kaal)){
+      const inhoud=regel.replace(/\*\*(.*?)\*\*/g,'$1');
+      return '<p style="margin:0 0 20px"><strong style="font-size:1.1rem;color:var(--groen);display:block;border-bottom:2px solid var(--oranje);padding-bottom:8px">'+inhoud+'</strong></p>';
     }
-    if(/^(Conditie|Mobiliteit|Kracht benen|Kracht schouders|Core|Lichaamssamenstelling|Belangrijk om mee te nemen|Overzicht mogelijke vervolgafspraken)/.test(regel.trim())){
-      return '<p><strong style="font-size:.95rem;color:#1a4a3a;display:block;margin-top:18px;margin-bottom:3px;border-left:3px solid #8B2FC9;padding-left:8px">'+regel+'</strong></p>';
+    if(/^(Conditie|Mobiliteit|Kracht benen|Kracht schouders|Core|Lichaamssamenstelling|Belangrijk om mee te nemen|Overzicht mogelijke vervolgafspraken)/.test(kaal)){
+      const inhoud=regel.replace(/\*\*(.*?)\*\*/g,'$1');
+      return '<p><strong style="font-size:.95rem;color:var(--groen);display:block;margin-top:18px;margin-bottom:3px;border-left:3px solid var(--oranje);padding-left:8px">'+inhoud+'</strong></p>';
     }
     if(/^\*\s/.test(regel)){
-      return '<p style="margin-bottom:4px;padding-left:16px;text-indent:-16px">&bull; '+regel.replace(/^\*\s/,'')+'</p>';
+      const inhoud=regel.replace(/^\*\s/,'').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>');
+      return '<p style="margin-bottom:4px;padding-left:16px;text-indent:-16px">&bull; '+inhoud+'</p>';
     }
-    return '<p style="margin-bottom:5px">'+regel+'</p>';
+    const inhoud=regel.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>');
+    return '<p style="margin-bottom:5px">'+inhoud+'</p>';
   }).join('');
 }
 
@@ -1020,25 +1025,27 @@ function downloadPDF(){
   const d=verzamelData();
 
   const regels=tekst.split('\n').map((r,i)=>{
-    if(!r.trim())return '<br>';
-    if(i===0||/^Testverslag\s/.test(r.trim()))return '';
-    if(/^(Conditie|Mobiliteit|Kracht benen|Kracht schouders|Core|Lichaamssamenstelling|Belangrijk om mee te nemen|Overzicht mogelijke vervolgafspraken)/.test(r.trim()))
-      return '<div class="sectie-kop">'+r+'</div>';
-    if(/^\* /.test(r))
-      return '<p style="padding-left:16px;text-indent:-16px">&bull; '+r.replace(/^\* /,'')+'</p>';
-    return '<p>'+r+'</p>';
+    const kaal=r.replace(/\*\*/g,'').trim();
+    if(!kaal)return '<br>';
+    if(i===0||/^Testverslag\s/.test(kaal))return '';
+    if(/^(Conditie|Mobiliteit|Kracht benen|Kracht schouders|Core|Lichaamssamenstelling|Belangrijk om mee te nemen|Overzicht mogelijke vervolgafspraken)/.test(kaal))
+      return '<div class="sectie-kop">'+kaal+'</div>';
+    if(/^\*\s/.test(r)){
+      const inhoud=r.replace(/^\*\s/,'').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>');
+      return '<p style="padding-left:16px;text-indent:-16px">&bull; '+inhoud+'</p>';
+    }
+    const inhoud=r.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>');
+    return '<p>'+inhoud+'</p>';
   }).join('');
 
   const html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Testverslag '+d.naam+'</title>'
-    +'<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">'
     +'<style>'
-    +'body{font-family:"Outfit",Arial,sans-serif;max-width:680px;margin:40px auto;padding:0 24px;font-size:13.5px;line-height:1.8;color:#1f2937}'
-    +'.header{display:flex;justify-content:space-between;align-items:center;border-bottom:3px solid #8B2FC9;padding-bottom:14px;margin-bottom:20px}'
+    +'body{font-family:"Segoe UI",Inter,Arial,sans-serif;max-width:680px;margin:40px auto;padding:0 24px;font-size:13.5px;line-height:1.8;color:#1a1a1a}'
+    +'.header{display:flex;justify-content:space-between;align-items:center;border-bottom:3px solid #82176D;padding-bottom:14px;margin-bottom:20px}'
     +'.logo{height:44px}'
     +'.meta{font-size:11px;color:#6b7280;text-align:right;line-height:1.6}'
-    +'.titel{font-size:18px;font-weight:700;color:#8B2FC9;margin-bottom:4px}'
-    +'.subtitel{font-size:12px;color:#6b7280;margin-bottom:20px}'
-    +'.sectie-kop{color:#1a4a3a;font-weight:700;font-size:13.5px;margin-top:20px;margin-bottom:4px;border-left:3px solid #8B2FC9;padding-left:8px}'
+    +'.titel{font-size:18px;font-weight:700;color:#82176D;margin-bottom:4px}'
+    +'.sectie-kop{color:#82176D;font-weight:700;font-size:13.5px;margin-top:20px;margin-bottom:4px;border-left:3px solid #00B6E8;padding-left:8px}'
     +'p{margin:0 0 5px}'
     +'.footer{border-top:1px solid #e5e7eb;padding-top:12px;font-size:11px;color:#9ca3af;margin-top:20px}'
     +'@media print{body{margin:20px;max-width:100%}}'
@@ -1048,7 +1055,6 @@ function downloadPDF(){
     +'<div class="meta">Fitheidstest Fyzio Totaal<br/>'+d.datum+'</div>'
     +'</div>'
     +'<div class="titel">Testverslag '+d.naam+'</div>'
-    +'<div class="subtitel">Patientnummer: '+d.pnr+' &nbsp;|&nbsp; Leeftijd: '+(d.leeftijd||'onbekend')+' &nbsp;|&nbsp; Geslacht: '+(d.geslacht||'onbekend')+'</div>'
     +regels
     +'<div class="footer">Fyzio Totaal &nbsp;·&nbsp; Nijverheidsstraat 7, Wierden &nbsp;·&nbsp; www.fyziototaal.nl</div>'
     +'</body></html>';
