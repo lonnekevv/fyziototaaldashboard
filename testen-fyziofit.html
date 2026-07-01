@@ -131,6 +131,10 @@
     <div class="input-group"><label>Geslacht</label><select id="input-geslacht"><option value="">selecteer</option><option value="man">Man</option><option value="vrouw">Vrouw</option></select></div>
     <div class="input-group"><label>Leeftijd</label><input type="number" id="input-leeftijd" placeholder="48" min="18" max="99"></div>
     <div class="input-group"><label>Tester</label><input type="text" id="input-tester" placeholder="Naam tester"></div>
+    <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:#e8f2ee;border-radius:8px;border:1.5px solid #dde8e4;margin-bottom:16px">
+      <input type="checkbox" id="input-herstelcheck" style="width:18px;height:18px;accent-color:#1a4a3a;cursor:pointer">
+      <label for="input-herstelcheck" style="font-size:.9rem;font-weight:600;color:#1a4a3a;cursor:pointer">Herstelcheck ingevuld</label>
+    </div>
     <div id="start-melding" class="melding"></div>
     <button class="btn btn-primary" onclick="startSessie()">Starten</button>
   </div>
@@ -552,6 +556,7 @@ function verzamelData(){
   return {
     naam:huidigNaam,pnr:huidigPNR,
     datum:v('input-datum'),geslacht:v('input-geslacht'),leeftijd:v('input-leeftijd'),tester:v('input-tester'),
+    herstelcheck:document.getElementById('input-herstelcheck')?.checked||false,
     lengte:v('lengte'),gewicht:v('gewicht'),buikomvang:v('buikomvang'),
     wall_angels:radio('wall_angels'),wall_angels_opm:v('wall_angels_opm'),
     overhead_squat:radio('overhead_squat'),overhead_squat_opm:v('overhead_squat_opm'),
@@ -588,6 +593,7 @@ function vulFormulierIn(d){
   if(d.roman_variant){stel('roman-variant',d.roman_variant);updateRomanNorm();}
   if(d.plank_variant){stel('plank-variant',d.plank_variant);updatePlankNorm();}
   if(d.conditie_variant){stel('conditie-variant',d.conditie_variant);updateConditieVariant();}
+  const hc=document.getElementById('input-herstelcheck');if(hc)hc.checked=!!d.herstelcheck;
   updateNormBuik();updateNormSP();updateNormStep();berekenVO2max();
 }
 
@@ -903,7 +909,7 @@ Als er geen aandachtspunten zijn op een van deze gebieden, noem die persoon dan 
 
 STRUCTUUR - volg dit patroon exact:
 
-Testverslag en vervolgadvies [Naam]
+Testverslag [Naam] — [datum]
 
 Conditie
 [Beschrijf de score feitelijk in 1-2 zinnen. Conclusie en advies in dezelfde alinea. Geen subkopjes.]
@@ -923,13 +929,11 @@ Core (rompstabiliteit)
 Lichaamssamenstelling
 [Benoem lengte, gewicht en buikomvang met feitelijke duiding. Kort concreet advies. Zorg dat de sectie volledig afgerond is.]
 
-Belangrijk om mee te nemen
-Gebruik hier een opsomming waarbij elke regel begint met een asterisk en een spatie (* ). Schrijf 4 tot 5 volledige zinnen, een mix van sterke punten en aandachtspunten als kansen. Voorbeeld van de opmaak:
-* Je conditie is goed en biedt een mooie basis om op voort te bouwen.
-* De stabiliteit van je linkerknie verdient aandacht bij krachttraining.
+Belangrijkste punten
+Gebruik hier een opsomming waarbij elke regel begint met een asterisk en een spatie (* ). Schrijf 4 tot 5 volledige zinnen, een mix van sterke punten en aandachtspunten als kansen.
 
-Overzicht mogelijke vervolgafspraken
-[Concreet en gericht advies op basis van de daadwerkelijke aandachtspunten uit dit verslag. Noem alleen de collega die relevant is gezien de scores. Vermeld altijd dat er een persoonlijk oefenschema wordt opgesteld waarmee de sporter direct aan de slag kan. Geen naam van de tester. Sluit altijd af met: "Met de persoon waarbij je traint, bespreek je het vervolg dat het beste bij jou past. Alle adviezen zijn altijd gebaseerd op onderling overleg, zodat het plan optimaal aansluit bij jouw doelen en mogelijkheden."]
+Aan de slag
+Geef hier een concrete actielijst op basis van de testresultaten. Elke actie begint met een asterisk en een spatie (* ). Schrijf 3 tot 5 punten. Elke punt is een concrete, uitvoerbare actie (bijv. "Werk aan je mobiliteit met een dagelijks stretchprogramma gericht op de heupen en schouders." of "Train je beenkracht met squat- en lungevarianten, minstens 2x per week."). Geen vage adviezen, geen verwijzingen naar collega's hier. Puur wat de deelnemer concreet kan doen.
 
 Maximaal 650 woorden. Schrijf in het Nederlands. Zorg dat elke sectie volledig is afgerond.`;
 
@@ -985,11 +989,194 @@ function toonRapport(tekst){
 }
 
 function opmaakRapport(tekst){
+  const secties=['Conditie','Mobiliteit','Kracht benen','Kracht schouders','Core (rompstabiliteit)','Lichaamssamenstelling','Belangrijkste punten','Aan de slag'];
+  const sectieRe=new RegExp('^('+secties.map(s=>s.replace(/[()]/g,'\\function opmaakRapport(tekst){
   return tekst.split('\n').map(regel=>{
     regel=regel.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>');
     if(!regel.trim())return '<br>';
     if(/^(Conditie|Mobiliteit|Kracht benen|Kracht schouders|Core|Lichaamssamenstelling|Belangrijk om mee te nemen|Overzicht mogelijke vervolgafspraken|Testverslag)/.test(regel.trim())){
       return '<p><strong style="font-size:.95rem;color:var(--groen);display:block;margin-top:18px;margin-bottom:3px">'+regel+'</strong></p>';
+    }
+    if(/^\*\s/.test(regel)){
+      return '<p style="margin-bottom:4px;padding-left:16px;text-indent:-16px">&bull; '+regel.replace(/^\*\s/,'')+'</p>';
+    }
+    return '<p style="margin-bottom:5px">'+regel+'</p>';
+  }).join('');
+}')).join('|')+')
+
+function toggleEdit(){
+  bewerkModus=!bewerkModus;
+  const weergave=document.getElementById('rapport-weergave'),edit=document.getElementById('rapport-edit');
+  if(bewerkModus){edit.value=rapportTekst;weergave.style.display='none';edit.style.display='block';document.querySelector('.rapport-acties .btn-secondary').textContent='Voorbeeld';}
+  else{rapportTekst=edit.value;weergave.innerHTML=opmaakRapport(edit.value);weergave.style.display='block';edit.style.display='none';document.querySelector('.rapport-acties .btn-secondary').textContent='Bewerken';}
+}
+
+function downloadPDF(){
+  const tekst=bewerkModus?document.getElementById('rapport-edit').value:rapportTekst;
+  const d=verzamelData();
+  const secties=['Conditie','Mobiliteit','Kracht benen','Kracht schouders','Core (rompstabiliteit)','Lichaamssamenstelling','Belangrijkste punten','Aan de slag'];
+  const sectieRe=new RegExp('^('+secties.map(s=>s.replace(/[()]/g,'\\function downloadPDF(){
+  const tekst=bewerkModus?document.getElementById('rapport-edit').value:rapportTekst;
+  const d=verzamelData();
+
+  const regels=tekst.split('\n').map(r=>{
+    if(!r.trim())return '<br>';
+    if(/^(Conditie|Mobiliteit|Kracht benen|Kracht schouders|Core|Lichaamssamenstelling|Belangrijk om mee te nemen|Overzicht mogelijke vervolgafspraken|Testverslag)/.test(r.trim()))
+      return '<div class="sectie-kop">'+r+'</div>';
+    if(/^\* /.test(r))
+      return '<p style="padding-left:16px;text-indent:-16px">&bull; '+r.replace(/^\* /,'')+'</p>';
+    return '<p>'+r+'</p>';
+  }).join('');
+
+  const html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Testverslag '+d.naam+'</title><style>'
+    +'body{font-family:"Segoe UI",Arial,sans-serif;max-width:660px;margin:40px auto;padding:0 24px;font-size:13.5px;line-height:1.8;color:#1a1a1a}'
+    +'.kop{border-bottom:3px solid #1a4a3a;padding-bottom:12px;margin-bottom:20px}'
+    +'h1{color:#1a4a3a;font-size:20px;margin-bottom:4px}'
+    +'.meta{color:#666;font-size:12px;margin-bottom:8px}'
+    +'.sectie-kop{color:#1a4a3a;font-weight:700;font-size:14px;margin-top:22px;margin-bottom:5px;border-bottom:1px solid #dde8e4;padding-bottom:3px}'
+    +'p{margin:0 0 6px}'
+    +'@media print{body{margin:20px;max-width:100%}}'
+    +'</style></head><body>'
+    +'<div class="kop"><h1>Testverslag '+d.naam+'</h1>'
+    +'<div class="meta">Patientnummer: '+d.pnr+' &nbsp;|&nbsp; Testdatum: '+d.datum+' &nbsp;|&nbsp; Fyzio Totaal</div></div>'
+    +regels
+    +'</body></html>';
+
+  const blob=new Blob([html],{type:'text/html;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;
+  a.download='Testverslag_'+d.naam+'_'+d.datum+'.html';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(()=>URL.revokeObjectURL(url),2000);
+}')).join('|')+')
+</script>
+</body>
+</html>
+);
+  return tekst.split('\n').map((regel,i)=>{
+    regel=regel.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>');
+    if(!regel.trim())return '<br>';
+    if(i===0||/^Testverslag\s/.test(regel.trim())){
+      return '<p style="margin:0 0 20px"><strong style="font-size:1.1rem;color:#8B2FC9;display:block;border-bottom:2px solid #8B2FC9;padding-bottom:8px">'+regel+'</strong></p>';
+    }
+    if(sectieRe.test(regel.trim())){
+      return '<p><strong style="font-size:.95rem;color:#1a4a3a;display:block;margin-top:18px;margin-bottom:3px;border-left:3px solid #8B2FC9;padding-left:8px">'+regel+'</strong></p>';
+    }
+    if(/^\*\s/.test(regel)){
+      return '<p style="margin-bottom:4px;padding-left:16px;text-indent:-16px">&bull; '+regel.replace(/^\*\s/,'')+'</p>';
+    }
+    return '<p style="margin-bottom:5px">'+regel+'</p>';
+  }).join('');
+}
+
+function toggleEdit(){
+  bewerkModus=!bewerkModus;
+  const weergave=document.getElementById('rapport-weergave'),edit=document.getElementById('rapport-edit');
+  if(bewerkModus){edit.value=rapportTekst;weergave.style.display='none';edit.style.display='block';document.querySelector('.rapport-acties .btn-secondary').textContent='Voorbeeld';}
+  else{rapportTekst=edit.value;weergave.innerHTML=opmaakRapport(edit.value);weergave.style.display='block';edit.style.display='none';document.querySelector('.rapport-acties .btn-secondary').textContent='Bewerken';}
+}
+
+function downloadPDF(){
+  const tekst=bewerkModus?document.getElementById('rapport-edit').value:rapportTekst;
+  const d=verzamelData();
+
+  const regels=tekst.split('\n').map(r=>{
+    if(!r.trim())return '<br>';
+    if(/^(Conditie|Mobiliteit|Kracht benen|Kracht schouders|Core|Lichaamssamenstelling|Belangrijk om mee te nemen|Overzicht mogelijke vervolgafspraken|Testverslag)/.test(r.trim()))
+      return '<div class="sectie-kop">'+r+'</div>';
+    if(/^\* /.test(r))
+      return '<p style="padding-left:16px;text-indent:-16px">&bull; '+r.replace(/^\* /,'')+'</p>';
+    return '<p>'+r+'</p>';
+  }).join('');
+
+  const html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Testverslag '+d.naam+'</title><style>'
+    +'body{font-family:"Segoe UI",Arial,sans-serif;max-width:660px;margin:40px auto;padding:0 24px;font-size:13.5px;line-height:1.8;color:#1a1a1a}'
+    +'.kop{border-bottom:3px solid #1a4a3a;padding-bottom:12px;margin-bottom:20px}'
+    +'h1{color:#1a4a3a;font-size:20px;margin-bottom:4px}'
+    +'.meta{color:#666;font-size:12px;margin-bottom:8px}'
+    +'.sectie-kop{color:#1a4a3a;font-weight:700;font-size:14px;margin-top:22px;margin-bottom:5px;border-bottom:1px solid #dde8e4;padding-bottom:3px}'
+    +'p{margin:0 0 6px}'
+    +'@media print{body{margin:20px;max-width:100%}}'
+    +'</style></head><body>'
+    +'<div class="kop"><h1>Testverslag '+d.naam+'</h1>'
+    +'<div class="meta">Patientnummer: '+d.pnr+' &nbsp;|&nbsp; Testdatum: '+d.datum+' &nbsp;|&nbsp; Fyzio Totaal</div></div>'
+    +regels
+    +'</body></html>';
+
+  const blob=new Blob([html],{type:'text/html;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;
+  a.download='Testverslag_'+d.naam+'_'+d.datum+'.html';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(()=>URL.revokeObjectURL(url),2000);
+}
+</script>
+</body>
+</html>
+);
+
+  const regels=tekst.split('\n').map((r,i)=>{
+    if(!r.trim())return '<br>';
+    if(i===0||/^Testverslag\s/.test(r.trim()))return '';
+    if(sectieRe.test(r.trim()))
+      return '<div class="sectie-kop">'+r+'</div>';
+    if(/^\* /.test(r))
+      return '<p style="padding-left:16px;text-indent:-16px">&bull; '+r.replace(/^\* /,'')+'</p>';
+    return '<p>'+r+'</p>';
+  }).join('');
+
+  const html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Testverslag '+d.naam+'</title>'
+    +'<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">'
+    +'<style>'
+    +'body{font-family:"Outfit",Arial,sans-serif;max-width:680px;margin:40px auto;padding:0 24px;font-size:13.5px;line-height:1.8;color:#1f2937}'
+    +'.header{display:flex;justify-content:space-between;align-items:center;border-bottom:3px solid #8B2FC9;padding-bottom:14px;margin-bottom:20px}'
+    +'.logo{height:44px}'
+    +'.meta{font-size:11px;color:#6b7280;text-align:right;line-height:1.6}'
+    +'.titel{font-size:18px;font-weight:700;color:#8B2FC9;margin-bottom:4px}'
+    +'.subtitel{font-size:12px;color:#6b7280;margin-bottom:20px}'
+    +'.sectie-kop{color:#1a4a3a;font-weight:700;font-size:13.5px;margin-top:20px;margin-bottom:4px;border-left:3px solid #8B2FC9;padding-left:8px}'
+    +'p{margin:0 0 5px}'
+    +'.footer{border-top:1px solid #e5e7eb;padding-top:12px;font-size:11px;color:#9ca3af;margin-top:20px}'
+    +'@media print{body{margin:20px;max-width:100%}}'
+    +'</style></head><body>'
+    +'<div class="header">'
+    +'<img src="https://lonnekevv.github.io/fyziototaaldashboard/logo.png" class="logo"/>'
+    +'<div class="meta">Fitheidstest Fyzio Totaal<br/>'+d.datum+'</div>'
+    +'</div>'
+    +'<div class="titel">Testverslag '+d.naam+'</div>'
+    +'<div class="subtitel">Patientnummer: '+d.pnr+' &nbsp;|&nbsp; Leeftijd: '+(d.leeftijd||'onbekend')+' &nbsp;|&nbsp; Geslacht: '+(d.geslacht||'onbekend')+'</div>'
+    +regels
+    +'<div class="footer">Fyzio Totaal &nbsp;·&nbsp; Nijverheidsstraat 7, Wierden &nbsp;·&nbsp; www.fyziototaal.nl</div>'
+    +'</body></html>';
+
+  const blob=new Blob([html],{type:'text/html;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;
+  a.download='Testverslag_'+d.naam+'_'+d.datum+'.html';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(()=>URL.revokeObjectURL(url),2000);
+}
+</script>
+</body>
+</html>
+);
+  return tekst.split('\n').map((regel,i)=>{
+    regel=regel.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>');
+    if(!regel.trim())return '<br>';
+    if(i===0||/^Testverslag\s/.test(regel.trim())){
+      return '<p style="margin:0 0 20px"><strong style="font-size:1.1rem;color:#8B2FC9;display:block;border-bottom:2px solid #8B2FC9;padding-bottom:8px">'+regel+'</strong></p>';
+    }
+    if(sectieRe.test(regel.trim())){
+      return '<p><strong style="font-size:.95rem;color:#1a4a3a;display:block;margin-top:18px;margin-bottom:3px;border-left:3px solid #8B2FC9;padding-left:8px">'+regel+'</strong></p>';
     }
     if(/^\*\s/.test(regel)){
       return '<p style="margin-bottom:4px;padding-left:16px;text-indent:-16px">&bull; '+regel.replace(/^\*\s/,'')+'</p>';
