@@ -944,12 +944,15 @@ Maximaal 650 woorden. Schrijf in het Nederlands. Zorg dat elke sectie volledig i
       new Promise((_,reject)=>setTimeout(()=>reject(new Error('timeout')),30000))
     ]);
     const json=await response.json();
+    if(!response.ok){
+      throw new Error(json.error?.message||('HTTP '+response.status));
+    }
     rapportTekst=json.content?.[0]?.text||'';
-    if(!rapportTekst)throw new Error('Geen tekst ontvangen');
+    if(!rapportTekst)throw new Error('Geen tekst ontvangen in API-antwoord');
     document.getElementById('melding-globaal').classList.remove('zichtbaar');
     toonRapport(rapportTekst);
   }catch(e){
-    rapportTekst='Testverslag '+data.naam+' - '+data.datum+'\n\n'+scores+'\n\nNoot: rapport kon niet automatisch worden gegenereerd. Gebruik de bewerkfunctie om het handmatig op te stellen.';
+    rapportTekst='Testverslag '+data.naam+' - '+data.datum+'\n\n'+scores+'\n\nNoot: rapport kon niet automatisch worden gegenereerd.\nFoutmelding: '+e.message+'\n\nGebruik de bewerkfunctie om het handmatig op te stellen.';
     document.getElementById('melding-globaal').classList.remove('zichtbaar');
     toonRapport(rapportTekst);
   }
