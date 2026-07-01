@@ -989,80 +989,13 @@ function toonRapport(tekst){
 }
 
 function opmaakRapport(tekst){
-  const secties=['Conditie','Mobiliteit','Kracht benen','Kracht schouders','Core (rompstabiliteit)','Lichaamssamenstelling','Belangrijkste punten','Aan de slag'];
-  const sectieRe=new RegExp('^('+secties.map(s=>s.replace(/[()]/g,'\\function opmaakRapport(tekst){
-  return tekst.split('\n').map(regel=>{
-    regel=regel.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>');
-    if(!regel.trim())return '<br>';
-    if(/^(Conditie|Mobiliteit|Kracht benen|Kracht schouders|Core|Lichaamssamenstelling|Belangrijk om mee te nemen|Overzicht mogelijke vervolgafspraken|Testverslag)/.test(regel.trim())){
-      return '<p><strong style="font-size:.95rem;color:var(--groen);display:block;margin-top:18px;margin-bottom:3px">'+regel+'</strong></p>';
-    }
-    if(/^\*\s/.test(regel)){
-      return '<p style="margin-bottom:4px;padding-left:16px;text-indent:-16px">&bull; '+regel.replace(/^\*\s/,'')+'</p>';
-    }
-    return '<p style="margin-bottom:5px">'+regel+'</p>';
-  }).join('');
-}')).join('|')+')
-
-function toggleEdit(){
-  bewerkModus=!bewerkModus;
-  const weergave=document.getElementById('rapport-weergave'),edit=document.getElementById('rapport-edit');
-  if(bewerkModus){edit.value=rapportTekst;weergave.style.display='none';edit.style.display='block';document.querySelector('.rapport-acties .btn-secondary').textContent='Voorbeeld';}
-  else{rapportTekst=edit.value;weergave.innerHTML=opmaakRapport(edit.value);weergave.style.display='block';edit.style.display='none';document.querySelector('.rapport-acties .btn-secondary').textContent='Bewerken';}
-}
-
-function downloadPDF(){
-  const tekst=bewerkModus?document.getElementById('rapport-edit').value:rapportTekst;
-  const d=verzamelData();
-  const secties=['Conditie','Mobiliteit','Kracht benen','Kracht schouders','Core (rompstabiliteit)','Lichaamssamenstelling','Belangrijkste punten','Aan de slag'];
-  const sectieRe=new RegExp('^('+secties.map(s=>s.replace(/[()]/g,'\\function downloadPDF(){
-  const tekst=bewerkModus?document.getElementById('rapport-edit').value:rapportTekst;
-  const d=verzamelData();
-
-  const regels=tekst.split('\n').map(r=>{
-    if(!r.trim())return '<br>';
-    if(/^(Conditie|Mobiliteit|Kracht benen|Kracht schouders|Core|Lichaamssamenstelling|Belangrijk om mee te nemen|Overzicht mogelijke vervolgafspraken|Testverslag)/.test(r.trim()))
-      return '<div class="sectie-kop">'+r+'</div>';
-    if(/^\* /.test(r))
-      return '<p style="padding-left:16px;text-indent:-16px">&bull; '+r.replace(/^\* /,'')+'</p>';
-    return '<p>'+r+'</p>';
-  }).join('');
-
-  const html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Testverslag '+d.naam+'</title><style>'
-    +'body{font-family:"Segoe UI",Arial,sans-serif;max-width:660px;margin:40px auto;padding:0 24px;font-size:13.5px;line-height:1.8;color:#1a1a1a}'
-    +'.kop{border-bottom:3px solid #1a4a3a;padding-bottom:12px;margin-bottom:20px}'
-    +'h1{color:#1a4a3a;font-size:20px;margin-bottom:4px}'
-    +'.meta{color:#666;font-size:12px;margin-bottom:8px}'
-    +'.sectie-kop{color:#1a4a3a;font-weight:700;font-size:14px;margin-top:22px;margin-bottom:5px;border-bottom:1px solid #dde8e4;padding-bottom:3px}'
-    +'p{margin:0 0 6px}'
-    +'@media print{body{margin:20px;max-width:100%}}'
-    +'</style></head><body>'
-    +'<div class="kop"><h1>Testverslag '+d.naam+'</h1>'
-    +'<div class="meta">Patientnummer: '+d.pnr+' &nbsp;|&nbsp; Testdatum: '+d.datum+' &nbsp;|&nbsp; Fyzio Totaal</div></div>'
-    +regels
-    +'</body></html>';
-
-  const blob=new Blob([html],{type:'text/html;charset=utf-8'});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement('a');
-  a.href=url;
-  a.download='Testverslag_'+d.naam+'_'+d.datum+'.html';
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  setTimeout(()=>URL.revokeObjectURL(url),2000);
-}')).join('|')+')
-</script>
-</body>
-</html>
-);
   return tekst.split('\n').map((regel,i)=>{
     regel=regel.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>');
     if(!regel.trim())return '<br>';
     if(i===0||/^Testverslag\s/.test(regel.trim())){
       return '<p style="margin:0 0 20px"><strong style="font-size:1.1rem;color:#8B2FC9;display:block;border-bottom:2px solid #8B2FC9;padding-bottom:8px">'+regel+'</strong></p>';
     }
-    if(sectieRe.test(regel.trim())){
+    if(/^(Conditie|Mobiliteit|Kracht benen|Kracht schouders|Core|Lichaamssamenstelling|Belangrijk om mee te nemen|Overzicht mogelijke vervolgafspraken)/.test(regel.trim())){
       return '<p><strong style="font-size:.95rem;color:#1a4a3a;display:block;margin-top:18px;margin-bottom:3px;border-left:3px solid #8B2FC9;padding-left:8px">'+regel+'</strong></p>';
     }
     if(/^\*\s/.test(regel)){
@@ -1083,48 +1016,10 @@ function downloadPDF(){
   const tekst=bewerkModus?document.getElementById('rapport-edit').value:rapportTekst;
   const d=verzamelData();
 
-  const regels=tekst.split('\n').map(r=>{
-    if(!r.trim())return '<br>';
-    if(/^(Conditie|Mobiliteit|Kracht benen|Kracht schouders|Core|Lichaamssamenstelling|Belangrijk om mee te nemen|Overzicht mogelijke vervolgafspraken|Testverslag)/.test(r.trim()))
-      return '<div class="sectie-kop">'+r+'</div>';
-    if(/^\* /.test(r))
-      return '<p style="padding-left:16px;text-indent:-16px">&bull; '+r.replace(/^\* /,'')+'</p>';
-    return '<p>'+r+'</p>';
-  }).join('');
-
-  const html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Testverslag '+d.naam+'</title><style>'
-    +'body{font-family:"Segoe UI",Arial,sans-serif;max-width:660px;margin:40px auto;padding:0 24px;font-size:13.5px;line-height:1.8;color:#1a1a1a}'
-    +'.kop{border-bottom:3px solid #1a4a3a;padding-bottom:12px;margin-bottom:20px}'
-    +'h1{color:#1a4a3a;font-size:20px;margin-bottom:4px}'
-    +'.meta{color:#666;font-size:12px;margin-bottom:8px}'
-    +'.sectie-kop{color:#1a4a3a;font-weight:700;font-size:14px;margin-top:22px;margin-bottom:5px;border-bottom:1px solid #dde8e4;padding-bottom:3px}'
-    +'p{margin:0 0 6px}'
-    +'@media print{body{margin:20px;max-width:100%}}'
-    +'</style></head><body>'
-    +'<div class="kop"><h1>Testverslag '+d.naam+'</h1>'
-    +'<div class="meta">Patientnummer: '+d.pnr+' &nbsp;|&nbsp; Testdatum: '+d.datum+' &nbsp;|&nbsp; Fyzio Totaal</div></div>'
-    +regels
-    +'</body></html>';
-
-  const blob=new Blob([html],{type:'text/html;charset=utf-8'});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement('a');
-  a.href=url;
-  a.download='Testverslag_'+d.naam+'_'+d.datum+'.html';
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  setTimeout(()=>URL.revokeObjectURL(url),2000);
-}
-</script>
-</body>
-</html>
-);
-
   const regels=tekst.split('\n').map((r,i)=>{
     if(!r.trim())return '<br>';
     if(i===0||/^Testverslag\s/.test(r.trim()))return '';
-    if(sectieRe.test(r.trim()))
+    if(/^(Conditie|Mobiliteit|Kracht benen|Kracht schouders|Core|Lichaamssamenstelling|Belangrijk om mee te nemen|Overzicht mogelijke vervolgafspraken)/.test(r.trim()))
       return '<div class="sectie-kop">'+r+'</div>';
     if(/^\* /.test(r))
       return '<p style="padding-left:16px;text-indent:-16px">&bull; '+r.replace(/^\* /,'')+'</p>';
@@ -1153,70 +1048,6 @@ function downloadPDF(){
     +'<div class="subtitel">Patientnummer: '+d.pnr+' &nbsp;|&nbsp; Leeftijd: '+(d.leeftijd||'onbekend')+' &nbsp;|&nbsp; Geslacht: '+(d.geslacht||'onbekend')+'</div>'
     +regels
     +'<div class="footer">Fyzio Totaal &nbsp;·&nbsp; Nijverheidsstraat 7, Wierden &nbsp;·&nbsp; www.fyziototaal.nl</div>'
-    +'</body></html>';
-
-  const blob=new Blob([html],{type:'text/html;charset=utf-8'});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement('a');
-  a.href=url;
-  a.download='Testverslag_'+d.naam+'_'+d.datum+'.html';
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  setTimeout(()=>URL.revokeObjectURL(url),2000);
-}
-</script>
-</body>
-</html>
-);
-  return tekst.split('\n').map((regel,i)=>{
-    regel=regel.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>');
-    if(!regel.trim())return '<br>';
-    if(i===0||/^Testverslag\s/.test(regel.trim())){
-      return '<p style="margin:0 0 20px"><strong style="font-size:1.1rem;color:#8B2FC9;display:block;border-bottom:2px solid #8B2FC9;padding-bottom:8px">'+regel+'</strong></p>';
-    }
-    if(sectieRe.test(regel.trim())){
-      return '<p><strong style="font-size:.95rem;color:#1a4a3a;display:block;margin-top:18px;margin-bottom:3px;border-left:3px solid #8B2FC9;padding-left:8px">'+regel+'</strong></p>';
-    }
-    if(/^\*\s/.test(regel)){
-      return '<p style="margin-bottom:4px;padding-left:16px;text-indent:-16px">&bull; '+regel.replace(/^\*\s/,'')+'</p>';
-    }
-    return '<p style="margin-bottom:5px">'+regel+'</p>';
-  }).join('');
-}
-
-function toggleEdit(){
-  bewerkModus=!bewerkModus;
-  const weergave=document.getElementById('rapport-weergave'),edit=document.getElementById('rapport-edit');
-  if(bewerkModus){edit.value=rapportTekst;weergave.style.display='none';edit.style.display='block';document.querySelector('.rapport-acties .btn-secondary').textContent='Voorbeeld';}
-  else{rapportTekst=edit.value;weergave.innerHTML=opmaakRapport(edit.value);weergave.style.display='block';edit.style.display='none';document.querySelector('.rapport-acties .btn-secondary').textContent='Bewerken';}
-}
-
-function downloadPDF(){
-  const tekst=bewerkModus?document.getElementById('rapport-edit').value:rapportTekst;
-  const d=verzamelData();
-
-  const regels=tekst.split('\n').map(r=>{
-    if(!r.trim())return '<br>';
-    if(/^(Conditie|Mobiliteit|Kracht benen|Kracht schouders|Core|Lichaamssamenstelling|Belangrijk om mee te nemen|Overzicht mogelijke vervolgafspraken|Testverslag)/.test(r.trim()))
-      return '<div class="sectie-kop">'+r+'</div>';
-    if(/^\* /.test(r))
-      return '<p style="padding-left:16px;text-indent:-16px">&bull; '+r.replace(/^\* /,'')+'</p>';
-    return '<p>'+r+'</p>';
-  }).join('');
-
-  const html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Testverslag '+d.naam+'</title><style>'
-    +'body{font-family:"Segoe UI",Arial,sans-serif;max-width:660px;margin:40px auto;padding:0 24px;font-size:13.5px;line-height:1.8;color:#1a1a1a}'
-    +'.kop{border-bottom:3px solid #1a4a3a;padding-bottom:12px;margin-bottom:20px}'
-    +'h1{color:#1a4a3a;font-size:20px;margin-bottom:4px}'
-    +'.meta{color:#666;font-size:12px;margin-bottom:8px}'
-    +'.sectie-kop{color:#1a4a3a;font-weight:700;font-size:14px;margin-top:22px;margin-bottom:5px;border-bottom:1px solid #dde8e4;padding-bottom:3px}'
-    +'p{margin:0 0 6px}'
-    +'@media print{body{margin:20px;max-width:100%}}'
-    +'</style></head><body>'
-    +'<div class="kop"><h1>Testverslag '+d.naam+'</h1>'
-    +'<div class="meta">Patientnummer: '+d.pnr+' &nbsp;|&nbsp; Testdatum: '+d.datum+' &nbsp;|&nbsp; Fyzio Totaal</div></div>'
-    +regels
     +'</body></html>';
 
   const blob=new Blob([html],{type:'text/html;charset=utf-8'});
