@@ -137,7 +137,7 @@
     <div class="input-group"><label>Testdatum</label><input type="date" id="input-datum"></div>
     <div class="input-group"><label>Geslacht</label><select id="input-geslacht"><option value="">selecteer</option><option value="man">Man</option><option value="vrouw">Vrouw</option></select></div>
     <div class="input-group"><label>Leeftijd</label><input type="number" id="input-leeftijd" placeholder="48" min="18" max="99"></div>
-    <div class="input-group"><label>Tester</label><input type="text" id="input-tester" placeholder="Naam tester"></div>
+    <div class="input-group"><label>Tester</label><select id="input-tester"><option value="">selecteer</option><option value="Lynn">Lynn</option><option value="Jesper">Jesper</option><option value="Julia">Julia</option><option value="Thomas">Thomas</option></select></div>
     <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--groen-licht);border-radius:8px;border:1.5px solid #dde8e4;margin-bottom:16px">
       <input type="checkbox" id="input-herstelcheck" style="width:18px;height:18px;accent-color:var(--groen);cursor:pointer">
       <label for="input-herstelcheck" style="font-size:.9rem;font-weight:600;color:var(--groen);cursor:pointer">Herstelcheck ingevuld</label>
@@ -1066,7 +1066,7 @@ async function downloadPDF(){
   const regels=delen.join('');
 
   const wrapper=document.createElement('div');
-  wrapper.style.cssText='position:absolute;left:-9999px;top:0;width:680px;background:#fff;font-family:"Segoe UI",Inter,Arial,sans-serif;font-size:13.5px;line-height:1.55;color:#1a1a1a;padding:28px';
+  wrapper.style.cssText='position:absolute;left:0;top:0;width:680px;background:#fff;font-family:"Segoe UI",Inter,Arial,sans-serif;font-size:13.5px;line-height:1.55;color:#1a1a1a;padding:28px;z-index:-9999;';
   wrapper.innerHTML=
     '<style>'
     +'.header{display:flex;justify-content:space-between;align-items:center;border-bottom:3px solid #82176D;padding-bottom:14px;margin-bottom:16px}'
@@ -1097,7 +1097,7 @@ async function downloadPDF(){
       margin:10,
       filename:'Testverslag_'+d.naam+'_'+d.datum+'.pdf',
       image:{type:'jpeg',quality:0.98},
-      html2canvas:{scale:2,windowWidth:wrapper.scrollWidth,windowHeight:wrapper.scrollHeight},
+      html2canvas:{scale:2},
       jsPDF:{unit:'mm',format:'a4',orientation:'portrait'},
       pagebreak:{mode:['avoid-all'],avoid:'.sectie-blok'}
     }).from(wrapper).save();
