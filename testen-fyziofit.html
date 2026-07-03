@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Fitheidstest - Fyzio Totaal v2</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <style>
   :root {
     --groen:#82176D; --groen-mid:#9C2589; --groen-licht:#f7e9f4;
@@ -107,10 +108,13 @@
   #rapport-weergave{font-size:.9rem;line-height:1.8;color:var(--tekst)}
   #rapport-edit{width:100%;min-height:500px;padding:12px;border:1.5px solid var(--border);border-radius:6px;font-size:.88rem;line-height:1.75;font-family:inherit;resize:vertical;display:none}
   .rapport-acties{display:flex;gap:10px;margin-top:20px;padding-top:16px;border-top:1px solid var(--border);flex-wrap:wrap}
+  .rapport-acties-groep{display:flex;gap:10px;flex:1;min-width:280px}
+  .rapport-acties-groep .btn{flex:1}
   @media(max-width:500px){
     .score-rij{grid-template-columns:1fr}
     .actie-balk,.rapport-acties{flex-direction:column}
     .actie-balk .btn,.rapport-acties .btn{width:100%;justify-content:center}
+    .rapport-acties-groep{flex-direction:column;min-width:0}
   }
 </style>
 </head>
@@ -433,10 +437,12 @@
         <textarea id="rapport-edit"></textarea>
         <div class="rapport-acties">
           <button class="btn btn-secondary" onclick="toggleEdit()">Bewerken</button>
-          <button class="btn btn-primary" onclick="downloadPDF()">Download als PDF</button>
-          <button class="btn btn-secondary" onclick="mailRapport()">Mail naar Mayke</button>
+          <div class="rapport-acties-groep">
+            <button class="btn btn-primary" onclick="downloadPDF()">Download als PDF</button>
+            <button class="btn btn-secondary" onclick="mailRapport()">Mail naar Mayke</button>
+          </div>
         </div>
-        <p style="font-size:.75rem;color:var(--tekst-zacht);margin-top:10px">Het bestand wordt gedownload als HTML-bestand. Open het in je browser en druk op <strong>Ctrl+P</strong> (Windows) of <strong>Cmd+P</strong> (Mac) om het op te slaan als PDF of af te drukken.</p>
+        <p style="font-size:.75rem;color:var(--tekst-zacht);margin-top:10px">Het rapport wordt direct als PDF-bestand gedownload.</p>
       </div>
     </div>
   </div>
@@ -1021,7 +1027,11 @@ function toggleEdit(){
   else{rapportTekst=edit.value;weergave.innerHTML=opmaakRapport(edit.value);weergave.style.display='block';edit.style.display='none';document.querySelector('.rapport-acties .btn-secondary').textContent='Bewerken';}
 }
 
-function downloadPDF(){
+async function downloadPDF(){
+  const knop=event.target;
+  const oorspronkelijkeTekst=knop.textContent;
+  knop.disabled=true;knop.textContent='Bezig...';
+
   const tekst=bewerkModus?document.getElementById('rapport-edit').value:rapportTekst;
   const d=verzamelData();
   const sectieRe=/^(Conditie|Mobiliteit|Kracht benen|Kracht schouders|Core|Lichaamssamenstelling|Belangrijk om mee te nemen|Overzicht mogelijke vervolgafspraken)/;
@@ -1049,38 +1059,47 @@ function downloadPDF(){
   if(open)delen.push('</div>');
   const regels=delen.join('');
 
-  const html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Testverslag '+d.naam+'</title>'
-    +'<style>'
-    +'body{font-family:"Segoe UI",Inter,Arial,sans-serif;max-width:680px;margin:40px auto;padding:0 24px;font-size:13.5px;line-height:1.55;color:#1a1a1a}'
+  const wrapper=document.createElement('div');
+  wrapper.style.cssText='position:fixed;left:-9999px;top:0;width:680px;background:#fff;font-family:"Segoe UI",Inter,Arial,sans-serif;font-size:13.5px;line-height:1.55;color:#1a1a1a;padding:28px';
+  wrapper.innerHTML=
+    '<style>'
     +'.header{display:flex;justify-content:space-between;align-items:center;border-bottom:3px solid #82176D;padding-bottom:14px;margin-bottom:16px}'
-    +'.logo{height:44px}'
+    +'.logotekst{font-size:20px;font-weight:800}'
+    +'.logotekst span:first-child{color:#82176D}'
+    +'.logotekst span:last-child{color:#00B6E8}'
     +'.meta{font-size:11px;color:#6b7280;text-align:right;line-height:1.6}'
     +'.titel{font-size:18px;font-weight:700;color:#82176D;margin-bottom:4px}'
-    +'.sectie-blok{margin-top:12px;break-inside:avoid;page-break-inside:avoid}'
+    +'.sectie-blok{margin-top:12px}'
     +'.sectie-blok:first-of-type{margin-top:0}'
     +'.sectie-kop{color:#82176D;font-weight:700;font-size:13.5px;margin-bottom:3px;border-left:3px solid #00B6E8;padding-left:8px}'
     +'p{margin:0 0 4px}'
     +'.footer{border-top:1px solid #e5e7eb;padding-top:12px;font-size:11px;color:#9ca3af;margin-top:16px}'
-    +'@media print{body{margin:20px;max-width:100%}}'
-    +'</style></head><body>'
+    +'</style>'
     +'<div class="header">'
-    +'<img src="https://lonnekevv.github.io/fyziototaaldashboard/logo.png" class="logo"/>'
-    +'<div class="meta">Fitheidstest Fyzio Totaal<br/>'+d.datum+'</div>'
+    +'<div class="logotekst"><span>Fyzio</span><span>Totaal</span></div>'
+    +'<div class="meta">Fitheidstest<br/>'+d.datum+'</div>'
     +'</div>'
     +'<div class="titel">Testverslag '+d.naam+'</div>'
     +regels
-    +'<div class="footer">Fyzio Totaal &nbsp;·&nbsp; Nijverheidsstraat 7, Wierden &nbsp;·&nbsp; www.fyziototaal.nl</div>'
-    +'</body></html>';
+    +'<div class="footer">Fyzio Totaal &nbsp;&middot;&nbsp; Nijverheidsstraat 7, Wierden &nbsp;&middot;&nbsp; www.fyziototaal.nl</div>';
 
-  const blob=new Blob([html],{type:'text/html;charset=utf-8'});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement('a');
-  a.href=url;
-  a.download='Testverslag_'+d.naam+'_'+d.datum+'.html';
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  setTimeout(()=>URL.revokeObjectURL(url),2000);
+  document.body.appendChild(wrapper);
+
+  try{
+    await html2pdf().set({
+      margin:10,
+      filename:'Testverslag_'+d.naam+'_'+d.datum+'.pdf',
+      image:{type:'jpeg',quality:0.98},
+      html2canvas:{scale:2},
+      jsPDF:{unit:'mm',format:'a4',orientation:'portrait'},
+      pagebreak:{mode:['avoid-all'],avoid:'.sectie-blok'}
+    }).from(wrapper).save();
+  }catch(e){
+    toonMelding('melding-globaal','PDF genereren mislukt: '+e.message,'fout');
+  }finally{
+    document.body.removeChild(wrapper);
+    knop.disabled=false;knop.textContent=oorspronkelijkeTekst;
+  }
 }
 
 function mailRapport(){
@@ -1089,8 +1108,8 @@ function mailRapport(){
   const platteTekst=tekst.replace(/\*\*(.*?)\*\*/g,'$1');
   const onderwerp='Testverslag '+d.naam+' - '+d.datum;
   const testadres='lonneke@fyziototaal.nl';
-  const link='mailto:'+testadres+'?subject='+encodeURIComponent(onderwerp)+'&body='+encodeURIComponent(platteTekst);
-  window.location.href=link;
+  const gmailLink='https://mail.google.com/mail/?view=cm&fs=1&to='+encodeURIComponent(testadres)+'&su='+encodeURIComponent(onderwerp)+'&body='+encodeURIComponent(platteTekst);
+  window.open(gmailLink,'_blank');
 }
 </script>
 </body>
