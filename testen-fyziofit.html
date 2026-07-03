@@ -884,6 +884,9 @@ async function genereerRapport(){
 
   const prompt=`Je bent een fysiotherapeut bij Fyzio Totaal en schrijft een persoonlijk testverslag voor een deelnemer aan het fysiofitnessprogramma.
 
+HARDE REGEL - GEEN VERZONNEN RESULTATEN:
+Gebruik uitsluitend de testresultaten die hieronder bij TESTRESULTATEN staan vermeld. Verzin NOOIT een score, tijd, aantal herhalingen, cm-waarde of observatie voor een test die daar niet in staat. Als een onderdeel (bijv. Kracht schouders of Lichaamssamenstelling) volledig ontbreekt in de testresultaten: schrijf dan bij dat kopje letterlijk dat er geen testresultaten voor dat onderdeel zijn geregistreerd, bijvoorbeeld "Voor dit onderdeel zijn geen testresultaten geregistreerd." Geef in dat geval geen conclusie, score-interpretatie of vervolgadvies voor dat onderdeel, want die zou op verzonnen data berusten. Dit is de belangrijkste regel in deze instructie en gaat boven alle andere stijlvoorkeuren.
+
 TAAL EN STIJL:
 - Schrijf in correct Nederlands. Gebruik geen Engelse woorden waar een goed Nederlands alternatief bestaat (bijv. niet "overall" maar "over het algemeen", niet "feedback" maar "terugkoppeling").
 - Informeel, jij-vorm ("je/jij"), nooit "u".
@@ -907,7 +910,7 @@ ADVIESTOON:
 DEELNEMER:
 Naam: ${data.naam} | Leeftijd: ${data.leeftijd||'onbekend'} | Geslacht: ${data.geslacht||'onbekend'} | Datum: ${data.datum}
 
-TESTRESULTATEN:
+TESTRESULTATEN (dit zijn de ENIGE gegevens die je mag gebruiken - ontbreekt een onderdeel hieronder, dan is dat onderdeel niet getest):
 ${scores}
 ${blessureDeel}
 ${vergelijkingDeel}
@@ -1063,7 +1066,7 @@ async function downloadPDF(){
   const regels=delen.join('');
 
   const wrapper=document.createElement('div');
-  wrapper.style.cssText='position:fixed;left:-9999px;top:0;width:680px;background:#fff;font-family:"Segoe UI",Inter,Arial,sans-serif;font-size:13.5px;line-height:1.55;color:#1a1a1a;padding:28px';
+  wrapper.style.cssText='position:absolute;left:-9999px;top:0;width:680px;background:#fff;font-family:"Segoe UI",Inter,Arial,sans-serif;font-size:13.5px;line-height:1.55;color:#1a1a1a;padding:28px';
   wrapper.innerHTML=
     '<style>'
     +'.header{display:flex;justify-content:space-between;align-items:center;border-bottom:3px solid #82176D;padding-bottom:14px;margin-bottom:16px}'
@@ -1087,13 +1090,14 @@ async function downloadPDF(){
     +'<div class="footer">Fyzio Totaal &nbsp;&middot;&nbsp; Nijverheidsstraat 7, Wierden &nbsp;&middot;&nbsp; www.fyziototaal.nl</div>';
 
   document.body.appendChild(wrapper);
+  await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));
 
   try{
     await html2pdf().set({
       margin:10,
       filename:'Testverslag_'+d.naam+'_'+d.datum+'.pdf',
       image:{type:'jpeg',quality:0.98},
-      html2canvas:{scale:2},
+      html2canvas:{scale:2,windowWidth:wrapper.scrollWidth,windowHeight:wrapper.scrollHeight},
       jsPDF:{unit:'mm',format:'a4',orientation:'portrait'},
       pagebreak:{mode:['avoid-all'],avoid:'.sectie-blok'}
     }).from(wrapper).save();
@@ -1109,9 +1113,11 @@ function mailRapport(){
   const tekst=bewerkModus?document.getElementById('rapport-edit').value:rapportTekst;
   const d=verzamelData();
   const platteTekst=tekst.replace(/\*\*(.*?)\*\*/g,'$1');
+  const herstelcheckRegel='Herstelcheck ingevuld: '+(d.herstelcheck?'ja':'nee');
+  const body=herstelcheckRegel+'\n\n'+platteTekst;
   const onderwerp='Testverslag '+d.naam+' - '+d.datum;
   const testadres='lonneke@fyziototaal.nl';
-  const gmailLink='https://mail.google.com/mail/?view=cm&fs=1&to='+encodeURIComponent(testadres)+'&su='+encodeURIComponent(onderwerp)+'&body='+encodeURIComponent(platteTekst);
+  const gmailLink='https://mail.google.com/mail/?view=cm&fs=1&to='+encodeURIComponent(testadres)+'&su='+encodeURIComponent(onderwerp)+'&body='+encodeURIComponent(body);
   window.open(gmailLink,'_blank');
 }
 </script>
