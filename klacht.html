@@ -91,7 +91,7 @@
           "anthropic-version": "2023-06-01",
           "anthropic-dangerous-direct-browser-access": "true",
         },
-        body: JSON.stringify({ model: "claude-sonnet-4-20250514", max_tokens: 1000, temperature: 0, system: system, messages: messages }),
+        body: JSON.stringify({ model: "claude-sonnet-4-5", max_tokens: 1000, temperature: 0, system: system, messages: messages }),
       });
       if (!res.ok) {
         const errText = await res.text();
