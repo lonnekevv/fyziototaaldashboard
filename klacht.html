@@ -18,11 +18,40 @@
   <script type="text/babel">
     const { useState, useRef } = React;
 
-    const API_KEY = "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";
+    function getApiKey() {
+      return localStorage.getItem("klacht_apikey") || "";
+    }
 
-    const KLACHT_SYSTEM = "Je helpt een fysiotherapeut bij het gestructureerd vastleggen van een anamnese volgens de KLACHT-methode. Houd je strikt aan de onderstaande richtlijnen:\n- Wees kort en bondig\n- Gebruik medische taal\n- Formuleer professioneel maar toegankelijk, zoals je met een collega zou overleggen\n- Gebruik waar mogelijk afkortingen (bijv. ventraal, HA, mn, ADL)\n- Vermijd lidwoorden waar niet noodzakelijk\n- Noem uitsluitend informatie die daadwerkelijk in de tekst voorkomt - geen aannames of toevoegingen\n- Wees secuur in formulering en structuur\n- Antwoord altijd direct, geen inleiding of nawoord\n- Gebruik geen witregels tussen onderdelen van de KLACHT\n- Vermijd woorden als: thans, aanvankelijk, initieel, intermitterend, persisterend, effusie, restsensitiviteit\n- Schrijf zoals je tegen een collega zou praten: geen formeel of ouderwets Nederlands. Gebruik gewone spreektaal waar mogelijk, bijv. \"pt ervaart nog lichte pijnklachten\" in plaats van \"er is sprake van restsensitiviteit\"\n- Gebruik vakjargon en anatomische termen waar logisch (ventraal, lateraal, m. supraspinatus, etc.)\n- Gebruik alleen gangbare afkortingen die direct begrijpelijk zijn (HA, ADL, mn, pcm). Niet alles afkorten.\n\nGenereer ALLEEN de onderdelen K t/m C (NIET de H). Format:\nK: [aard van de klacht: type pijn, uitstraling, verloop, duur; relevante medische onderzoeken/bevindingen indien vermeld]\nL: [leefstijl en dagritme inclusief fitheid, slaap en stress indien bekend; als niets bekend: schrijf \"Niet vermeld.\"]\nA: [ADL-beperkingen: welke handelingen/activiteiten worden beperkt]\nC: [context: beroep, sport/hobby's, omstandigheden van ontstaan, relevante determinanten; laat weg wat niet vermeld is - vermeld hier NOOIT de hulpvraag, ook niet als \"HV: ...\", die hoort uitsluitend bij de H]";
+    async function vraagApiKey() {
+      return new Promise(function(resolve) {
+        var overlay = document.createElement("div");
+        overlay.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:9999;padding:20px";
+        overlay.innerHTML = '<div style="background:#fff;border-radius:12px;padding:24px;max-width:380px;width:100%"><p style="font-size:15px;font-weight:700;color:#667eea;margin-bottom:8px">API key invoeren</p><p style="font-size:13px;color:#555;line-height:1.6;margin-bottom:16px">Voer eenmalig de API key in. Deze wordt opgeslagen in je browser en hoef je daarna niet opnieuw in te voeren.</p><input id="klacht-apikey-input" type="password" placeholder="sk-ant-api03-..." style="width:100%;padding:10px 12px;border-radius:8px;border:1.5px solid #e5e7eb;font-size:14px;box-sizing:border-box;margin-bottom:8px;font-family:monospace"><p id="klacht-apikey-fout" style="font-size:12px;color:#f87171;display:none;margin-bottom:8px">Voer een geldige key in (begint met sk-ant-).</p><button id="klacht-apikey-opslaan" style="width:100%;padding:11px;border-radius:8px;border:none;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;font-size:14px;font-weight:700;cursor:pointer">Opslaan en doorgaan</button></div>';
+        document.body.appendChild(overlay);
+        var input = overlay.querySelector("#klacht-apikey-input");
+        var btn = overlay.querySelector("#klacht-apikey-opslaan");
+        var fout = overlay.querySelector("#klacht-apikey-fout");
+        var opslaan = function() {
+          var val = input.value.trim();
+          if (!val.startsWith("sk-ant-")) { fout.style.display = "block"; return; }
+          localStorage.setItem("klacht_apikey", val);
+          document.body.removeChild(overlay);
+          resolve(val);
+        };
+        btn.onclick = opslaan;
+        input.onkeydown = function(e) { if (e.key === "Enter") opslaan(); };
+      });
+    }
 
-    const H_SUGGESTIONS_SYSTEM = "Je bent een fysiotherapeut-assistent. Op basis van de anamnesetekst genereer je 2 korte, concrete hulpvraagopties die een patiënt zou kunnen hebben. Elke optie is max 12 woorden, in eerste persoon (\"Ik wil...\"), toegankelijke taal, geen medisch jargon.\n\nAls er al een hulpvraag (expliciet of impliciet) in de anamnesetekst staat, neem die dan als eerste optie over. Een hulpvraag kan expliciet zijn (bijv. na \"HV:\", \"hulpvraag:\") maar ook impliciet: alles wat de patiënt graag wil kunnen (bijv. \"wil graag weer voetballen\", \"wil kunnen lopen zonder pijn\") of wil krijgen (bijv. \"wil graag oefeningen\", \"wil weten wat hij kan doen\"). Pas de formulering zo nodig licht aan naar eerste persoon. De tweede optie is dan een alternatieve suggestie.\nAls er helemaal geen hulpvraag of wens in de tekst staat, geef dan 2 eigen suggesties.\n\nGeef ALLEEN een JSON array met 2 strings, niets anders.";
+    async function zorgVoorApiKey() {
+      var key = getApiKey();
+      if (!key) key = await vraagApiKey();
+      return key;
+    }
+
+    const KLACHT_SYSTEM = "Je helpt een fysiotherapeut bij het gestructureerd vastleggen van een anamnese volgens de KLACHT-methode. Houd je strikt aan de onderstaande richtlijnen:\n- Wees kort en bondig\n- Gebruik medische taal\n- Formuleer professioneel maar toegankelijk, zoals je met een collega zou overleggen\n- Gebruik waar mogelijk afkortingen (bijv. ventraal, HA, mn, ADL)\n- Vermijd lidwoorden waar niet noodzakelijk\n- Noem uitsluitend informatie die daadwerkelijk in de tekst voorkomt - geen aannames of toevoegingen\n- Wees secuur in formulering en structuur\n- Antwoord altijd direct, geen inleiding of nawoord\n- Gebruik geen witregels tussen onderdelen van de KLACHT\n- Vermijd woorden als: thans, aanvankelijk, initieel, intermitterend, persisterend, effusie, restsensitiviteit, audibel, ecchymose, supinatieletsel\n- Schrijf zoals je tegen een collega zou praten: geen formeel of ouderwets Nederlands. Gebruik gewone spreektaal waar mogelijk, bijv. \"pt ervaart nog lichte pijnklachten\" in plaats van \"er is sprake van restsensitiviteit\", of \"pt hoorde wat knappen\" in plaats van \"audibel knappen\"\n- Gebruik vakjargon en anatomische termen waar logisch (ventraal, lateraal, m. supraspinatus, etc.)\n- Gebruik alleen gangbare afkortingen die direct begrijpelijk zijn (HA, ADL, mn, pcm). Niet alles afkorten.\n- Gebruik nooit 'ecchymose', maar schrijf 'hematoom' of 'blauwverkleuring'\n- Gebruik bij een trauma liever 'hydrops' dan 'oedeem'\n- Bij een inversietrauma: gebruik altijd 'inversieletsel' of 'inversietrauma', nooit 'supinatieletsel'\n\nGenereer ALLEEN de onderdelen K t/m C (NIET de H). Format:\nK: [aard van de klacht: type pijn, uitstraling, verloop, duur; relevante medische onderzoeken/bevindingen indien vermeld]\nL: [leefstijl en dagritme inclusief fitheid, slaap en stress indien bekend; als niets bekend: schrijf \"Niet vermeld.\"]\nA: [ADL-beperkingen: welke handelingen/activiteiten worden beperkt]\nC: [context: beroep, sport/hobby's, omstandigheden van ontstaan, relevante determinanten; laat weg wat niet vermeld is - vermeld hier NOOIT de hulpvraag, ook niet als \"HV: ...\", die hoort uitsluitend bij de H]";
+
+    const H_SUGGESTIONS_SYSTEM = "Je bent een fysiotherapeut-assistent. Op basis van de anamnesetekst genereer je 2 korte, concrete hulpvraagopties die een patiënt zou kunnen hebben. Elke optie is max 15 woorden, in eerste persoon (\"Ik wil...\"), toegankelijke taal, geen medisch jargon.\n\nAls er al een hulpvraag (expliciet of impliciet) in de anamnesetekst staat, neem die dan als eerste optie over. Een hulpvraag kan expliciet zijn (bijv. na \"HV:\", \"hulpvraag:\") maar ook impliciet: alles wat de patiënt graag wil kunnen (bijv. \"wil graag weer voetballen\", \"wil kunnen lopen zonder pijn\") of wil krijgen (bijv. \"wil graag oefeningen\", \"wil weten wat hij kan doen\"). Pas de formulering zo nodig licht aan naar eerste persoon. De tweede optie is dan een alternatieve suggestie.\nAls er helemaal geen hulpvraag of wens in de tekst staat, geef dan 2 eigen suggesties.\n\nBelangrijk: als de patiënt meerdere vergelijkbare wensen noemt (bijv. zowel pijnvrij werken als pijnvrij sporten), combineer deze dan in één optie (bijv. \"Ik wil weer pijnvrij kunnen werken en sporten\"). Splits ze niet op in twee losse opties.\n\nGeef ALLEEN een JSON array met 2 strings, niets anders.";
 
     const LEEFSTIJL_CHECK_SYSTEM = "Analyseer de anamnesetekst en bepaal welke van de volgende drie onderwerpen NIET of nauwelijks worden besproken: fitheid, slaap, stress. Geef ALLEEN een JSON object: {\"fitheid\": true/false, \"slaap\": true/false, \"stress\": true/false}. true = ontbreekt, false = al vermeld. Niets anders.";
 
@@ -53,12 +82,14 @@
     ];
 
     const callClaude = async (messages, system) => {
+      const apiKey = await zorgVoorApiKey();
       const res = await fetch("https://api.anthropic.com/v1/messages", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "x-api-key": API_KEY,
+          "x-api-key": apiKey,
           "anthropic-version": "2023-06-01",
+          "anthropic-dangerous-direct-browser-access": "true",
         },
         body: JSON.stringify({ model: "claude-sonnet-4-20250514", max_tokens: 1000, temperature: 0, system: system, messages: messages }),
       });
