@@ -4,22 +4,23 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Fyzio Totaal — Dashboard</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Inter', 'Segoe UI', sans-serif; background: #f0f0ee; min-height: 100vh; color: #1a1a1a; }
+    body { font-family: 'Poppins', 'Segoe UI', sans-serif; background: #f6f0f4; min-height: 100vh; color: #1a1a1a; }
 
-    header { background: #1a4a3a; padding: 0 1.25rem; display: flex; align-items: center; justify-content: space-between; height: 62px; box-shadow: 0 2px 12px rgba(0,0,0,0.15); }
+    header { background: #82176D; padding: 0 1.25rem; display: flex; align-items: center; justify-content: space-between; height: 62px; box-shadow: 0 2px 12px rgba(0,0,0,0.15); }
     .header-left { display: flex; align-items: center; gap: 12px; }
-    .logo-circle { width: 38px; height: 38px; background: #e8611a; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+    .logo-circle { width: 38px; height: 38px; background: #00B6E8; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
     .header-title { color: #fff; font-size: 16px; font-weight: 700; }
     .header-subtitle { color: rgba(255,255,255,0.65); font-size: 11px; margin-top: 1px; }
     .header-right { color: rgba(255,255,255,0.6); font-size: 12px; white-space: nowrap; }
     @media (max-width: 420px) { .header-right { display: none; } }
 
-    .hero { background: linear-gradient(135deg, #1a4a3a 0%, #2d6b55 100%); padding: 36px 1.25rem 30px; text-align: center; color: #fff; }
+    .hero { background: linear-gradient(135deg, #82176D 0%, #5e1152 100%); padding: 36px 1.25rem 30px; text-align: center; color: #fff; position: relative; overflow: hidden; }
+    .hero::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, #00B6E8, #82176D); }
     .hero h1 { font-size: 22px; font-weight: 700; margin-bottom: 7px; }
-    .hero p { font-size: 13px; opacity: 0.8; max-width: 420px; margin: 0 auto; line-height: 1.6; }
+    .hero p { font-size: 13px; opacity: 0.85; max-width: 420px; margin: 0 auto; line-height: 1.6; }
 
     .container { max-width: 860px; margin: 0 auto; padding: 28px 1rem 60px; }
     .section-title { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.4px; color: #999; margin-bottom: 12px; }
@@ -28,9 +29,9 @@
     @media (max-width: 640px) { .tools-grid { grid-template-columns: 1fr 1fr; } }
     @media (max-width: 380px) { .tools-grid { grid-template-columns: 1fr; } }
 
-    .tool-card { background: #fff; border-radius: 12px; padding: 18px; text-decoration: none; color: inherit; border: 1.5px solid #e4e4e0; transition: box-shadow 0.2s, transform 0.2s; display: flex; flex-direction: column; position: relative; overflow: hidden; min-height: 0; }
+    .tool-card { background: #fff; border-radius: 12px; padding: 18px; text-decoration: none; color: inherit; border: 1.5px solid #ece4ea; transition: box-shadow 0.2s, transform 0.2s; display: flex; flex-direction: column; position: relative; overflow: hidden; min-height: 0; }
     .tool-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: var(--accent); }
-    @media (hover: hover) { .tool-card:hover { box-shadow: 0 6px 24px rgba(0,0,0,0.10); transform: translateY(-2px); border-color: var(--accent); } }
+    @media (hover: hover) { .tool-card:hover { box-shadow: 0 6px 24px rgba(130,23,109,0.14); transform: translateY(-2px); border-color: var(--accent); } }
     .tool-card:active { transform: scale(0.98); }
 
     .tool-icon { font-size: 22px; margin-bottom: 8px; display: block; }
@@ -39,22 +40,21 @@
     @media (max-width: 480px) { .tool-desc { display: none; } }
 
     .tool-tags { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 12px; }
-    .tag { font-size: 10px; padding: 2px 7px; border-radius: 20px; font-weight: 500; background: #f0f0ee; color: #777; }
-    .tag.green { background: #e8f5ed; color: #1e7e4e; }
-    .tag.blue  { background: #e8f0f8; color: #1a3a5a; }
-    .tag.orange{ background: #fdf0e8; color: #e8611a; }
+    .tag { font-size: 10px; padding: 2px 7px; border-radius: 20px; font-weight: 500; background: #f6f0f4; color: #777; }
+    .tag.purple { background: #f3e6f0; color: #82176D; }
+    .tag.blue   { background: #e2f7fc; color: #00728e; }
     @media (max-width: 480px) { .tool-tags { display: none; } }
 
     .open-btn { display: inline-flex; align-items: center; gap: 5px; padding: 8px 14px; background: var(--accent); color: #fff; border-radius: 7px; font-size: 12px; font-weight: 600; text-decoration: none; align-self: flex-start; transition: opacity 0.15s; min-height: 36px; }
     .open-btn:hover { opacity: 0.85; }
 
-    .divider { height: 1px; background: #e4e4e0; margin: 22px 0; }
+    .divider { height: 1px; background: #ece4ea; margin: 22px 0; }
     .soon-card { background: #fff; border-radius: 12px; padding: 18px; border: 1.5px dashed #ddd; opacity: 0.5; display: flex; flex-direction: column; }
 
-    .info-bar { background: #fff; border-radius: 10px; padding: 12px 16px; border: 1px solid #e4e4e0; display: flex; align-items: flex-start; gap: 10px; font-size: 12px; color: #666; margin-top: 8px; }
-    .info-bar code { word-break: break-all; font-size: 11px; background: #f0f0ee; padding: 1px 5px; border-radius: 4px; }
+    .info-bar { background: #fff; border-radius: 10px; padding: 12px 16px; border: 1px solid #ece4ea; display: flex; align-items: flex-start; gap: 10px; font-size: 12px; color: #666; margin-top: 8px; }
+    .info-bar code { word-break: break-all; font-size: 11px; background: #f6f0f4; padding: 1px 5px; border-radius: 4px; }
 
-    footer { background: #1a4a3a; color: rgba(255,255,255,0.5); text-align: center; padding: 16px 1rem; font-size: 12px; }
+    footer { background: #82176D; color: rgba(255,255,255,0.5); text-align: center; padding: 16px 1rem; font-size: 12px; }
     footer strong { color: rgba(255,255,255,0.85); }
   </style>
 </head>
@@ -80,44 +80,44 @@
     <div class="section-title">Beschikbare tools</div>
     <div class="tools-grid">
 
-      <a class="tool-card" href="klacht.html" target="_blank" style="--accent: #1a3a5a;">
+      <a class="tool-card" href="klacht.html" target="_blank" style="--accent: #00B6E8;">
         <span class="tool-icon">📋</span>
         <div class="tool-name">Administratiehulp KLACHT</div>
         <div class="tool-desc">Gestructureerde hulp bij het documenteren van klachten volgens de KLACHT-methode.</div>
         <div class="tool-tags"><span class="tag blue">Administratie</span><span class="tag">Klinisch</span></div>
-        <span class="open-btn" style="--accent: #1a3a5a;">Openen →</span>
+        <span class="open-btn" style="--accent: #00B6E8;">Openen →</span>
       </a>
 
-      <a class="tool-card" href="groepsbeheer.html" target="_blank" style="--accent: #1a4a3a;">
+      <a class="tool-card" href="groepsbeheer.html" target="_blank" style="--accent: #82176D;">
         <span class="tool-icon">🏃</span>
         <div class="tool-name">Fyziotraining & Balance</div>
         <div class="tool-desc">Beheer deelnemers, wachtlijsten, tijdelijke stops en reserveringen voor alle trainingsgroepen.</div>
-        <div class="tool-tags"><span class="tag green">Fyziotraining</span><span class="tag blue">Balance</span><span class="tag orange">Wachtlijst</span></div>
-        <span class="open-btn" style="--accent: #1a4a3a;">Openen →</span>
+        <div class="tool-tags"><span class="tag purple">Fyziotraining</span><span class="tag blue">Balance</span><span class="tag">Wachtlijst</span></div>
+        <span class="open-btn" style="--accent: #82176D;">Openen →</span>
       </a>
 
-      <a class="tool-card" href="vkb-planning.html" target="_blank" style="--accent: #1a4a3a;">
+      <a class="tool-card" href="vkb-planning.html" target="_blank" style="--accent: #00B6E8;">
         <span class="tool-icon">🦵</span>
         <div class="tool-name">VKB Testen & Planning</div>
         <div class="tool-desc">Testprotocol, scoringsoverzicht én testplanning voor VKB-revalidaties. Inclusief urgentieoverzicht.</div>
-        <div class="tool-tags"><span class="tag green">Revalidatie</span><span class="tag">Planning</span><span class="tag">Klinisch</span></div>
-        <span class="open-btn" style="--accent: #1a4a3a;">Openen →</span>
+        <div class="tool-tags"><span class="tag blue">Revalidatie</span><span class="tag">Planning</span><span class="tag">Klinisch</span></div>
+        <span class="open-btn" style="--accent: #00B6E8;">Openen →</span>
       </a>
 
-      <a class="tool-card" href="testen-fyziofit.html" target="_blank" style="--accent: #e8611a;">
+      <a class="tool-card" href="testen-fyziofit.html" target="_blank" style="--accent: #82176D;">
         <span class="tool-icon">💪</span>
         <div class="tool-name">Fitheidstest</div>
         <div class="tool-desc">Testregistratie, scoring en rapportage voor deelnemers van de fyziotraining.</div>
-        <div class="tool-tags"><span class="tag orange">Fyziotraining</span><span class="tag">Scoring</span><span class="tag">Rapport</span></div>
-        <span class="open-btn" style="--accent: #e8611a;">Openen →</span>
+        <div class="tool-tags"><span class="tag purple">Fyziotraining</span><span class="tag">Scoring</span><span class="tag">Rapport</span></div>
+        <span class="open-btn" style="--accent: #82176D;">Openen →</span>
       </a>
 
-      <a class="tool-card" href="tendinopathie.html" target="_blank" style="--accent: #2d6b55;">
+      <a class="tool-card" href="tendinopathie.html" target="_blank" style="--accent: #00B6E8;">
         <span class="tool-icon">🩹</span>
         <div class="tool-name">Peesklachten Patiënteninformatie</div>
         <div class="tool-desc">Genereer fase-specifieke patiëntenbrieven en infographics voor tendinopathieën op basis van het Cook & Purdam model.</div>
-        <div class="tool-tags"><span class="tag green">Patiënteninformatie</span><span class="tag">Klinisch</span></div>
-        <span class="open-btn" style="--accent: #2d6b55;">Openen →</span>
+        <div class="tool-tags"><span class="tag blue">Patiënteninformatie</span><span class="tag">Klinisch</span></div>
+        <span class="open-btn" style="--accent: #00B6E8;">Openen →</span>
       </a>
 
     </div>
