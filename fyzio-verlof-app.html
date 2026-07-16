@@ -2,6 +2,9 @@
 <html lang="nl">
 <head>
 <meta charset="utf-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <style>
   html, body { max-width: 100vw; overflow-x: hidden; }
@@ -345,6 +348,10 @@ function DateRangePicker(props) {
   var todayIso = todayISO();
   var initial = new Date((startDate || todayIso) + "T00:00:00");
   var _view = useState({ y: initial.getFullYear(), m: initial.getMonth() }), view = _view[0], setView = _view[1];
+  // Expliciete, ZICHTBARE modus (i.p.v. verborgen "raad maar welke datum je
+  // kiest"-logica): de twee knoppen hierboven laten precies zien - en laten
+  // je altijd zelf omzetten - of een volgende tik de begin- of einddatum zet.
+  var _mode = useState("start"), mode = _mode[0], setMode = _mode[1];
 
   var year = view.y, month = view.m;
   var daysInMonth = new Date(year, month + 1, 0).getDate();
@@ -354,18 +361,15 @@ function DateRangePicker(props) {
   function prevMonth() { if (month === 0) setView({ y: year - 1, m: 11 }); else setView({ y: year, m: month - 1 }); }
   function nextMonth() { if (month === 11) setView({ y: year + 1, m: 0 }); else setView({ y: year, m: month + 1 }); }
 
-  // Geen verborgen "fase" meer — de knop bepaalt puur op basis van de
-  // zichtbare begin-/einddatum wat een volgende tik betekent, zodat hij
-  // nooit in een onzichtbare, verkeerde staat kan vastlopen.
   function handleClick(iso) {
-    if (startDate !== endDate) {
-      onChange(iso, iso); // er stond al een volledige periode -> begin opnieuw
-    } else if (iso === startDate) {
-      // zelfde dag nogmaals aangetikt: niets veranderen
-    } else if (iso < startDate) {
-      onChange(iso, iso);
+    if (mode === "start") {
+      var newEnd = endDate && endDate >= iso ? endDate : iso;
+      onChange(iso, newEnd);
+      setMode("end");
     } else {
-      onChange(startDate, iso);
+      var newStart = startDate && startDate <= iso ? startDate : iso;
+      onChange(newStart, iso);
+      setMode("start");
     }
   }
 
@@ -373,16 +377,22 @@ function DateRangePicker(props) {
   for (var i = 0; i < leading; i++) cells.push(null);
   for (var d = 1; d <= daysInMonth; d++) cells.push(d);
 
+  var activeCls = "rounded-lg border-2 border-teal-600 bg-teal-50 px-3 py-2 text-left text-teal-800";
+  var inactiveCls = "rounded-lg border-2 border-transparent bg-slate-50 px-3 py-2 text-left text-slate-500 hover:bg-slate-100";
+
   return h("div", { className: "rounded-xl border border-slate-200 p-3" },
-    h("div", { className: "mb-2 flex flex-wrap items-center justify-between gap-1 text-sm" },
-      h("div", null,
-        h("span", { className: "text-slate-500" }, "Van "), h("strong", { className: "text-slate-800" }, fmtDatumKort(startDate)),
-        h("span", { className: "text-slate-500" }, " tot en met "), h("strong", { className: "text-slate-800" }, fmtDatumKort(endDate))
+    h("div", { className: "mb-3 grid grid-cols-2 gap-2" },
+      h("button", { type: "button", className: mode === "start" ? activeCls : inactiveCls, onClick: function () { setMode("start"); } },
+        h("div", { className: "text-[11px] font-semibold uppercase tracking-wide opacity-70" }, "Begindatum"),
+        h("div", { className: "text-sm font-semibold" }, fmtDatumKort(startDate))
       ),
-      h("button", { type: "button", className: "text-xs font-medium text-teal-700 hover:underline", onClick: function () { onChange(todayIso, todayIso); } }, "Vandaag")
+      h("button", { type: "button", className: mode === "end" ? activeCls : inactiveCls, onClick: function () { setMode("end"); } },
+        h("div", { className: "text-[11px] font-semibold uppercase tracking-wide opacity-70" }, "Einddatum"),
+        h("div", { className: "text-sm font-semibold" }, fmtDatumKort(endDate))
+      )
     ),
     h("p", { className: "mb-2 text-xs font-medium text-teal-700" },
-      startDate === endDate ? "Tik een latere dag aan om een periode te kiezen (of laat dit staan voor 1 dag)" : "Tik een nieuwe dag aan om een andere periode te beginnen"
+      "Tik een dag aan om de " + (mode === "start" ? "begindatum" : "einddatum") + " te zetten"
     ),
     h("div", { className: "mb-1 flex items-center justify-between" },
       h("button", { type: "button", className: "rounded-lg px-2 py-1 text-slate-500 hover:bg-slate-100", onClick: prevMonth, "aria-label": "Vorige maand" }, "←"),
@@ -413,6 +423,16 @@ function DateRangePicker(props) {
 
 function Field(props) {
   return h("label", { className: "block" },
+    h("span", { className: "mb-1 block text-sm font-medium text-slate-700" }, props.label),
+    props.children
+  );
+}
+// Zelfde uiterlijk als Field, maar zonder <label>-element. Nodig voor velden
+// met eigen interactieve inhoud (zoals de kalenderwidget), omdat sommige
+// mobiele browsers de eerste tik op geneste interactieve elementen binnen
+// een <label> onderscheppen in plaats van meteen door te laten.
+function PlainField(props) {
+  return h("div", { className: "block" },
     h("span", { className: "mb-1 block text-sm font-medium text-slate-700" }, props.label),
     props.children
   );
@@ -717,7 +737,7 @@ function VerlofForm(props) {
       inAanvraag > 0 && (" · al in aanvraag: " + fmtNum(inAanvraag) + " uur")
     ),
     h("div", { className: "space-y-3" },
-      h(Field, { label: "Periode" }, h(DateRangePicker, { startDate: startDate, endDate: endDate, onChange: handlePeriodeChange })),
+      h(PlainField, { label: "Periode" }, h(DateRangePicker, { startDate: startDate, endDate: endDate, onChange: handlePeriodeChange })),
       h("div", { className: "grid grid-cols-2 gap-3" },
         h(Field, { label: "Aantal dagen" }, h("input", { className: INPUT_CLS, type: "text", inputMode: "decimal", value: dagenStr, onChange: function (e) { setDagenStr(e.target.value); } })),
         h(Field, { label: "Aantal uren" }, h("input", { className: INPUT_CLS, type: "text", inputMode: "decimal", value: urenStr, onChange: function (e) { setUrenStr(e.target.value); } }))
@@ -912,7 +932,7 @@ function AddOnBehalfForm(props) {
         )
       ),
       type === "verlof"
-        ? h("div", { className: "sm:col-span-2" }, h(Field, { label: "Periode" }, h(DateRangePicker, { startDate: start, endDate: end, onChange: handlePeriodeChange })))
+        ? h("div", { className: "sm:col-span-2" }, h(PlainField, { label: "Periode" }, h(DateRangePicker, { startDate: start, endDate: end, onChange: handlePeriodeChange })))
         : h(Field, { label: "Datum" }, h("input", { className: INPUT_CLS, type: "date", value: start, onChange: function (e) { setStart(e.target.value); } })),
       type === "verlof"
         ? h("div", { className: "sm:col-span-2 rounded-xl bg-teal-50 p-3 text-sm text-slate-700" },
