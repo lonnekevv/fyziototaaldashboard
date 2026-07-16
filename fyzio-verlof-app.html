@@ -345,7 +345,6 @@ function DateRangePicker(props) {
   var todayIso = todayISO();
   var initial = new Date((startDate || todayIso) + "T00:00:00");
   var _view = useState({ y: initial.getFullYear(), m: initial.getMonth() }), view = _view[0], setView = _view[1];
-  var _phase = useState("start"), phase = _phase[0], setPhase = _phase[1];
 
   var year = view.y, month = view.m;
   var daysInMonth = new Date(year, month + 1, 0).getDate();
@@ -355,15 +354,18 @@ function DateRangePicker(props) {
   function prevMonth() { if (month === 0) setView({ y: year - 1, m: 11 }); else setView({ y: year, m: month - 1 }); }
   function nextMonth() { if (month === 11) setView({ y: year + 1, m: 0 }); else setView({ y: year, m: month + 1 }); }
 
+  // Geen verborgen "fase" meer — de knop bepaalt puur op basis van de
+  // zichtbare begin-/einddatum wat een volgende tik betekent, zodat hij
+  // nooit in een onzichtbare, verkeerde staat kan vastlopen.
   function handleClick(iso) {
-    if (phase === "start") {
-      onChange(iso, iso);
-      setPhase("end");
+    if (startDate !== endDate) {
+      onChange(iso, iso); // er stond al een volledige periode -> begin opnieuw
+    } else if (iso === startDate) {
+      // zelfde dag nogmaals aangetikt: niets veranderen
     } else if (iso < startDate) {
       onChange(iso, iso);
     } else {
       onChange(startDate, iso);
-      setPhase("start");
     }
   }
 
@@ -377,9 +379,11 @@ function DateRangePicker(props) {
         h("span", { className: "text-slate-500" }, "Van "), h("strong", { className: "text-slate-800" }, fmtDatumKort(startDate)),
         h("span", { className: "text-slate-500" }, " tot en met "), h("strong", { className: "text-slate-800" }, fmtDatumKort(endDate))
       ),
-      h("button", { type: "button", className: "text-xs font-medium text-teal-700 hover:underline", onClick: function () { setPhase("start"); } }, "Nieuwe periode")
+      h("button", { type: "button", className: "text-xs font-medium text-teal-700 hover:underline", onClick: function () { onChange(todayIso, todayIso); } }, "Vandaag")
     ),
-    h("p", { className: "mb-2 text-xs font-medium text-teal-700" }, phase === "start" ? "Tik de begindatum aan" : "Tik nu de einddatum aan"),
+    h("p", { className: "mb-2 text-xs font-medium text-teal-700" },
+      startDate === endDate ? "Tik een latere dag aan om een periode te kiezen (of laat dit staan voor 1 dag)" : "Tik een nieuwe dag aan om een andere periode te beginnen"
+    ),
     h("div", { className: "mb-1 flex items-center justify-between" },
       h("button", { type: "button", className: "rounded-lg px-2 py-1 text-slate-500 hover:bg-slate-100", onClick: prevMonth, "aria-label": "Vorige maand" }, "←"),
       h("span", { className: "text-sm font-semibold capitalize text-slate-700" }, MONTH_LABELS[month] + " " + year),
