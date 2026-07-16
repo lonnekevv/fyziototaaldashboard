@@ -70,7 +70,7 @@ if (!window.storage) {
 "use strict";
 var STORAGE_KEY = "fyzio-verlof-v1";
 var h = React.createElement;
-var useState = React.useState, useEffect = React.useEffect, useCallback = React.useCallback, useMemo = React.useMemo;
+var useState = React.useState, useEffect = React.useEffect, useCallback = React.useCallback, useMemo = React.useMemo, useRef = React.useRef;
 
 // ------------------------------------------------------------
 // Datum / tijd / rooster helpers
@@ -140,6 +140,23 @@ function dayCost(shift) {
   return halves * 0.5;
 }
 
+// Pauzes tellen niet mee als werktijd bij het berekenen van de uren.
+var BREAKS = [[605, 620], [745, 780], [905, 920]]; // 10:05-10:20, 12:25-13:00, 15:05-15:20
+
+// Netto gewerkte uren voor één dienst, met pauzes die binnen die dienst
+// vallen eraf getrokken. Afgerond op één decimaal.
+function shiftWorkedHours(shift) {
+  if (!shift || !shift.start || !shift.end) return 0;
+  var s = timeToMin(shift.start), e = timeToMin(shift.end);
+  if (e <= s) return 0;
+  var minutes = e - s;
+  for (var i = 0; i < BREAKS.length; i++) {
+    var overlap = Math.min(e, BREAKS[i][1]) - Math.max(s, BREAKS[i][0]);
+    if (overlap > 0) minutes -= overlap;
+  }
+  return Math.round((minutes / 60) * 10) / 10;
+}
+
 function eachDateISO(startISO, endISO) {
   var out = [];
   var d = new Date(startISO + "T00:00:00");
@@ -189,29 +206,72 @@ function defaultSchedule() {
   };
 }
 
-// Berekent hoeveel verlofdagen (in halven) een periode kost voor een
-// medewerker, o.b.v. diens eigen rooster. Weekend en "vrije" dagen tellen
-// niet mee (die kosten toch al geen verlof).
+// Berekent hoeveel verlofdagen (in halven) én hoeveel netto uren een periode
+// kost voor een medewerker, o.b.v. diens eigen rooster (incl. pauzeaftrek).
+// Weekend en "vrije" dagen tellen niet mee (die kosten toch al geen verlof).
 function computeLeaveCost(schedule, startISO, endISO) {
-  if (!startISO || !endISO) return { days: 0, breakdown: [] };
+  if (!startISO || !endISO) return { days: 0, hours: 0, breakdown: [] };
   var sched = schedule || defaultSchedule();
   var dates = eachDateISO(startISO, endISO);
-  var total = 0;
+  var totalDays = 0, totalHours = 0;
   var breakdown = [];
   for (var i = 0; i < dates.length; i++) {
     var iso = dates[i];
     var key = weekdayKeyFromISO(iso);
     var shift = key ? sched[key] : null;
     var cost = dayCost(shift);
-    total += cost;
-    breakdown.push({ iso: iso, key: key, shift: shift, cost: cost });
+    var hrs = shiftWorkedHours(shift);
+    totalDays += cost;
+    totalHours += hrs;
+    breakdown.push({ iso: iso, key: key, shift: shift, cost: cost, hours: hrs });
   }
-  return { days: Math.round(total * 2) / 2, breakdown: breakdown };
+  return { days: Math.round(totalDays * 2) / 2, hours: Math.round(totalHours * 10) / 10, breakdown: breakdown };
 }
 
 // ------------------------------------------------------------
 // Saldo helpers
 // ------------------------------------------------------------
+// Contractueel uitgangspunt: bij een voltijds dienstverband van 40 uur/week
+// heeft iemand recht op 23 vakantiedagen (excl. feestdagen), oftewel 184 uur
+// per jaar (23 x 8 uur). Dit rekenen we naar rato door op basis van iemands
+// eigen netto weekuren (rooster minus pauzes).
+var FULLTIME_WEEKHOURS = 40;
+var FULLTIME_LEAVE_HOURS_PER_YEAR = 23 * 8; // 184 uur
+
+function weeklyNetHours(schedule) {
+  var sched = schedule || defaultSchedule();
+  return DAY_KEYS.reduce(function (sum, key) { return sum + shiftWorkedHours(sched[key]); }, 0);
+}
+
+function suggestedAnnualLeaveHours(schedule) {
+  var weekly = weeklyNetHours(schedule);
+  var suggestion = (weekly / FULLTIME_WEEKHOURS) * FULLTIME_LEAVE_HOURS_PER_YEAR;
+  return Math.round(suggestion * 10) / 10;
+}
+
+// ------------------------------------------------------------
+// Voorstel verlofurenbudget per jaar, o.b.v. het rooster
+// ------------------------------------------------------------
+// Contract: bij een voltijds dienstverband van 40 uur/week heeft iemand
+// recht op 23 vakantiedagen per jaar (exclusief feestdagen). Bij een
+// werkweek van 5 dagen komt dat neer op 8 uur/dag => 184 uur/jaar voltijds.
+// Voor iedereen anders wordt dit naar rato berekend op basis van het aantal
+// uren dat diegene volgens zijn/haar eigen rooster per week werkt.
+var FULLTIME_WEEKLY_HOURS = 40;
+var FULLTIME_ANNUAL_LEAVE_DAYS = 23;
+var FULLTIME_ANNUAL_LEAVE_HOURS = FULLTIME_ANNUAL_LEAVE_DAYS * (FULLTIME_WEEKLY_HOURS / 5); // 184 uur
+
+function weeklyContractedHours(schedule) {
+  var sched = schedule || defaultSchedule();
+  var total = 0;
+  for (var i = 0; i < DAY_KEYS.length; i++) total += shiftWorkedHours(sched[DAY_KEYS[i]]);
+  return total;
+}
+function suggestedAnnualLeaveHours(schedule) {
+  var weekly = weeklyContractedHours(schedule);
+  return Math.round((weekly / FULLTIME_WEEKLY_HOURS) * FULLTIME_ANNUAL_LEAVE_HOURS * 10) / 10;
+}
+
 function saldoFor(emp, requests) {
   var base = Number(emp.baseSaldo) || 0;
   var used = 0, overtime = 0;
@@ -229,6 +289,20 @@ function sumHours(requests, empId, type, status) {
     .reduce(function (s, r) { return s + (Number(r.hours) || 0); }, 0);
 }
 
+// Vindt collega's die in dezelfde periode al verlof hebben (goedgekeurd of
+// in aanvraag), zodat je in één oogopslag ziet of de bezetting krap wordt.
+function findOverlappingColleagues(requests, employees, excludeEmployeeId, startISO, endISO) {
+  if (!startISO || !endISO) return [];
+  var nameFor = function (id) { var e = employees.find(function (x) { return x.id === id; }); return e ? e.name : "Onbekend"; };
+  return requests
+    .filter(function (r) {
+      return r.type === "verlof" && r.employeeId !== excludeEmployeeId && r.status !== "rejected" &&
+        r.startDate <= endISO && r.endDate >= startISO;
+    })
+    .map(function (r) { return { name: nameFor(r.employeeId), startDate: r.startDate, endDate: r.endDate, status: r.status }; })
+    .sort(function (a, b) { return a.name.localeCompare(b.name); });
+}
+
 // ------------------------------------------------------------
 // Kleine UI-bouwstenen
 // ------------------------------------------------------------
@@ -239,6 +313,35 @@ var BTN_SECONDARY = "rounded-xl border border-slate-200 bg-white px-4 py-2 text-
 function Card(props) {
   return h("div", { className: "rounded-3xl border border-slate-100 bg-white p-6 shadow-md " + (props.className || "") }, props.children);
 }
+// Opent op mobiel meteen de volgende datumkiezer, zodat je niet apart het
+// tweede veld hoeft aan te tikken om de kalender te openen.
+function openPicker(ref) {
+  var el = ref && ref.current;
+  if (!el) return;
+  el.focus();
+  if (typeof el.showPicker === "function") {
+    try { el.showPicker(); } catch (e) { /* niet ondersteund, gewoon focus laten staan */ }
+  }
+}
+
+function OverlapWarning(props) {
+  var overlaps = props.overlaps;
+  if (!overlaps || overlaps.length === 0) return null;
+  var namen = overlaps.map(function (o) { return o.name; });
+  var uniekeNamen = namen.filter(function (n, i) { return namen.indexOf(n) === i; });
+  return h("div", { className: "rounded-lg bg-amber-50 px-3 py-2.5 text-sm text-amber-800" },
+    h("p", null,
+      h("strong", null, uniekeNamen.length === 1 ? "Let op: " + uniekeNamen[0] + " heeft" : "Let op: " + uniekeNamen.length + " collega's (" + uniekeNamen.join(", ") + ") hebben"),
+      " voor (een deel van) deze periode al verlof aangevraagd of goedgekeurd. Check even of de bezetting haalbaar blijft."
+    ),
+    h("ul", { className: "mt-1.5 space-y-0.5 text-xs text-amber-700" },
+      overlaps.map(function (o, i) {
+        return h("li", { key: i }, o.name + ": " + fmtPeriode(o.startDate, o.endDate) + (o.status === "pending" ? " (in aanvraag)" : " (goedgekeurd)"));
+      })
+    )
+  );
+}
+
 function Field(props) {
   return h("label", { className: "block" },
     h("span", { className: "mb-1 block text-sm font-medium text-slate-700" }, props.label),
@@ -450,7 +553,7 @@ function LeavePreview(props) {
       werkdagen.map(function (b) {
         return h("li", { key: b.iso, className: "flex justify-between gap-2" },
           h("span", null, DAY_LABELS[b.key] + " " + fmtDatumKort(b.iso) + (b.shift ? " (" + b.shift.start + "–" + b.shift.end + ")" : " (vrije dag)")),
-          h("span", { className: "font-medium" }, b.cost > 0 ? fmtNum(b.cost) + " dag" : "geen verlof")
+          h("span", { className: "font-medium" }, b.cost > 0 ? fmtNum(b.cost) + " dag · " + fmtNum(b.hours) + " uur" : "geen verlof")
         );
       })
     )
@@ -461,13 +564,20 @@ function VerlofForm(props) {
   var user = props.user, data = props.data, persist = props.persist, done = props.done;
   var _start = useState(todayISO()), startDate = _start[0], setStartDate = _start[1];
   var _end = useState(todayISO()), endDate = _end[0], setEndDate = _end[1];
+  var endDateRef = useRef(null);
+  function handleStartChange(e) {
+    var val = e.target.value;
+    setStartDate(val);
+    if (endDate && endDate < val) setEndDate(val);
+    openPicker(endDateRef);
+  }
   var _note = useState(""), note = _note[0], setNote = _note[1];
   var _err = useState(""), err = _err[0], setErr = _err[1];
   var _done = useState(null), submitted = _done[0], setSubmitted = _done[1];
 
   var berekening = useMemo(function () { return computeLeaveCost(user.schedule, startDate, endDate); }, [user, startDate, endDate]);
   var autoDagen = berekening.days;
-  var autoUren = Math.round(autoDagen * 8 * 100) / 100;
+  var autoUren = berekening.hours;
 
   // Dagen en uren staan in bewerkbare velden. Ze worden automatisch
   // ingevuld zodra de periode verandert, maar iedereen kan de waarde
@@ -486,6 +596,9 @@ function VerlofForm(props) {
   var beschikbaar = saldoFor(user, data.requests);
   var inAanvraag = sumHours(data.requests, user.id, "verlof", "pending");
   var overBudget = uren > 0 && uren + inAanvraag > beschikbaar;
+  var overlaps = useMemo(function () {
+    return findOverlappingColleagues(data.requests, data.employees, user.id, startDate, endDate);
+  }, [data.requests, data.employees, user.id, startDate, endDate]);
 
   function herstelAutomatisch() {
     setDagenStr(fmtNum(autoDagen));
@@ -506,6 +619,7 @@ function VerlofForm(props) {
   }
 
   var notifyEmail = data.settings && data.settings.notifyEmail;
+  var notifyName = data.settings && data.settings.notifyName;
 
   if (submitted) {
     return h(Card, { className: "mx-auto max-w-md text-center" },
@@ -513,7 +627,7 @@ function VerlofForm(props) {
       h("h3", { className: "mt-2 text-base font-bold text-slate-900" }, "Aanvraag ingediend"),
       h("p", { className: "mt-1 text-sm text-slate-500" }, "Je verlofaanvraag staat klaar voor goedkeuring."),
       notifyEmail
-        ? h(NotifyButton, { email: notifyEmail, user: user, req: submitted, done: done })
+        ? h(NotifyButton, { email: notifyEmail, name: notifyName, user: user, req: submitted, done: done })
         : h("button", { className: BTN_PRIMARY + " mt-5", onClick: done }, "Naar mijn overzicht")
     );
   }
@@ -526,8 +640,8 @@ function VerlofForm(props) {
     ),
     h("div", { className: "space-y-3" },
       h("div", { className: "grid grid-cols-2 gap-3" },
-        h(Field, { label: "Van" }, h("input", { className: INPUT_CLS, type: "date", value: startDate, onChange: function (e) { setStartDate(e.target.value); } })),
-        h(Field, { label: "Tot en met" }, h("input", { className: INPUT_CLS, type: "date", value: endDate, onChange: function (e) { setEndDate(e.target.value); } }))
+        h(Field, { label: "Van" }, h("input", { className: INPUT_CLS, type: "date", value: startDate, onChange: handleStartChange })),
+        h(Field, { label: "Tot en met" }, h("input", { ref: endDateRef, className: INPUT_CLS, type: "date", value: endDate, min: startDate, onChange: function (e) { setEndDate(e.target.value); } }))
       ),
       h("div", { className: "grid grid-cols-2 gap-3" },
         h(Field, { label: "Aantal dagen" }, h("input", { className: INPUT_CLS, type: "text", inputMode: "decimal", value: dagenStr, onChange: function (e) { setDagenStr(e.target.value); } })),
@@ -543,6 +657,7 @@ function VerlofForm(props) {
         )
       ),
       h(LeavePreview, { breakdown: berekening.breakdown }),
+      h(OverlapWarning, { overlaps: overlaps }),
       h(Field, { label: "Toelichting (optioneel)" },
         h("textarea", { className: INPUT_CLS, rows: 2, value: note, onChange: function (e) { setNote(e.target.value); }, placeholder: "bijv. vakantie, verhuizing…" })
       ),
@@ -554,7 +669,7 @@ function VerlofForm(props) {
 }
 
 function NotifyButton(props) {
-  var email = props.email, user = props.user, req = props.req, done = props.done;
+  var email = props.email, name = props.name, user = props.user, req = props.req, done = props.done;
   var _copied = useState(false), copied = _copied[0], setCopied = _copied[1];
   var typeLabel = req.type === "verlof" ? "verlof" : "overuren";
   var tekst = user.name + " heeft " + typeLabel + " aangevraagd: " + fmtPeriode(req.startDate, req.endDate) +
@@ -563,13 +678,14 @@ function NotifyButton(props) {
   var subject = encodeURIComponent("Aanvraag " + typeLabel + " — " + user.name);
   var body = encodeURIComponent(tekst);
   var href = "mailto:" + email + "?subject=" + subject + "&body=" + body;
+  var displayName = (name || "").trim() || "Lars";
 
   function copy() {
     navigator.clipboard.writeText(tekst).then(function () { setCopied(true); }).catch(function () { setCopied(false); });
   }
 
   return h("div", { className: "mt-5 flex flex-col items-center gap-2" },
-    h("a", { className: BTN_PRIMARY + " inline-block no-underline", href: href, target: "_blank", rel: "noreferrer" }, "📧 Verzend je aanvraag naar de beheerder"),
+    h("a", { className: BTN_PRIMARY + " inline-block no-underline", href: href, target: "_blank", rel: "noreferrer" }, "📧 Mail " + displayName),
     h("button", { className: BTN_SECONDARY, onClick: copy }, copied ? "✓ Gekopieerd! Plak hem in je mail of appje" : "Kopieer melding"),
     h("button", { className: "mt-1 text-sm font-medium text-slate-500 transition hover:text-slate-700 hover:underline", onClick: done }, "Naar mijn overzicht")
   );
@@ -600,6 +716,7 @@ function OverurenForm(props) {
   }
 
   var notifyEmail = data.settings && data.settings.notifyEmail;
+  var notifyName = data.settings && data.settings.notifyName;
 
   if (submitted) {
     return h(Card, { className: "mx-auto max-w-md text-center" },
@@ -607,7 +724,7 @@ function OverurenForm(props) {
       h("h3", { className: "mt-2 text-base font-bold text-slate-900" }, "Overuren doorgegeven"),
       h("p", { className: "mt-1 text-sm text-slate-500" }, "Na goedkeuring komen deze uren bij je verlofsaldo (tijd voor tijd)."),
       notifyEmail
-        ? h(NotifyButton, { email: notifyEmail, user: user, req: submitted, done: done })
+        ? h(NotifyButton, { email: notifyEmail, name: notifyName, user: user, req: submitted, done: done })
         : h("button", { className: BTN_PRIMARY + " mt-5", onClick: done }, "Naar mijn overzicht")
     );
   }
@@ -664,6 +781,13 @@ function AddOnBehalfForm(props) {
   var _type = useState("verlof"), type = _type[0], setType = _type[1];
   var _start = useState(todayISO()), start = _start[0], setStart = _start[1];
   var _end = useState(todayISO()), end = _end[0], setEnd = _end[1];
+  var endDateRef = useRef(null);
+  function handleStartChange(e) {
+    var val = e.target.value;
+    setStart(val);
+    if (end && end < val) setEnd(val);
+    openPicker(endDateRef);
+  }
   var _hoursStr = useState(""), hoursStr = _hoursStr[0], setHoursStr = _hoursStr[1];
   var _note = useState(""), note = _note[0], setNote = _note[1];
   var _direct = useState(true), direct = _direct[0], setDirect = _direct[1];
@@ -671,9 +795,12 @@ function AddOnBehalfForm(props) {
 
   var employee = data.employees.find(function (e) { return e.id === empId; });
   var berekening = useMemo(function () {
-    return type === "verlof" && employee ? computeLeaveCost(employee.schedule, start, end) : { days: 0, breakdown: [] };
+    return type === "verlof" && employee ? computeLeaveCost(employee.schedule, start, end) : { days: 0, hours: 0, breakdown: [] };
   }, [empId, type, start, end]);
-  var autoUren = type === "verlof" ? Math.round(berekening.days * 8 * 100) / 100 : parseNum(hoursStr);
+  var autoUren = type === "verlof" ? berekening.hours : parseNum(hoursStr);
+  var overlaps = useMemo(function () {
+    return type === "verlof" && empId ? findOverlappingColleagues(data.requests, data.employees, empId, start, end) : [];
+  }, [data.requests, data.employees, empId, type, start, end]);
 
   function submit() {
     setMsg(null);
@@ -710,8 +837,8 @@ function AddOnBehalfForm(props) {
           h("option", { value: "overuren" }, "Overuren")
         )
       ),
-      h(Field, { label: type === "verlof" ? "Van" : "Datum" }, h("input", { className: INPUT_CLS, type: "date", value: start, onChange: function (e) { setStart(e.target.value); } })),
-      type === "verlof" && h(Field, { label: "Tot en met" }, h("input", { className: INPUT_CLS, type: "date", value: end, onChange: function (e) { setEnd(e.target.value); } })),
+      h(Field, { label: type === "verlof" ? "Van" : "Datum" }, h("input", { className: INPUT_CLS, type: "date", value: start, onChange: type === "verlof" ? handleStartChange : function (e) { setStart(e.target.value); } })),
+      type === "verlof" && h(Field, { label: "Tot en met" }, h("input", { ref: endDateRef, className: INPUT_CLS, type: "date", value: end, min: start, onChange: function (e) { setEnd(e.target.value); } })),
       type === "verlof"
         ? h("div", { className: "sm:col-span-2 rounded-xl bg-teal-50 p-3 text-sm text-slate-700" },
             employee
@@ -719,6 +846,7 @@ function AddOnBehalfForm(props) {
               : "Kies eerst een medewerker om de automatische berekening te zien."
           )
         : h(Field, { label: "Aantal uren" }, h("input", { className: INPUT_CLS, type: "text", inputMode: "decimal", value: hoursStr, onChange: function (e) { setHoursStr(e.target.value); }, placeholder: "bijv. 1,5" })),
+      overlaps.length > 0 && h("div", { className: "sm:col-span-2" }, h(OverlapWarning, { overlaps: overlaps })),
       h("div", { className: "sm:col-span-2" },
         h(Field, { label: "Toelichting (optioneel)" }, h("input", { className: INPUT_CLS, value: note, onChange: function (e) { setNote(e.target.value); }, placeholder: "bijv. mondeling afgestemd op de gang" }))
       )
@@ -801,6 +929,7 @@ function Goedkeuren(props) {
           var emp = data.employees.find(function (e) { return e.id === r.employeeId; });
           var saldo = emp ? saldoFor(emp, data.requests) : 0;
           var teVeel = r.type === "verlof" && Number(r.hours) > saldo;
+          var overlaps = r.type === "verlof" ? findOverlappingColleagues(data.requests, data.employees, r.employeeId, r.startDate, r.endDate) : [];
           return h(Card, { key: r.id },
             h("div", { className: "flex flex-wrap items-center gap-x-4 gap-y-1" },
               h("span", { className: "text-sm font-bold text-slate-900" }, name(r.employeeId)),
@@ -814,6 +943,7 @@ function Goedkeuren(props) {
               "Huidig saldo " + name(r.employeeId) + ": " + fmtNum(saldo) + " uur",
               teVeel && h("span", { className: "ml-2 font-medium text-amber-700" }, "· aanvraag is groter dan het saldo")
             ),
+            overlaps.length > 0 && h("div", { className: "mt-2" }, h(OverlapWarning, { overlaps: overlaps })),
             h("div", { className: "mt-3 flex flex-wrap items-center gap-2" },
               h("input", {
                 className: INPUT_CLS + " !w-auto flex-1", placeholder: "Reactie (optioneel)", value: notes[r.id] || "",
@@ -977,6 +1107,7 @@ function Team(props) {
   var _baseEdits = useState({}), baseEdits = _baseEdits[0], setBaseEdits = _baseEdits[1];
   var _schedEdit = useState(null), schedEditId = _schedEdit[0], setSchedEditId = _schedEdit[1];
   var _email = useState((data.settings && data.settings.notifyEmail) || ""), email = _email[0], setEmail = _email[1];
+  var _notifyName = useState((data.settings && data.settings.notifyName) || ""), notifyNameInput = _notifyName[0], setNotifyNameInput = _notifyName[1];
   var _emailMsg = useState(""), emailMsg = _emailMsg[0], setEmailMsg = _emailMsg[1];
 
   function updateEmployee(id, patch) {
@@ -986,7 +1117,9 @@ function Team(props) {
   function addEmployee() {
     var trimmed = newName.trim();
     if (!trimmed) return;
-    var emp = { id: uid(), name: trimmed, pin: "0000", isAdmin: newAdmin, baseSaldo: Number(newBase) || 0, schedule: knownScheduleFor(trimmed) || defaultSchedule() };
+    var schedule = knownScheduleFor(trimmed) || defaultSchedule();
+    var baseSaldo = newBase.trim() ? Number(newBase) || 0 : suggestedAnnualLeaveHours(schedule);
+    var emp = { id: uid(), name: trimmed, pin: "0000", isAdmin: newAdmin, baseSaldo: baseSaldo, schedule: schedule };
     persist(Object.assign({}, data, { employees: data.employees.concat([emp]) }));
     setNewName(""); setNewAdmin(false); setNewBase("");
   }
@@ -998,7 +1131,7 @@ function Team(props) {
     setDelId(null);
   }
   function saveEmail() {
-    persist(Object.assign({}, data, { settings: Object.assign({}, data.settings || {}, { notifyEmail: email.trim() }) }));
+    persist(Object.assign({}, data, { settings: Object.assign({}, data.settings || {}, { notifyEmail: email.trim(), notifyName: notifyNameInput.trim() }) }));
     setEmailMsg(email.trim() ? "Opgeslagen. De meldingsknop staat nu aan." : "Opgeslagen. De meldingsknop staat uit.");
   }
 
@@ -1020,6 +1153,7 @@ function Team(props) {
           h("tbody", { className: "divide-y divide-slate-100" },
             data.employees.map(function (emp) {
               var current = saldoFor(emp, data.requests);
+              var voorstel = suggestedAnnualLeaveHours(emp.schedule);
               return h(React.Fragment, { key: emp.id },
                 h("tr", null,
                   h("td", { className: "px-4 py-2.5 font-medium text-slate-800" }, emp.name),
@@ -1038,7 +1172,15 @@ function Team(props) {
                             var next = Object.assign({}, baseEdits); delete next[emp.id]; setBaseEdits(next);
                           }
                         }, "Opslaan")
-                    )
+                    ),
+                    Number(emp.baseSaldo) !== voorstel &&
+                      h("p", { className: "mt-1 text-xs text-slate-400" },
+                        "Voorstel o.b.v. rooster: " + fmtNum(voorstel) + " uur — ",
+                        h("button", {
+                          className: "font-medium text-teal-600 hover:underline",
+                          onClick: function () { setBaseEdits(Object.assign({}, baseEdits, { [emp.id]: String(voorstel) })); }
+                        }, "gebruik voorstel")
+                      )
                   ),
                   h("td", { className: "px-4 py-2.5 font-semibold text-slate-800" }, fmtNum(current) + " uur"),
                   h("td", { className: "px-4 py-2.5" },
@@ -1091,16 +1233,17 @@ function Team(props) {
       h("h3", { className: "mb-3 text-base font-bold text-slate-900" }, "Medewerker toevoegen"),
       h("div", { className: "flex flex-wrap items-end gap-3" },
         h(Field, { label: "Naam" }, h("input", { className: INPUT_CLS + " !w-44", value: newName, onChange: function (e) { setNewName(e.target.value); }, placeholder: "bijv. Tim" })),
-        h(Field, { label: "Basissaldo (uren)" }, h("input", { className: INPUT_CLS + " !w-32", type: "number", step: "0.5", value: newBase, onChange: function (e) { setNewBase(e.target.value); }, placeholder: "bijv. 160" })),
+        h(Field, { label: "Basissaldo (uren)" }, h("input", { className: INPUT_CLS + " !w-32", type: "number", step: "0.5", value: newBase, onChange: function (e) { setNewBase(e.target.value); }, placeholder: "auto o.b.v. rooster" })),
         h("label", { className: "mb-2 flex items-center gap-2 text-sm text-slate-700" }, h("input", { type: "checkbox", className: "h-4 w-4 accent-teal-700", checked: newAdmin, onChange: function (e) { setNewAdmin(e.target.checked); } }), "Beheerder"),
         h("button", { className: BTN_PRIMARY, onClick: addEmployee, disabled: !newName.trim() }, "Toevoegen")
       ),
-      h("p", { className: "mt-3 text-xs text-slate-500" }, "Nieuwe medewerkers krijgen standaard pincode 0000 en een standaard rooster (ma–vr 7:35–17:25). Pas dit aan via 'Rooster wijzigen'.")
+      h("p", { className: "mt-3 text-xs text-slate-500" }, "Nieuwe medewerkers krijgen standaard pincode 0000 en een standaard rooster (ma–vr 7:35–17:25) — pas dit aan via 'Rooster wijzigen'. Laat je het basissaldo leeg, dan wordt dit automatisch berekend naar rato van het rooster (23 vakantiedagen/jaar bij een voltijds dienstverband van 40 uur).")
     ),
     h(Card, { className: "max-w-xl" },
       h("h3", { className: "mb-1 text-base font-bold text-slate-900" }, "Meldingen per mail"),
-      h("p", { className: "mb-4 text-sm text-slate-500" }, "Vul hier jouw mailadres in. Zodra iemand een aanvraag indient, ziet diegene een knop waarmee met één klik een kant-en-klare melding naar dit adres klaarstaat."),
+      h("p", { className: "mb-4 text-sm text-slate-500" }, "Vul hier de naam en het mailadres van de beheerder in. Zodra iemand een aanvraag indient, ziet diegene een knop (bijv. \"Mail Lars\") waarmee met één klik een kant-en-klare melding naar dit adres klaarstaat."),
       h("div", { className: "flex flex-wrap items-center gap-3" },
+        h("input", { className: INPUT_CLS + " !w-40", type: "text", value: notifyNameInput, onChange: function (e) { setNotifyNameInput(e.target.value); setEmailMsg(""); }, placeholder: "bijv. Lars" }),
         h("input", { className: INPUT_CLS + " !w-72", type: "email", value: email, onChange: function (e) { setEmail(e.target.value); setEmailMsg(""); }, placeholder: "bijv. lars@fyziototaal.nl" }),
         h("button", { className: BTN_PRIMARY, onClick: saveEmail }, "Opslaan")
       ),
@@ -1116,7 +1259,7 @@ function seedData() {
   return {
     employees: [],
     requests: [],
-    settings: {}
+    settings: { notifyName: "Lars" }
   };
 }
 
