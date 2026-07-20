@@ -456,6 +456,10 @@
 const SUPABASE_URL='https://szunargvsmtzbbnmnghc.supabase.co';
 const SUPABASE_KEY='sb_publishable_EiIt1zJuqgjj-2FJ4mXTlg__kmUrPu5';
 const TABEL='fyziofit_testen';
+
+// ── Drive-upload endpoint (FyzioFit Rapport Ontvanger, Apps Script Web App) ──
+const DRIVE_UPLOAD_URL = 'https://script.google.com/macros/s/AKfycbzZZHNKhzSP8c51MnC9dwKOtQFsmsSuQQBjTqC21fqZyLkk5_gRXKQ9f1xZBqMAuAQmdw/exec';
+
 let huidigPNR='',huidigNaam='',vorigVerslagTekst='',rapportTekst='',bewerkModus=false;
 
 // ─── API KEY VIA LOKALE OPSLAG ───
@@ -1087,6 +1091,19 @@ function toggleEdit(){
   else{rapportTekst=edit.value;weergave.innerHTML=opmaakRapport(edit.value);weergave.style.display='block';edit.style.display='none';document.querySelector('.rapport-acties .btn-secondary').textContent='Bewerken';}
 }
 
+function uploadNaarDrive(doc, bestandsnaam) {
+  try {
+    const base64 = doc.output('datauristring').split(',')[1]; // pdf als base64, zonder de data-URI-prefix
+    fetch(DRIVE_UPLOAD_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain' }, // text/plain voorkomt CORS-preflight problemen bij Apps Script
+      body: JSON.stringify({ bestandsnaam, pdfBase64: base64 })
+    }).catch(()=>{}); // stille fout: als upload mislukt, blokkeert dit de lokale download niet
+  } catch(e) {
+    // upload is 'nice to have', geen harde afhankelijkheid
+  }
+}
+
 function downloadPDF(){
   const knop=event.target;
   const oorspronkelijkeTekst=knop.textContent;
@@ -1167,7 +1184,11 @@ function downloadPDF(){
       doc.text('Fyzio Totaal   \u00b7   Nijverheidsstraat 7, Wierden   \u00b7   www.fyziototaal.nl',pageWidth/2,pageHeight-10,{align:'center'});
     }
 
-    doc.save('Testverslag_'+d.naam+'_'+d.datum+'.pdf');
+    const bestandsnaam='Testverslag_'+d.naam+'_'+d.datum+'.pdf';
+    doc.save(bestandsnaam);
+
+    // Ook uploaden naar Drive (op de achtergrond, blokkeert de download niet)
+    uploadNaarDrive(doc, bestandsnaam);
   }catch(e){
     toonMelding('melding-globaal','PDF genereren mislukt: '+e.message,'fout');
   }finally{
