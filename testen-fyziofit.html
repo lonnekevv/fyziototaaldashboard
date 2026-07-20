@@ -911,7 +911,7 @@ async function genereerRapport(){
   const scores=bouwScoreSamenvatting(data);
   const btn=document.getElementById('btn-rapport');
   btn.disabled=true;btn.innerHTML='<div class="loader"></div> Rapport wordt gegenereerd...';
-  toonMelding('melding-globaal','AI genereert het testverslag, even geduld...','laden');
+  toonMelding('melding-globaal','AI genereert het testverslag, dit kan bij een volledig verslag tot een minuut duren...','laden');
 
   const vergelijkingDeel=vorigVerslagTekst
     ?'\n\nVORIG TESTVERSLAG:\n"""\n'+vorigVerslagTekst.substring(0,3500)+'\n"""\n\nVergelijk de nieuwe scores uitdrukkelijk met het vorige verslag. Benoem meetbare vooruitgang positief en concreet (bijv. "Je plank is van 45 naar 62 seconden gegaan"). Bij gelijkblijvende scores: benadruk dat het niveau is vastgehouden als prestatie. Noem NOOIT achteruitgang als negatief feit; formuleer dit als aandachtspunt met perspectief.\n\nBELANGRIJK - TESTUITVOERING KAN VERSCHILLEN: De Biering-Sorensen, Laterale Roman Chair en Plank kunnen nu zijn afgenomen in de VERZWAARDE variant (met extra gewicht), terwijl deze testen bij een vorige meting mogelijk in de NORMALE variant (zonder gewicht) zijn afgenomen, of andersom. Controleer dit altijd aan de hand van wat in de huidige testresultaten staat vermeld (variant staat erbij). Als de variant is veranderd ten opzichte van het vorige verslag: vergelijk de score dan NIET direct, maar benoem expliciet dat de testuitvoering zwaarder of lichter is geworden, zodat de score niet één-op-één te vergelijken is met de vorige keer. Bijvoorbeeld: "Je hebt deze test nu met extra gewicht uitgevoerd, dus is een directe vergelijking met de vorige meting niet helemaal eerlijk. Voor deze zwaardere uitvoering is een tijd van X seconden een mooie score."'
@@ -994,7 +994,7 @@ Maximaal 650 woorden. Schrijf in het Nederlands. Zorg dat elke sectie volledig i
     const apiKey = await zorgVoorApiKey();
     const response=await Promise.race([
       fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-4-5',max_tokens:1500,messages:[{role:'user',content:prompt}]})}),
-      new Promise((_,reject)=>setTimeout(()=>reject(new Error('timeout')),30000))
+      new Promise((_,reject)=>setTimeout(()=>reject(new Error('timeout - het duurde langer dan 75 seconden')),75000))
     ]);
     const json=await response.json();
     if(!response.ok){
